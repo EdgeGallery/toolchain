@@ -1,39 +1,66 @@
-# toolchain
+# Toolchain 工具链
 
-#### 介绍
-{**以下是码云平台说明，您可以替换此简介**
-码云是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用码云实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Jenkins](https://img.shields.io/jenkins/build?jobUrl=http%3A%2F%2Fjenkins.edgegallery.org%2Fview%2FMEC-PLATFORM-BUILD%2Fjob%2Ftoolchain-docker-image-build-update-daily-master%2F)
 
-#### 软件架构
-软件架构说明
+工具链是MEC Developer开发者平台中的一个重要特性，当x86平台的App想要上车ARM平台时，底层的代码不可避免的需要进行修改或重写。
+App提供者可以通过MEC Developer开发者平台中集成的工具链进行源代码分析，定位需要修改的源代码并根据指导意见进行修改，方便App
+部署在ARM平台。
 
+## 功能介绍
 
-#### 安装教程
+目前，工具链服务集成了华为鲲鹏平台提供的[Porting Advisor代码迁移工具](https://www.huaweicloud.com/kunpeng/software/portingadvisor.html)，可以对以下文件进行分析：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- C/C++软件源码
+- C/C++软件构建工程文件
+- X86汇编代码
 
-#### 使用说明
+## 编译运行
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+toolchain对外提供restful接口，基于开源的ServiceComb微服务框架进行开发，并且集成了Spring Boot框架。由于toolchain的运行需要
+依赖Porting Advisor，所以两者需要运行在同一环境下，此处仅介绍toolchain的编译运行，Porting Advisor的安装部署请参考[官方指导](https://www.huaweicloud.com/kunpeng/software/portingadvisor.html)。
 
-#### 参与贡献
+- ### 环境准备
+  
+    |  Name     | Version   | Link |
+    |  ----     | ----  |  ---- |
+    | JDK1.8 |1.8xxx or above | [download](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html)|
+    | MavApache Maven |3.6.3 | [download](https://maven.apache.org/download.cgi)|
+    | IntelliJ IDEA |Community |[download](https://www.jetbrains.com/idea/download/)|
+    | Servicecomb Service-Center    | 1.3.0 | [download](https://servicecomb.apache.org/cn/release/service-center-downloads/)|
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+- ### 修改配置文件/src/main/resources/application.properties
 
-
-#### 码云特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+    - 配置Service Center，本地安装IP是127.0.0.1，默认端口30100，配置如下：
+    ```
+    ### service center config ###
+    servicecenter.ip=127.0.0.1
+    servicecenter.port=30100
+    ```
+  
+    - 配置Porting Advisor，建议toolchain与Porting Advisor安装在同一个环境，因为两者需要对同一个文件夹进行读写：
+    ```
+    ### porting advisor parameter config ###
+    porting.param.tasksUrl=https://127.0.0.1:8084/porting/api/portadv/tasks/
+    porting.param.userUrl=https://127.0.0.1:8084/porting/api/users/
+    ```
+  
+- ### 编译打包
+    从代码仓库拉取代码，默认master分支
+     
+     ```
+     git clone https://github.com/EdgeGallery/toolchain.git
+     ```
+ 
+     编译构建，需要依赖JDK1.8，首次编译会比较耗时，因为maven需要下载所有的依赖库。
+ 
+     ```
+     mvn clean install
+     ```
+ 
+- ### 运行
+     cd到打包路径，通过java启动：
+     ```
+     java -jar toolchain.jar
+     ```
+     启动后通过浏览器访问 http://127.0.0.1/30103 可以查看服务是否注册成功。
