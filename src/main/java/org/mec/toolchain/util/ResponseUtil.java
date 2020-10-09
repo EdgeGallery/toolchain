@@ -23,6 +23,10 @@ import org.springframework.http.ResponseEntity;
 
 public class ResponseUtil {
 
+    private ResponseUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * build response by either.
      *

@@ -75,41 +75,14 @@ public class HttpUtil {
         return HttpUtilHandler.connManager;
     }
 
-    private static SSLContext getSslContext() throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        X509TrustManager trustManager = new X509TrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            }
-        };
-        sslContext.init(null, new TrustManager[]{trustManager}, null);
-        return sslContext;
-
-    }
-
     private CloseableHttpClient getHttpClient() {
         RequestConfig requestConfig = RequestConfig.custom()
             .setConnectionRequestTimeout(httpPoolConfig.getConnectionRequestTimeout())
-                .setConnectTimeout(httpPoolConfig.getConnectTimeout())
-                .setSocketTimeout(httpPoolConfig.getSocketTimeout())
-                .build();
-
-        CloseableHttpClient httpClient = HttpClients.custom()
-            .setConnectionManager(getConnManager())
-            .setDefaultRequestConfig(requestConfig)
+            .setConnectTimeout(httpPoolConfig.getConnectTimeout()).setSocketTimeout(httpPoolConfig.getSocketTimeout())
             .build();
 
-        return httpClient;
-
+        return HttpClients.custom().setConnectionManager(getConnManager()).setDefaultRequestConfig(requestConfig)
+            .build();
     }
 
     private String getResponse(HttpRequestBase httpRequest) {
@@ -125,7 +98,7 @@ public class HttpUtil {
                 HttpEntity responseEntity = response.getEntity();
                 res = EntityUtils.toString(responseEntity);
             }
-        }  catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.error("IOException: " + e);
         } finally {
             if (null != response) {
@@ -179,17 +152,18 @@ public class HttpUtil {
     }
 
     static class HttpUtilHandler {
+        private  HttpUtilHandler(){
+            throw new IllegalStateException("Utility class");
+        }
         static PoolingHttpClientConnectionManager connManager;
 
         static {
             try {
                 SSLContext sslContext = getSslContext();
                 SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(sslContext,
-                        NoopHostnameVerifier.INSTANCE);
+                    NoopHostnameVerifier.INSTANCE);
                 Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-                        .register("http", PlainConnectionSocketFactory.INSTANCE)
-                        .register("https", sslFactory)
-                        .build();
+                    .register("http", PlainConnectionSocketFactory.INSTANCE).register("https", sslFactory).build();
 
                 connManager = new PoolingHttpClientConnectionManager(registry);
                 connManager.setMaxTotal(httpPoolConfig.getMaxTotal());
@@ -197,6 +171,27 @@ public class HttpUtil {
             } catch (SSLInitializationException | KeyManagementException | NoSuchAlgorithmException e) {
                 LOGGER.error("Create SSL connection failed: " + e);
             }
+        }
+
+        private static SSLContext getSslContext() throws NoSuchAlgorithmException, KeyManagementException {
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            X509TrustManager trustManager = new X509TrustManager() {
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+            };
+            sslContext.init(null, new TrustManager[] {trustManager}, null);
+            return sslContext;
+
         }
     }
 }
