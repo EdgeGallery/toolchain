@@ -57,6 +57,18 @@ public class PortingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PortingService.class);
 
+    private static final String CONTENT_TYPE = "Content-type";
+
+    private static final String CHARSET = "application/json;charset=UTF-8";
+
+    private static final String AUTHORIZATION = "Authorization";
+
+    private static final String CREAETE_TASK_FAIL = "Create task failed";
+
+    private static final String GET_TASK_FAIL = "Get task info failed";
+
+    private static final String REPORT = "report";
+
     private Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     @Autowired
@@ -159,8 +171,8 @@ public class PortingService {
         String token = getToken(
             loginPorting(portingParamConfig.getAdminUsername(), portingParamConfig.getAdminPassword()));
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-type", "application/json;charset=UTF-8");
-        headers.put("Authorization", token);
+        headers.put(CONTENT_TYPE, CHARSET);
+        headers.put(AUTHORIZATION, token);
 
         String srcPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
             .append(File.separator).append("src").append(File.separator).toString();
@@ -170,15 +182,15 @@ public class PortingService {
         String httpResponse = httpUtil.httpsPost(url, headers, gson.toJson(task));
 
         if (httpResponse == null) {
-            LOGGER.error("Create task failed");
+            LOGGER.error(CREAETE_TASK_FAIL);
             logoutPorting(token);
-            return Either.left(new FormatRespDto(Status.BAD_REQUEST, "Create task failed"));
+            return Either.left(new FormatRespDto(Status.BAD_REQUEST, CREAETE_TASK_FAIL));
         }
         BaseResponse baseResponse = gson.fromJson(httpResponse, BaseResponse.class);
         if (baseResponse.getStatus() != 0) {
-            LOGGER.error("Create task failed : " + baseResponse.getInfo());
+            LOGGER.error(CREAETE_TASK_FAIL + " : " + baseResponse.getInfo());
             logoutPorting(token);
-            return Either.left(new FormatRespDto(Status.BAD_REQUEST, "Create task failed"));
+            return Either.left(new FormatRespDto(Status.BAD_REQUEST, CREAETE_TASK_FAIL));
         }
         LOGGER.info("Create task success");
         TaskResponse taskResponse = gson.fromJson(httpResponse, TaskResponse.class);
@@ -186,7 +198,7 @@ public class PortingService {
         if (taskId == null) {
             LOGGER.error("Task id is empty");
             logoutPorting(token);
-            return Either.left(new FormatRespDto(Status.BAD_REQUEST, "Create task failed"));
+            return Either.left(new FormatRespDto(Status.BAD_REQUEST, CREAETE_TASK_FAIL));
         }
         LOGGER.info("Begin search task result");
 
@@ -203,6 +215,7 @@ public class PortingService {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 LOGGER.error("Thread is interrupted.");
+                Thread.currentThread().interrupt();
                 return;
             }
         }
@@ -218,10 +231,10 @@ public class PortingService {
     private boolean isTaskAnalysisEnd(String taskId, String token) {
         String getTaskStatusUrl = portingParamConfig.getTasksUrl() + taskId + "/";
         Map<String, String> taskHeaders = new HashMap<>();
-        taskHeaders.put("Authorization", token);
+        taskHeaders.put(AUTHORIZATION, token);
         String getTaskStatusResponse = httpUtil.httpsGet(getTaskStatusUrl, taskHeaders);
         if (getTaskStatusResponse == null) {
-            LOGGER.error("Get task info failed");
+            LOGGER.error(GET_TASK_FAIL);
             return true;
         }
         TaskStatusAnalysis taskStatus = gson.fromJson(getTaskStatusResponse, TaskStatusAnalysis.class);
@@ -249,7 +262,8 @@ public class PortingService {
         TasksData tasksData = new TasksData();
         try {
             File report = new File(
-                portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + "report/");
+                portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + REPORT
+                    + File.separator);
             if (report.exists() && report.isDirectory()) {
                 String[] reportName = report.list();
                 if (reportName != null) {
@@ -284,13 +298,13 @@ public class PortingService {
             loginPorting(portingParamConfig.getAdminUsername(), portingParamConfig.getAdminPassword()));
         String url = portingParamConfig.getTasksUrl() + taskId + "/";
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", token);
+        headers.put(AUTHORIZATION, token);
 
         String httpResponse = httpUtil.httpsGet(url, headers);
         logoutPorting(token);
         if (httpResponse == null) {
-            LOGGER.error("Get task info failed");
-            return Either.left(new FormatRespDto(Status.BAD_REQUEST, "Get task info failed"));
+            LOGGER.error(GET_TASK_FAIL);
+            return Either.left(new FormatRespDto(Status.BAD_REQUEST, GET_TASK_FAIL));
         }
         String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
             .append(File.separator).append("src").toString();
@@ -308,8 +322,8 @@ public class PortingService {
     public ResponseEntity<InputStream> downloadTask(String projectId, String taskId) {
         LOGGER.info("Begin download task report");
         String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
-            .append(File.separator).append("report").append(File.separator).append(taskId)
-            .append("porting-advisor.csv").toString();
+            .append(File.separator).append(REPORT).append(File.separator).append(taskId).append("porting-advisor.csv")
+            .toString();
         File task = new File(taskPath);
         if (!task.exists() || !task.isFile()) {
             LOGGER.error("task file is not exist");
@@ -323,7 +337,7 @@ public class PortingService {
             String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
                 .append(File.separator).append("src").toString();
             InputStream inputStream = new ByteArrayInputStream(
-                    FileUtil.readFileToString(task).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
+                FileUtil.readFileToString(task).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
             return ResponseEntity.ok().headers(headers).body(inputStream);
         } catch (IOException e) {
             LOGGER.error("read task file IOException: " + e);
@@ -342,7 +356,7 @@ public class PortingService {
     public Either<FormatRespDto, BaseResponse> deleteTask(String projectId, String taskId) {
         LOGGER.info("Begin delete task report");
         String projectTaskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
-            .append(File.separator).append("report").append(File.separator).append(taskId).append(File.separator)
+            .append(File.separator).append(REPORT).append(File.separator).append(taskId).append(File.separator)
             .toString();
         File projectTask = new File(projectTaskPath);
         File adminTask = new File(portingParamConfig.getReportPath() + taskId + File.separator);
@@ -375,7 +389,7 @@ public class PortingService {
         LOGGER.info("Login porting advisor");
         String url = portingParamConfig.getUserUrl() + "login/";
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-type", "application/json;charset=UTF-8");
+        headers.put(CONTENT_TYPE, CHARSET);
         LoginRequest loginRequest = new LoginRequest(username, verifyCode);
         return httpUtil.httpsPost(url, headers, gson.toJson(loginRequest));
     }
@@ -392,8 +406,8 @@ public class PortingService {
             return;
         }
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-type", "application/json;charset=UTF-8");
-        headers.put("Authorization", token);
+        headers.put(CONTENT_TYPE, CHARSET);
+        headers.put(AUTHORIZATION, token);
         String url = portingParamConfig.getUserUrl() + "logout/";
         BaseResponse logoutResponse = gson.fromJson(httpUtil.httpsPost(url, headers, null), BaseResponse.class);
         if (logoutResponse != null) {
@@ -445,8 +459,8 @@ public class PortingService {
             LoginResponse response = gson.fromJson(loginRes, LoginResponse.class);
             String token = response.getData().getToken();
             Map<String, String> headers = new HashMap<>();
-            headers.put("Content-type", "application/json;charset=UTF-8");
-            headers.put("Authorization", token);
+            headers.put(CONTENT_TYPE, CHARSET);
+            headers.put(AUTHORIZATION, token);
             Map<String, String> bodyMap = new HashMap<>();
             bodyMap.put("old_password", portingParamConfig.getAdminOldPassword());
             bodyMap.put("new_password", portingParamConfig.getAdminPassword());
@@ -465,7 +479,7 @@ public class PortingService {
      */
     private void moveReport(String reportId, String projectId) {
         File projectDir = new File(
-            portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + "report" + File.separator);
+            portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + REPORT + File.separator);
         if (!projectDir.exists() || !projectDir.isDirectory()) {
             boolean res = projectDir.mkdirs();
             if (!res) {

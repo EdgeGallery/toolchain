@@ -35,6 +35,10 @@ import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
+    private FileUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
     private static final int LINE_MAX_LEN = 4096;
@@ -77,8 +81,8 @@ public class FileUtil {
      */
     public static void deCompressTgz(String destDir, File tgz) throws IOException {
         try (InputStream is = FileUtils.openInputStream(tgz);
-            CompressorInputStream in = new GzipCompressorInputStream(is, true);
-            TarArchiveInputStream tin = new TarArchiveInputStream(in);) {
+             CompressorInputStream in = new GzipCompressorInputStream(is, true);
+             TarArchiveInputStream tin = new TarArchiveInputStream(in);) {
             TarArchiveEntry entry = tin.getNextTarEntry();
             while (entry != null) {
                 File archiveEntry = new File(destDir, entry.getName());
@@ -123,8 +127,8 @@ public class FileUtil {
      */
     public static String readFileToString(File file) throws IOException {
         try (FileInputStream in = FileUtils.openInputStream(file);
-            InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
-            BufferedReader buffReader = new BufferedReader(reader)) {
+             InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+             BufferedReader buffReader = new BufferedReader(reader)) {
             StringBuilder sb = new StringBuilder();
             String str = "";
             while ((str = readLine(buffReader)) != null) {
