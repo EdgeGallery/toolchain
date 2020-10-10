@@ -18,6 +18,7 @@ package org.mec.toolchain.controller;
 
 import static org.mockito.Matchers.eq;
 
+
 import java.util.UUID;
 import mockit.Mock;
 import mockit.MockUp;
@@ -58,8 +59,7 @@ public class CreateTaskTest extends PortingControllerTest {
         TaskDataDetail data = new TaskDataDetail();
         data.setStatus(2);
         taskStatus.setData(data);
-        Mockito.when(httpUtil.httpsGet(eq(getTaskStatusUrl), Mockito.anyMap()))
-            .thenReturn(gson.toJson(taskStatus));
+        Mockito.when(httpUtil.httpsGet(eq(getTaskStatusUrl), Mockito.anyMap())).thenReturn(gson.toJson(taskStatus));
 
         new MockUp<PortingService>() {
             @Mock
@@ -81,8 +81,7 @@ public class CreateTaskTest extends PortingControllerTest {
         baseTask.setSourceDir("/sourceDir");
 
         String tasksUrl = portingParamConfig.getTasksUrl();
-        Mockito.when(httpUtil.httpsPost(eq(tasksUrl), Mockito.anyMap(), Mockito.anyString()))
-            .thenReturn(null);
+        Mockito.when(httpUtil.httpsPost(eq(tasksUrl), Mockito.anyMap(), Mockito.anyString())).thenReturn(null);
 
         mvc.perform(MockMvcRequestBuilders.post("/mec/toolchain/v1/porting/" + projectId + "/tasks")
             .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
@@ -92,7 +91,6 @@ public class CreateTaskTest extends PortingControllerTest {
     @Test(expected = NestedServletException.class)
     public void testCreateTaskFai2() throws Exception {
         String projectId = UUID.randomUUID().toString();
-        String taskId = "202020202020";
         BaseTask baseTask = new BaseTask();
         baseTask.setSourceDir("/sourceDir");
 
