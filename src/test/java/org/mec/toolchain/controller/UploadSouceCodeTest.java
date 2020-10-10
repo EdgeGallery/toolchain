@@ -37,7 +37,6 @@ public class UploadSouceCodeTest extends PortingControllerTest {
     @Test
     public void uploadSuccess() throws Exception {
         ClassPathResource resource = new ClassPathResource("testdata/72965ecc-47e8-44e3-88c2-f09269a6f61a.tgz");
-        InputStream stream = resource.getInputStream();
         File sourceFile = resource.getFile();
         InputStream sourceInputStream = new FileInputStream(sourceFile);
 
