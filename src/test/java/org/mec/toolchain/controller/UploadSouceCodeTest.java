@@ -16,12 +16,40 @@
 
 package org.mec.toolchain.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.UUID;
+import org.apache.http.entity.ContentType;
+import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UploadSouceCodeTest extends PortingControllerTest {
 
     @Test
-    public void uploadSuccess() {
+    public void uploadSuccess() throws Exception {
+        ClassPathResource resource = new ClassPathResource("testdata/72965ecc-47e8-44e3-88c2-f09269a6f61a.tgz");
+        InputStream stream = resource.getInputStream();
+        File sourceFile = resource.getFile();
+        InputStream sourceInputStream = new FileInputStream(sourceFile);
+
+        MultipartFile sourceMultiFile = new MockMultipartFile(sourceFile.getName(), sourceFile.getName(),
+            ContentType.APPLICATION_OCTET_STREAM.toString(), sourceInputStream);
+
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.multipart("/mec/toolchain/v1/porting/" + UUID.randomUUID().toString())
+                .file("file", sourceMultiFile.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk())
+            .andDo(MockMvcResultHandlers.print());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
 
     }
 }
