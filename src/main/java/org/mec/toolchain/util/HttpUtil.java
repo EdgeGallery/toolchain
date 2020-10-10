@@ -152,9 +152,7 @@ public class HttpUtil {
     }
 
     static class HttpUtilHandler {
-        private  HttpUtilHandler(){
-            throw new IllegalStateException("Utility class");
-        }
+
         static PoolingHttpClientConnectionManager connManager;
 
         static {
@@ -171,6 +169,10 @@ public class HttpUtil {
             } catch (SSLInitializationException | KeyManagementException | NoSuchAlgorithmException e) {
                 LOGGER.error("Create SSL connection failed: " + e);
             }
+        }
+
+        private HttpUtilHandler() {
+            throw new IllegalStateException("Utility class");
         }
 
         private static SSLContext getSslContext() throws NoSuchAlgorithmException, KeyManagementException {
