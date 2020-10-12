@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadSouceCodeTest extends PortingControllerTest {
 
     @Test
-    public void uploadSuccess() throws Exception {
+    public void testUploadSuccess() throws Exception {
         ClassPathResource resource = new ClassPathResource("testdata/72965ecc-47e8-44e3-88c2-f09269a6f61a.tgz");
         File sourceFile = resource.getFile();
         InputStream sourceInputStream = new FileInputStream(sourceFile);
@@ -49,6 +49,23 @@ public class UploadSouceCodeTest extends PortingControllerTest {
                 .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk())
             .andDo(MockMvcResultHandlers.print());
         Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
+
+    }
+
+    @Test
+    public void testUploadFail() throws Exception {
+        ClassPathResource resource = new ClassPathResource("testdata/72965ecc-47e8-44e3-88c2-f09269a6f61a.tgz");
+        File sourceFile = resource.getFile();
+        InputStream sourceInputStream = new FileInputStream(sourceFile);
+
+        MultipartFile sourceMultiFile = new MockMultipartFile(sourceFile.getName(), sourceFile.getName(),
+            ContentType.APPLICATION_OCTET_STREAM.toString(), sourceInputStream);
+
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.multipart("/mec/toolchain/v1/porting/?").file("file", sourceMultiFile.getBytes())
+                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
+            .andDo(MockMvcResultHandlers.print());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 404);
 
     }
 }

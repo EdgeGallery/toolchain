@@ -17,8 +17,10 @@
 package org.mec.toolchain.controller;
 
 import java.util.UUID;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -27,9 +29,28 @@ public class DeleteSourceCodeTest extends UploadSouceCodeTest {
     @Test
     public void testDeleteSuccess() throws Exception {
         String projectId = UUID.randomUUID().toString();
-        mvc.perform(MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId)
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId)
             .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
-            .accept(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(MockMvcResultMatchers.status().isOk());
+            .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk());
+        Assert.assertTrue(result.andReturn().getResponse().getContentAsString().contains("0"));
     }
+
+    @Test
+    public void testDeleteFail() throws Exception {
+        String projectId = "1&2";
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId)
+            .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
+            .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk());
+        Assert.assertTrue(result.andReturn().getResponse().getContentAsString().contains("0"));
+    }
+
+    @Test
+    public void testDeleteFail2() throws Exception {
+        String projectId = "?123";
+        ResultActions result = mvc.perform(MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId)
+            .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
+            .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isNotFound());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 404);
+    }
+
 }

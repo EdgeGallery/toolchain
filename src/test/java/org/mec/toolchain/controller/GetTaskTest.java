@@ -18,11 +18,14 @@ package org.mec.toolchain.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
 
+
 import java.util.UUID;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mec.toolchain.model.porting.TaskStatus;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.util.NestedServletException;
@@ -37,10 +40,11 @@ public class GetTaskTest extends PortingControllerTest {
         String tasksUrl = portingParamConfig.getTasksUrl() + taskId + "/";
         Mockito.when(httpUtil.httpsGet(eq(tasksUrl), Mockito.anyMap())).thenReturn(gson.toJson(new TaskStatus()));
 
-        mvc.perform(MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
-            .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
-            .accept(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(MockMvcResultMatchers.status().isOk());
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
+                .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
     }
 
     @Test(expected = NestedServletException.class)
@@ -51,9 +55,11 @@ public class GetTaskTest extends PortingControllerTest {
         String tasksUrl = portingParamConfig.getTasksUrl() + taskId + "/";
         Mockito.when(httpUtil.httpsGet(eq(tasksUrl), Mockito.anyMap())).thenReturn(null);
 
-        mvc.perform(MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
-            .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
-            .accept(MediaType.APPLICATION_JSON_UTF8));
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
+        Assert.assertTrue(result.andReturn().getResponse().getContentAsString().contains("Get task info failed"));
     }
 
 }

@@ -24,30 +24,41 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class GetTaskListTest extends PortingControllerTest {
+public class DownLoadTaskTest extends PortingControllerTest {
 
     @Test
-    public void testGetTaskListSuccess() throws Exception {
-
+    public void testDownLoadTaskSuccess() throws Exception {
         String projectId = UUID.randomUUID().toString();
+        String taskId = "10";
 
         ResultActions result = mvc.perform(
-            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
+            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId + "/download")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
                 .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk());
         Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
     }
 
     @Test
-    public void testGetTaskListFail() throws Exception {
-
-        String projectId = "?123";
+    public void testDownLoadTaskFail() throws Exception {
+        String projectId = "1&2";
+        String taskId = "2&3";
 
         ResultActions result = mvc.perform(
-            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId)
+            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId + "/download")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
+                .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
+    }
+
+    @Test
+    public void testDownLoadTaskFail2() throws Exception {
+        String projectId = "?123";
+        String taskId = "?123233";
+
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId + "/download")
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
                 .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isNotFound());
         Assert.assertEquals(result.andReturn().getResponse().getStatus(), 404);
     }
-
 }
