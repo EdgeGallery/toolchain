@@ -79,16 +79,7 @@
                     <artifactId>jackson-databind</artifactId>
                     <groupId>com.fasterxml.jackson.core</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>netty-transport</artifactId>
-                    <groupId>io.netty</groupId>
-                </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport</artifactId>
-            <version>4.1.47.Final</version>
         </dependency>
         <dependency>
             <groupId>org.reactivestreams</groupId>
