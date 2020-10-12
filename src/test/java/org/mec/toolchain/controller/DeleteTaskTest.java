@@ -17,8 +17,10 @@
 package org.mec.toolchain.controller;
 
 import java.util.UUID;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.NestedServletException;
 
@@ -29,8 +31,22 @@ public class DeleteTaskTest extends PortingControllerTest {
         String projectId = UUID.randomUUID().toString();
         String taskId = "10";
 
-        mvc.perform(MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
-            .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
-            .accept(MediaType.APPLICATION_JSON_UTF8));
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
+        Assert.assertTrue(result.andReturn().getResponse().getContentAsString().contains("Delete task IOException"));
+    }
+
+    @Test(expected = NestedServletException.class)
+    public void testDeleteTaskFail2() throws Exception {
+        String projectId = "1&2";
+        String taskId = "2&3";
+
+        ResultActions result = mvc.perform(
+            MockMvcRequestBuilders.delete("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId)
+                .contentType(MediaType.APPLICATION_JSON_UTF8).param("projectId", projectId).param("id", taskId)
+                .accept(MediaType.APPLICATION_JSON_UTF8));
+        Assert.assertTrue(result.andReturn().getResponse().getContentAsString().contains("Delete task failed"));
     }
 }
