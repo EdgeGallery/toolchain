@@ -52,6 +52,10 @@
                     <artifactId>spring-core</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>spring-jcl</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -64,6 +68,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
+            <version>5.1.13.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jcl</artifactId>
             <version>5.1.13.RELEASE</version>
         </dependency>
 
@@ -156,7 +166,7 @@
                     <groupId>org.apache.tomcat.embed</groupId>
                 </exclusion>
             </exclusions>
-            <version>9.0.33</version>
+            <version>9.0.37</version>
         </dependency>
 
         <dependency>
