@@ -94,7 +94,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jcl</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -134,23 +134,23 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-expression</artifactId>
@@ -161,7 +161,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-context</artifactId>
@@ -176,7 +176,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-beans</artifactId>
@@ -256,7 +256,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>5.1.13.RELEASE</version>
+            <version>5.1.18.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-beans</artifactId>
