@@ -64,6 +64,10 @@
                     <artifactId>spring-beans</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -121,13 +125,45 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>5.1.13.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.1.13.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
             <version>5.1.13.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.1.13.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-expression</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>5.1.13.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-expression</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -170,6 +206,10 @@
                 </exclusion>
                 <exclusion>
                     <artifactId>spring-webmvc</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
             </exclusions>
@@ -304,6 +344,10 @@
             <exclusions>
                 <exclusion>
                     <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-test</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
             </exclusions>
