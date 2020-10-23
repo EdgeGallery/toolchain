@@ -1,7 +1,7 @@
 # Toolchain 工具链
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-![Jenkins](https://img.shields.io/jenkins/build?jobUrl=http%3A%2F%2Fjenkins.edgegallery.org%2Fview%2FMEC-PLATFORM-BUILD%2Fjob%2Ftoolchain-docker-image-build-update-daily-master%2F)
+![Jenkins](https://img.shields.io/jenkins/build?jobUrl=http://jenkins.edgegallery.org/job/toolchain-docker-daily-master/)
 
 工具链是MEC Developer开发者平台中的一个重要特性，当x86平台的App想要上车ARM平台时，底层的代码不可避免的需要进行修改或重写。
 App提供者可以通过MEC Developer开发者平台中集成的工具链进行源代码分析，定位需要修改的源代码并根据指导意见进行修改，方便App
