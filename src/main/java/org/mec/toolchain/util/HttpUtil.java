@@ -82,7 +82,7 @@ public class HttpUtil {
             .build();
 
         return HttpClients.custom().setConnectionManager(getConnManager()).setDefaultRequestConfig(requestConfig)
-            .build();
+            .setConnectionManagerShared(true).build();
     }
 
     private String getResponse(HttpRequestBase httpRequest) {
@@ -100,14 +100,6 @@ public class HttpUtil {
             }
         } catch (IOException e) {
             LOGGER.error("IOException: " + e);
-        } finally {
-            if (null != response) {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    LOGGER.error("Close response error: " + e);
-                }
-            }
         }
         return res;
     }
