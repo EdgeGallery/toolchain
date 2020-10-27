@@ -60,7 +60,7 @@ public class PortingController {
         @ApiResponse(code = HttpStatus.OK_200, message = "OK", response = UploadSrcResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+    @RequestMapping(value = "/{userId}", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<UploadSrcResponse> uploadSourceCode(
         @ApiParam(value = "file", required = true) @RequestPart("file") MultipartFile sourceCode,
