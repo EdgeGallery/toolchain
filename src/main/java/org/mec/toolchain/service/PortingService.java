@@ -323,6 +323,7 @@ public class PortingService {
         String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append("porting-advisor.csv")
             .toString();
+        LOGGER.info(taskPath);
         File task = new File(taskPath);
         if (!task.exists() || !task.isFile()) {
             LOGGER.error("task file is not exist");
