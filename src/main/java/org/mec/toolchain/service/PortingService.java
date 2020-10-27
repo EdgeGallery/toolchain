@@ -80,15 +80,15 @@ public class PortingService {
     /**
      * upload source code to toolchain service.
      *
-     * @param projectId project id
+     * @param userId user id
      * @param sourceCode source code .tar.gz
      * @return UploadSrcResponse
      */
-    public Either<FormatRespDto, UploadSrcResponse> uploadSourceCode(String projectId, MultipartFile sourceCode) {
+    public Either<FormatRespDto, UploadSrcResponse> uploadSourceCode(String userId, MultipartFile sourceCode) {
         LOGGER.info("Begin to upload source code");
         String fileName = sourceCode.getOriginalFilename();
 
-        String srcPath = new StringBuffer(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String srcPath = new StringBuffer(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").append(File.separator).toString();
         String filePath = srcPath + fileName;
         File src = null;
@@ -113,19 +113,19 @@ public class PortingService {
 
         LOGGER.info("Upload source code success");
         UploadSrcResponse response = new UploadSrcResponse(
-            transToUsername(projectId) + File.separator + "src" + File.separator);
+            transToUsername(userId) + File.separator + "src" + File.separator);
         return Either.right(response);
     }
 
     /**
-     * get source code by project id.
+     * get source code by user id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @return GetSrcResponse
      */
-    public Either<FormatRespDto, GetSrcResponse> getSourceCode(String projectId) {
+    public Either<FormatRespDto, GetSrcResponse> getSourceCode(String userId) {
         LOGGER.info("Search source code");
-        String srcPath = new StringBuffer(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String srcPath = new StringBuffer(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").toString();
         File src = new File(srcPath);
         if (!src.exists() || !src.isDirectory()) {
@@ -139,14 +139,14 @@ public class PortingService {
     }
 
     /**
-     * delete source code by project id.
+     * delete source code by user id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @return BaseResponse
      */
-    public Either<FormatRespDto, BaseResponse> deleteSourceCode(String projectId) {
+    public Either<FormatRespDto, BaseResponse> deleteSourceCode(String userId) {
         LOGGER.info("Begin delete source code");
-        String srcPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String srcPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").toString();
         try {
             FileUtil.deleteDir(new File(srcPath));
@@ -162,11 +162,11 @@ public class PortingService {
     /**
      * create analysis task.
      *
-     * @param projectId project id
+     * @param userId user id
      * @param taskInfo analysis task info
      * @return TaskResponse
      */
-    public synchronized Either<FormatRespDto, TaskResponse> createTask(String projectId, BaseTask taskInfo) {
+    public synchronized Either<FormatRespDto, TaskResponse> createTask(String userId, BaseTask taskInfo) {
         LOGGER.info("Begin create analysis task");
         String token = getToken(
             loginPorting(portingParamConfig.getAdminUsername(), portingParamConfig.getAdminPassword()));
@@ -174,7 +174,7 @@ public class PortingService {
         headers.put(CONTENT_TYPE, CHARSET);
         headers.put(AUTHORIZATION, token);
 
-        String srcPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String srcPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").append(File.separator).toString();
         taskInfo.setSourceDir(srcPath);
         BaseTaskInfo task = new BaseTaskInfo(taskInfo);
@@ -205,7 +205,7 @@ public class PortingService {
         // search task result and wait task end
         waitTaskEnd(taskId, token);
         logoutPorting(token);
-        moveReport(taskId, projectId);
+        moveReport(taskId, userId);
         return Either.right(taskResponse);
     }
 
@@ -253,17 +253,16 @@ public class PortingService {
     /**
      * get task list by project id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @return TasksResponse
      */
-    public Either<FormatRespDto, TasksResponse> getTaskList(String projectId) {
+    public Either<FormatRespDto, TasksResponse> getTaskList(String userId) {
         LOGGER.info("Begin get tasks list");
         TasksResponse response = new TasksResponse();
         TasksData tasksData = new TasksData();
         try {
             File report = new File(
-                portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + REPORT
-                    + File.separator);
+                portingParamConfig.getSrcPath() + transToUsername(userId) + File.separator + REPORT + File.separator);
             if (report.exists() && report.isDirectory()) {
                 String[] reportName = report.list();
                 if (reportName != null) {
@@ -289,11 +288,11 @@ public class PortingService {
     /**
      * get a task by project id and task id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @param taskId task id
      * @return TaskStatus
      */
-    public Either<FormatRespDto, TaskStatus> getTask(String projectId, String taskId) {
+    public Either<FormatRespDto, TaskStatus> getTask(String userId, String taskId) {
         String token = getToken(
             loginPorting(portingParamConfig.getAdminUsername(), portingParamConfig.getAdminPassword()));
         String url = portingParamConfig.getTasksUrl() + taskId + "/";
@@ -306,7 +305,7 @@ public class PortingService {
             LOGGER.error(GET_TASK_FAIL);
             return Either.left(new FormatRespDto(Status.BAD_REQUEST, GET_TASK_FAIL));
         }
-        String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").toString();
         TaskStatus response = gson.fromJson(httpResponse.replaceAll(src, ""), TaskStatus.class);
         return Either.right(response);
@@ -315,13 +314,13 @@ public class PortingService {
     /**
      * download task by project id and task id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @param taskId task id
      * @return file
      */
-    public ResponseEntity<InputStream> downloadTask(String projectId, String taskId) {
+    public ResponseEntity<InputStream> downloadTask(String userId, String taskId) {
         LOGGER.info("Begin download task report");
-        String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append("porting-advisor.csv")
             .toString();
         File task = new File(taskPath);
@@ -334,7 +333,7 @@ public class PortingService {
             headers.add("Content-Type", "application/octet-stream");
             headers.add("Content-Disposition", "attachment; filename=porting-advisor.csv");
             LOGGER.info("Download task success.");
-            String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+            String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
                 .append(File.separator).append("src").toString();
             InputStream inputStream = new ByteArrayInputStream(
                 FileUtil.readFileToString(task).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
@@ -349,13 +348,13 @@ public class PortingService {
     /**
      * delete task by project id and task id.
      *
-     * @param projectId project id
+     * @param userId user id
      * @param taskId task id
      * @return BaseResponse
      */
-    public Either<FormatRespDto, BaseResponse> deleteTask(String projectId, String taskId) {
+    public Either<FormatRespDto, BaseResponse> deleteTask(String userId, String taskId) {
         LOGGER.info("Begin delete task report");
-        String projectTaskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(projectId))
+        String projectTaskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append(File.separator)
             .toString();
         File projectTask = new File(projectTaskPath);
@@ -475,11 +474,11 @@ public class PortingService {
      * move report from admin to project dir.
      *
      * @param reportId report id
-     * @param projectId project id
+     * @param userId user id
      */
-    private void moveReport(String reportId, String projectId) {
+    private void moveReport(String reportId, String userId) {
         File projectDir = new File(
-            portingParamConfig.getSrcPath() + transToUsername(projectId) + File.separator + REPORT + File.separator);
+            portingParamConfig.getSrcPath() + transToUsername(userId) + File.separator + REPORT + File.separator);
         if (!projectDir.exists() || !projectDir.isDirectory()) {
             boolean res = projectDir.mkdirs();
             if (!res) {
