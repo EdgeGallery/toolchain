@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.Response.Status;
 import org.mec.toolchain.config.PortingParamConfig;
 import org.mec.toolchain.model.dto.FormatRespDto;
@@ -329,9 +330,10 @@ public class PortingService {
             return null;
         }
         try {
+            String name = UUID.randomUUID().toString();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/octet-stream");
-            headers.add("Content-Disposition", "attachment; filename=porting-advisor.csv");
+            headers.add("Content-Disposition", "attachment; filename=" + name + ".csv");
             LOGGER.info("Download task success.");
             String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
                 .append(File.separator).append("src").toString();
