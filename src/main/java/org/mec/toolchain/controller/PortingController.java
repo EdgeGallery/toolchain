@@ -140,7 +140,7 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = File.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET)
+    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET,produces = {})
     public ResponseEntity<InputStream> downloadTask(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
