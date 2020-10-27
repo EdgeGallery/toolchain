@@ -45,8 +45,8 @@ public class UploadSouceCodeTest extends PortingControllerTest {
 
         ResultActions result = mvc.perform(
             MockMvcRequestBuilders.multipart("/mec/toolchain/v1/porting/" + UUID.randomUUID().toString())
-                .file("file", sourceMultiFile.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaType.APPLICATION_JSON_UTF8)).andExpect(MockMvcResultMatchers.status().isOk())
+                .file("file", sourceMultiFile.getBytes()).contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                ).andExpect(MockMvcResultMatchers.status().isOk())
             .andDo(MockMvcResultHandlers.print());
         Assert.assertEquals(result.andReturn().getResponse().getStatus(), 200);
 
