@@ -21,8 +21,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.File;
-import java.io.InputStream;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.eclipse.jetty.http.HttpStatus;
 import org.mec.toolchain.model.dto.ErrorRespDto;
@@ -37,6 +35,7 @@ import org.mec.toolchain.model.porting.UploadSrcResponse;
 import org.mec.toolchain.service.PortingService;
 import org.mec.toolchain.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -135,13 +134,14 @@ public class PortingController {
         return ResponseUtil.buildResponse(either);
     }
 
-    @ApiOperation(value = "download task", response = File.class)
+    @ApiOperation(value = "download task", response = InputStreamResource.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = File.class),
+        @ApiResponse(code = 200, message = "OK", response = InputStreamResource.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET,produces = {})
-    public ResponseEntity<InputStream> downloadTask(
+    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<InputStreamResource> downloadTask(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
         return portingService.downloadTask(userId, taskId);

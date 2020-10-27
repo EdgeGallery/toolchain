@@ -27,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import javax.ws.rs.core.Response.Status;
 import org.mec.toolchain.config.PortingParamConfig;
 import org.mec.toolchain.model.dto.FormatRespDto;
@@ -48,7 +47,9 @@ import org.mec.toolchain.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -319,7 +320,7 @@ public class PortingService {
      * @param taskId task id
      * @return file
      */
-    public ResponseEntity<InputStream> downloadTask(String userId, String taskId) {
+    public ResponseEntity<InputStreamResource> downloadTask(String userId, String taskId) {
         LOGGER.info("Begin download task report");
         String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append(File.separator)
@@ -330,16 +331,16 @@ public class PortingService {
             return null;
         }
         try {
-            String name = UUID.randomUUID().toString();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/octet-stream");
-            headers.add("Content-Disposition", "attachment; filename=" + name + ".csv");
+            headers.add("Content-Disposition", "attachment; filename=porting-advisor.csv");
             LOGGER.info("Download task success.");
             String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
                 .append(File.separator).append("src").toString();
             InputStream inputStream = new ByteArrayInputStream(
                 FileUtil.readFileToString(task).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
-            return ResponseEntity.ok().headers(headers).body(inputStream);
+            return ResponseEntity.ok().headers(headers).contentLength(task.length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).body(new InputStreamResource(inputStream));
         } catch (IOException e) {
             LOGGER.error("read task file IOException: " + e);
             LOGGER.error("Download task failed");
