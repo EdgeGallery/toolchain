@@ -1,5 +1,5 @@
 servicecomb-config-order: 1
-APPLICATION_ID: openMec
+APPLICATION_ID: edgegallery
 service_description:
   name: toolchain
   version: 1.0.0
