@@ -16,11 +16,6 @@
 
 package org.mec.toolchain.controller;
 
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-
 import com.spencerwi.either.Either;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -48,6 +43,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,7 +60,7 @@ public class PortingController {
         @ApiResponse(code = HttpStatus.OK_200, message = "OK", response = UploadSrcResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}", method = POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+    @RequestMapping(value = "/{userId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<UploadSrcResponse> uploadSourceCode(
         @ApiParam(value = "file", required = true) @RequestPart("file") MultipartFile sourceCode,
@@ -78,7 +74,7 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = GetSrcResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}", method = GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetSrcResponse> getSourceCode(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId) {
         Either<FormatRespDto, GetSrcResponse> either = portingService.getSourceCode(userId);
@@ -90,7 +86,8 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = BaseResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}", method = DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<BaseResponse> deleteSourceCode(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId) {
         Either<FormatRespDto, BaseResponse> either = portingService.deleteSourceCode(userId);
@@ -102,8 +99,8 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = TaskResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks", method = POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
-        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}/tasks", method = RequestMethod.POST,
+        consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<TaskResponse> createTask(
         @ApiParam(value = "taskInfo", required = true) @RequestBody BaseTask taskInfo,
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId) {
@@ -116,7 +113,8 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = TasksResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks", method = GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}/tasks", method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<TasksResponse> getTaskList(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId) {
         Either<FormatRespDto, TasksResponse> either = portingService.getTaskList(userId);
@@ -128,7 +126,8 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = TaskStatus.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}", method = GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}/tasks/{id}", method = RequestMethod.GET,
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<TaskStatus> getTask(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
@@ -141,7 +140,7 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = File.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = GET,
+    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<InputStream> downloadTask(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
@@ -154,7 +153,8 @@ public class PortingController {
         @ApiResponse(code = 200, message = "OK", response = BaseResponse.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}", method = DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/{userId}/tasks/{id}", method = RequestMethod.DELETE,
+        produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<BaseResponse> deleteTask(
         @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
