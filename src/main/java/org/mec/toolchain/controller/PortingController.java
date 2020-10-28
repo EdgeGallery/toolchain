@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.File;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.eclipse.jetty.http.HttpStatus;
@@ -138,19 +137,24 @@ public class PortingController {
         return ResponseUtil.buildResponse(either);
     }
 
+    /**
+     * down load file.
+     */
     @ApiOperation(value = "download task", response = File.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = File.class),
-        @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
+        @ApiResponse(code = 200, message = "OK", response = File.class)
     })
     @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET)
     public void downloadTask(@ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
             .getRequestAttributes();
-        HttpServletRequest request = servletRequestAttributes.getRequest();
-        HttpServletResponse response = servletRequestAttributes.getResponse();
-        portingService.downloadTask(userId, taskId, request, response);
+        if (servletRequestAttributes != null) {
+            HttpServletResponse response = servletRequestAttributes.getResponse();
+            if (response != null) {
+                portingService.downloadTask(userId, taskId, response);
+            }
+        }
     }
 
     @ApiOperation(value = "delete task", response = BaseResponse.class)

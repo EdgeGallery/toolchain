@@ -33,8 +33,9 @@ public class DownLoadTaskTest extends PortingControllerTest {
 
         ResultActions result = mvc.perform(
             MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId + "/download")
-                .param("projectId", projectId).param("id", taskId)).andExpect(MockMvcResultMatchers.status().is3xxRedirection());
-        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 302);
+                .param("projectId", projectId).param("id", taskId))
+            .andExpect(MockMvcResultMatchers.status().isNotFound());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 404);
     }
 
     @Test
@@ -44,8 +45,9 @@ public class DownLoadTaskTest extends PortingControllerTest {
 
         ResultActions result = mvc.perform(
             MockMvcRequestBuilders.get("/mec/toolchain/v1/porting/" + projectId + "/tasks/" + taskId + "/download")
-                .param("projectId", projectId).param("id", taskId)).andExpect(MockMvcResultMatchers.status().is3xxRedirection());
-        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 302);
+                .param("projectId", projectId).param("id", taskId))
+            .andExpect(MockMvcResultMatchers.status().isNotFound());
+        Assert.assertEquals(result.andReturn().getResponse().getStatus(), 404);
     }
 
     @Test

@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 import org.mec.toolchain.config.PortingParamConfig;
@@ -318,9 +317,8 @@ public class PortingService {
      *
      * @param userId user id
      * @param taskId task id
-     * @return file
      */
-    public void downloadTask(String userId, String taskId, HttpServletRequest request, HttpServletResponse response) {
+    public void downloadTask(String userId, String taskId, HttpServletResponse response) {
         LOGGER.info("Begin download task report");
         String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append(File.separator)
@@ -353,7 +351,7 @@ public class PortingService {
                 }
             } else {
                 LOGGER.error("task file is not exist");
-                response.sendRedirect("not found");
+                response.sendError(404, "no found resource");
             }
         } catch (IOException ex) {
             ex.printStackTrace();
