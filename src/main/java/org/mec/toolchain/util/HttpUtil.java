@@ -82,7 +82,7 @@ public class HttpUtil {
             .build();
 
         return HttpClients.custom().setConnectionManager(getConnManager()).setDefaultRequestConfig(requestConfig)
-            .setConnectionManagerShared(true).build();
+            .setConnectionManagerShared(false).build();
     }
 
     private String getResponse(HttpRequestBase httpRequest) {
