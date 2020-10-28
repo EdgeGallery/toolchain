@@ -337,7 +337,6 @@ public class PortingService {
                 response.setHeader("Content-Type", "application/octet-stream");
                 //设置下载的文件的名称-该方式已解决中文乱码问题
                 response.setHeader("Content-Disposition", "attachment;filename=porting-advisor.csv");
-                // is = new FileInputStream(file);
                 String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
                     .append(File.separator).append("src").toString();
                 is = new ByteArrayInputStream(
@@ -353,8 +352,8 @@ public class PortingService {
                 LOGGER.error("task file is not exist");
                 response.sendError(404, "no found resource");
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+                LOGGER.error("download file,occur exception {}",e.getMessage());
         } finally {
             try {
                 if (is != null) {
@@ -368,7 +367,7 @@ public class PortingService {
                     os.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("close stream,occur exception {}",e.getMessage());
             }
         }
 
