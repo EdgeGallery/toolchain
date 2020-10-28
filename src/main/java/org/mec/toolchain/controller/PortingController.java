@@ -21,6 +21,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.io.File;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
 import org.eclipse.jetty.http.HttpStatus;
 import org.mec.toolchain.model.dto.ErrorRespDto;
@@ -35,7 +38,6 @@ import org.mec.toolchain.model.porting.UploadSrcResponse;
 import org.mec.toolchain.service.PortingService;
 import org.mec.toolchain.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,6 +46,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestSchema(schemaId = "porting")
@@ -134,17 +138,19 @@ public class PortingController {
         return ResponseUtil.buildResponse(either);
     }
 
-    @ApiOperation(value = "download task", response = InputStreamResource.class)
+    @ApiOperation(value = "download task", response = File.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = InputStreamResource.class),
+        @ApiResponse(code = 200, message = "OK", response = File.class),
         @ApiResponse(code = HttpStatus.BAD_REQUEST_400, message = "Bad Request", response = ErrorRespDto.class)
     })
-    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET,
-        produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<InputStreamResource> downloadTask(
-        @ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
+    @RequestMapping(value = "/{userId}/tasks/{id}/download", method = RequestMethod.GET)
+    public void downloadTask(@ApiParam(value = "userId", required = true) @PathVariable("userId") String userId,
         @ApiParam(value = "id", required = true) @PathVariable("id") String taskId) {
-        return portingService.downloadTask(userId, taskId);
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
+            .getRequestAttributes();
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        HttpServletResponse response = servletRequestAttributes.getResponse();
+        portingService.downloadTask(userId, taskId, request, response);
     }
 
     @ApiOperation(value = "delete task", response = BaseResponse.class)

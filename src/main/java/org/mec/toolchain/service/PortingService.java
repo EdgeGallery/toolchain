@@ -19,14 +19,18 @@ package org.mec.toolchain.service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.spencerwi.either.Either;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 import org.mec.toolchain.config.PortingParamConfig;
 import org.mec.toolchain.model.dto.FormatRespDto;
@@ -47,10 +51,6 @@ import org.mec.toolchain.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -320,32 +320,60 @@ public class PortingService {
      * @param taskId task id
      * @return file
      */
-    public ResponseEntity<InputStreamResource> downloadTask(String userId, String taskId) {
+    public void downloadTask(String userId, String taskId, HttpServletRequest request, HttpServletResponse response) {
         LOGGER.info("Begin download task report");
         String taskPath = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append(REPORT).append(File.separator).append(taskId).append(File.separator)
             .append("porting-advisor.csv").toString();
         File task = new File(taskPath);
-        if (!task.exists() || !task.isFile()) {
-            LOGGER.error("task file is not exist");
-            return null;
-        }
+        downFile(response, task, userId);
+    }
+
+    private void downFile(HttpServletResponse response, File file, String userId) {
+        InputStream is = null;
+        BufferedInputStream bs = null;
+        OutputStream os = null;
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Type", "application/octet-stream");
-            headers.add("Content-Disposition", "attachment; filename=porting-advisor.csv");
-            LOGGER.info("Download task success.");
-            String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
-                .append(File.separator).append("src").toString();
-            InputStream inputStream = new ByteArrayInputStream(
-                FileUtil.readFileToString(task).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
-            return ResponseEntity.ok().headers(headers).contentLength(task.length())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM).body(new InputStreamResource(inputStream));
-        } catch (IOException e) {
-            LOGGER.error("read task file IOException: " + e);
-            LOGGER.error("Download task failed");
-            return null;
+            if (file.exists()) {
+                //设置Headers
+                response.setHeader("Content-Type", "application/octet-stream");
+                //设置下载的文件的名称-该方式已解决中文乱码问题
+                response.setHeader("Content-Disposition", "attachment;filename=porting-advisor.csv");
+                // is = new FileInputStream(file);
+                String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
+                    .append(File.separator).append("src").toString();
+                is = new ByteArrayInputStream(
+                    FileUtil.readFileToString(file).replaceAll(src, "").getBytes(StandardCharsets.UTF_8));
+                bs = new BufferedInputStream(is);
+                os = response.getOutputStream();
+                byte[] buffer = new byte[1024];
+                int len = 0;
+                while ((len = bs.read(buffer)) != -1) {
+                    os.write(buffer, 0, len);
+                }
+            } else {
+                LOGGER.error("task file is not exist");
+                response.sendRedirect("not found");
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+                if (bs != null) {
+                    bs.close();
+                }
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     /**
