@@ -353,7 +353,7 @@ public class PortingService {
                 response.sendError(404, "no found resource");
             }
         } catch (IOException e) {
-                LOGGER.error("download file,occur exception {}",e.getMessage());
+            LOGGER.error("download file,occur exception {}", e.getMessage());
         } finally {
             try {
                 if (is != null) {
@@ -367,7 +367,7 @@ public class PortingService {
                     os.close();
                 }
             } catch (IOException e) {
-                LOGGER.error("close stream,occur exception {}",e.getMessage());
+                LOGGER.error("close stream,occur exception {}", e.getMessage());
             }
         }
 
