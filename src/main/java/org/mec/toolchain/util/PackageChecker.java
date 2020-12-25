@@ -34,9 +34,9 @@ public class PackageChecker {
 
     static final int BUFFER = 512;
 
-    static final int TOOBIG = 0x640; // max size of unzipped data, 100MB
+    static final int TOOBIG = 0x640000; // max size of unzipped data, 100MB
 
-    static final int TOOMANY = 2; // max number of files
+    static final int TOOMANY = 1024; // max number of files
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageChecker.class);
 
