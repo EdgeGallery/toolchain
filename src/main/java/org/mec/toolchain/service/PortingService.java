@@ -111,7 +111,9 @@ public class PortingService {
 
             // to bomb check
             PackageChecker checker = new PackageChecker();
-            checker.bombCheckGzip(tgz);
+            if (!checker.bombCheckGzip(tgz)) {
+                return Either.left(new FormatRespDto(Status.BAD_REQUEST, "Tar.gz decompress failed."));
+            }
 
             FileUtil.deCompressTgz(filePath, tgz);
         } catch (IOException e) {

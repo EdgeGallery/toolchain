@@ -49,9 +49,13 @@ public class PackageChecker {
         File sendboxDir = new File(sendbox);
         if (sendboxDir.exists() && sendboxDir.isDirectory()) {
             return;
-        } else {
-            sendboxDir.mkdirs();
         }
+        try {
+            org.mec.toolchain.util.FileUtil.createNewDir(sendbox);
+        } catch (IOException e) {
+            LOGGER.error("failed to create sendbox {}.", sendbox);
+        }
+
     }
 
     /**
@@ -97,7 +101,7 @@ public class PackageChecker {
      * @param gzFile file.
      * @throws IOException throw IOException
      */
-    public final boolean bombCheckGzip(File gzFile) throws IOException {
+    public final boolean bombCheckGzip(File gzFile) {
         int entries = 0;
         int total = 0;
         byte[] data = new byte[BUFFER];
@@ -132,8 +136,9 @@ public class PackageChecker {
                 }
             }
             return true;
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to unzip.");
+        } catch (IOException e) {
+            LOGGER.error("failed to check zip bomb.");
+            return false;
         } finally {
             // delete send box contents
             FileUtil.deleteContents(new File(getSendbox()));
