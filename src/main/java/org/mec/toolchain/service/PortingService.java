@@ -47,6 +47,7 @@ import org.mec.toolchain.model.porting.TasksResponse;
 import org.mec.toolchain.model.porting.UploadSrcResponse;
 import org.mec.toolchain.util.FileUtil;
 import org.mec.toolchain.util.HttpUtil;
+import org.mec.toolchain.util.PackageChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +93,7 @@ public class PortingService {
         String srcPath = new StringBuffer(portingParamConfig.getSrcPath()).append(transToUsername(userId))
             .append(File.separator).append("src").append(File.separator).toString();
         String filePath = srcPath + fileName;
+
         File src = null;
         try {
             src = FileUtil.createNewDir(filePath);
@@ -106,6 +108,13 @@ public class PortingService {
                 LOGGER.error("Create tgz file error.");
             }
             sourceCode.transferTo(tgz);
+
+            // to bomb check
+            File sendbox = File.createTempFile("sendbox", "test");
+            sendbox.mkdirs();
+            PackageChecker checker = new PackageChecker(sendbox.getCanonicalPath());
+            checker.bombCheckGzip(tgz);
+
             FileUtil.deCompressTgz(filePath, tgz);
         } catch (IOException e) {
             LOGGER.error("Create new file IOException");
@@ -207,6 +216,12 @@ public class PortingService {
         waitTaskEnd(taskId, token);
         logoutPorting(token);
         moveReport(taskId, userId);
+        try {
+            FileUtil.deleteDir(new File(srcPath));
+        } catch (IOException e) {
+            LOGGER.error("Delete resource code failed");
+            return Either.left(new FormatRespDto(Status.INTERNAL_SERVER_ERROR));
+        }
         return Either.right(taskResponse);
     }
 
