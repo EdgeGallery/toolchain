@@ -40,15 +40,18 @@ public class PackageChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageChecker.class);
 
-    private String sendbox;
+    private final String sendbox = "./sendbox/";
 
     /**
      * Constructor to create PackageChecker.
-     *
-     * @param dir package path
      */
-    public PackageChecker(String dir) {
-        this.sendbox = dir;
+    public PackageChecker() {
+        File sendboxDir = new File(sendbox);
+        if (sendboxDir.exists() && sendboxDir.isDirectory()) {
+            return;
+        } else {
+            sendboxDir.mkdirs();
+        }
     }
 
     /**
@@ -94,7 +97,7 @@ public class PackageChecker {
      * @param gzFile file.
      * @throws IOException throw IOException
      */
-    public final void bombCheckGzip(File gzFile) throws IOException {
+    public final boolean bombCheckGzip(File gzFile) throws IOException {
         int entries = 0;
         int total = 0;
         byte[] data = new byte[BUFFER];
@@ -103,7 +106,6 @@ public class PackageChecker {
              TarArchiveInputStream tin = new TarArchiveInputStream(in)) {
             ArchiveEntry entry;
             while ((entry = tin.getNextEntry()) != null) {
-                System.out.println(entry.getName());
                 int count;
                 // Write the files to the disk, but ensure that the entryName is valid,
                 // and that the file is not insanely big
@@ -129,9 +131,11 @@ public class PackageChecker {
                     throw new IllegalStateException("File being unzipped is too big.");
                 }
             }
+            return true;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to unzip.");
         } finally {
+            // delete send box contents
             FileUtil.deleteContents(new File(getSendbox()));
         }
     }

@@ -110,9 +110,7 @@ public class PortingService {
             sourceCode.transferTo(tgz);
 
             // to bomb check
-            File sendbox = File.createTempFile("sendbox", "test");
-            sendbox.mkdirs();
-            PackageChecker checker = new PackageChecker(sendbox.getCanonicalPath());
+            PackageChecker checker = new PackageChecker();
             checker.bombCheckGzip(tgz);
 
             FileUtil.deCompressTgz(filePath, tgz);
