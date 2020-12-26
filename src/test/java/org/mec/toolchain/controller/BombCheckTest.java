@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 public class BombCheckTest {
 
     @Test
-    public void should_successfule_when_read_gz_file() throws IOException {
+    public void should_successful_when_read_gz_file() throws IOException {
         PackageChecker checker = new PackageChecker();
         ClassPathResource resource = new ClassPathResource("testdata/72965ecc-47e8-44e3-88c2-f09269a6f61a.tgz");
         File sourceFile = resource.getFile();
