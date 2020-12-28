@@ -40,20 +40,20 @@ public class PackageChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageChecker.class);
 
-    private final String sendbox = "./sendbox/";
+    private static final String SANDBOX = "./sandbox/";
 
     /**
      * Constructor to create PackageChecker.
      */
     public PackageChecker() {
-        File sendboxDir = new File(sendbox);
-        if (sendboxDir.exists() && sendboxDir.isDirectory()) {
+        File sandboxDir = new File(SANDBOX);
+        if (sandboxDir.exists() && sandboxDir.isDirectory()) {
             return;
         }
         try {
-            org.mec.toolchain.util.FileUtil.createNewDir(sendbox);
+            org.mec.toolchain.util.FileUtil.createNewDir(SANDBOX);
         } catch (IOException e) {
-            LOGGER.error("failed to create sendbox {}.", sendbox);
+            LOGGER.error("failed to create sandbox {}.", SANDBOX);
         }
 
     }
@@ -63,8 +63,8 @@ public class PackageChecker {
      *
      * @return dir
      */
-    public String getSendbox() {
-        return sendbox;
+    public String getSandbox() {
+        return SANDBOX;
     }
 
     private String sanitzeFileName(String entryName, String intendedDir) throws IOException {
@@ -113,7 +113,7 @@ public class PackageChecker {
                 int count;
                 // Write the files to the disk, but ensure that the entryName is valid,
                 // and that the file is not insanely big
-                String name = sanitzeFileName(entry.getName(), getSendbox() + File.separator + "temp");
+                String name = sanitzeFileName(entry.getName(), getSandbox() + File.separator + "temp");
                 File f = new File(name);
                 if (isDir(entry, f)) {
                     continue;
@@ -126,7 +126,6 @@ public class PackageChecker {
                     }
                     dest.flush();
                 }
-                // tin.close();
                 entries++;
                 if (entries > TOOMANY) {
                     throw new IllegalStateException("Too many files to unzip.");
@@ -141,7 +140,7 @@ public class PackageChecker {
             return false;
         } finally {
             // delete send box contents
-            FileUtil.deleteContents(new File(getSendbox()));
+            FileUtil.deleteContents(new File(getSandbox()));
         }
     }
 
