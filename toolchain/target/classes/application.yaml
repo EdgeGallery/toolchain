@@ -1,0 +1,38 @@
+servicecomb-config-order: 1
+APPLICATION_ID: openMec
+service_description:
+  name: toolchain
+  version: 1.0.0
+  environment: development
+servicecomb:
+  service:
+    registry:
+      address: ${SC_ADDRESS}
+  rest:
+    address: ${LISTEN_IP:0.0.0.0}:8059
+    servlet:
+      urlPattern: /cse/*  #using spring mvc rest server to handle requests
+  uploads:
+    directory: /toolchain
+    maxSize: -1
+  request:
+    timeout: 30000
+
+server:
+  port: 8059
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+    key-store: ${SSL_KEY_STORE_PATH:}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:}
+    key-store-type: ${SSL_KEY_STORE_TYPE:}
+    key-alias: ${SSL_KEY_ALIAS:}
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+
