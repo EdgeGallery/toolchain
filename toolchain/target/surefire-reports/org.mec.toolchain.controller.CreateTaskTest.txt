@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.mec.toolchain.controller.CreateTaskTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.604 s - in org.mec.toolchain.controller.CreateTaskTest
