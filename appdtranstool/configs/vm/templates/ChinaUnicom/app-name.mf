@@ -1,0 +1,22 @@
+metadata:
+app_name: {app_name}
+app_provider: {app_provider}
+app_package_version: {app_package_version}
+app_release_data_time: {app_release_data_time}
+app_type: {app_type}
+app_package_description: {app_package_description}
+me_iaas_type: openstack
+product_vendor_id: {app_provider}
+product_type: {app_type}
+product_id: {product_id}
+version: {app_package_version}
+product_vendor: {app_provider}
+product_name: {app_name}
+
+Source: MEAD/openstack/templates/deploy.yaml
+Algorithm: SHA-256
+Hash: {hash_appd}
+
+Source: MEAD/mep/config.yaml
+Algorithm: SHA-256
+Hash: {hash_mep}
