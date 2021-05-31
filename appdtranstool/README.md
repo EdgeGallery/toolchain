@@ -4,6 +4,7 @@
 ## 工具转换方案 
 将各个标准的应用包模板、应用包信息定义、包模板转换规则录入系统，只支持系统中有的标准转换。
 在界面选择源、目标标准，上传需要的文件，通过标准模板、包定义、模板转换规则等进行转换，虚机部署信息，如AZ、主机组、启动脚本可以通过界面输入，也可以在线编译部署文件，前台将编辑好的部署文件传给后台替换，因此前台需要保存各个标准的部署模板文件。
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184421_6e8d8544_8354563.png "files.png")
 
 #### 应用包模板
 
@@ -213,13 +214,14 @@ Hash: {hash_mep}
 
 | URL                                  | Method | Change Type | request                                                      | response                                                     |
 | ------------------------------------ | ------ | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| /mec/appdtranstool/v1/appd/templates/ | GET   | Add         |  无                                                          | ["ChinaUnicom", "EdgeGallery"]  |
-| /mec/appdtranstool/v1/package/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />    "upload file success."<br />}  <br />             |
-| /mec/appdtranstool/v1/package/merge  | GET    | Add         | 同/mec/appstore/v1/apps/merge接口                            | {<br />    "file address"<br />}                             |
-| /mec/appdtranstool/v1/package/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootdata": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
+| /mec/appdtranstool/v1/vm/templates/ | GET   | Add         |  无                                                          | ["ChinaUnicom", "EdgeGallery"]  |
+| /mec/appdtranstool/v1/vm/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />    "upload file success."<br />}  <br />             |
+| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | 同/mec/appstore/v1/apps/merge接口                            | {<br />    "file address"<br />}                             |
+| /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootdata": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
 
 
 ### 界面设计
 
-
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184454_e0bc5473_8354563.png "appd-1.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184507_a765b1dc_8354563.png "appd-2.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184517_7bf47847_8354563.png "appd-3.png")
