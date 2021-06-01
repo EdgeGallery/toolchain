@@ -217,7 +217,7 @@ Hash: {hash_mep}
 | ------------------------------------ | ------ | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | /mec/appdtranstool/v1/vm/templates/ | GET   | Add         |  无                                                          | ["ChinaUnicom", "EdgeGallery"]  |
 | /mec/appdtranstool/v1/vm/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />    "upload file success."<br />}  <br />             |
-| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | 同/mec/appstore/v1/apps/merge接口                            | {<br />    "file address"<br />}                             |
+| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | {<br />    "fileName" : string,<br />    "guid" : string, <br />    "fileType" : string<br />}<br />fileType的取值为：package、doc、image、deploy。 | {<br />    "file address"<br />}                             |
 | /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootdata": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
 
 

@@ -67,8 +67,7 @@ public class VmController {
     })
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public ResponseEntity<String> uploadImage(HttpServletRequest request, Chunk chunk) throws Exception {
-        boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-        return vmService.uploadImage(isMultipart,chunk);
+        return vmService.uploadImage(ServletFileUpload.isMultipartContent(request), chunk);
     }
 
     /**
@@ -80,8 +79,10 @@ public class VmController {
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class)
     })
     @RequestMapping(value = "/apps/merge", method = RequestMethod.GET)
-    public ResponseEntity<String> merge(@RequestParam(value = "fileName") String fileName,
-        @RequestParam(value = "guid") String guid) throws Exception {
-        return vmService.merge(fileName,guid);
+    public ResponseEntity<String> merge(
+        @RequestParam(value = "fileName") String fileName,
+        @RequestParam(value = "guid") String guid,
+        @RequestParam(value = "fileType") String fileType) throws Exception {
+        return vmService.merge(fileName, guid, fileType);
     }
 }
