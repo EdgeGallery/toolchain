@@ -53,8 +53,8 @@ public class VmService {
         List<String> templates = new ArrayList<>();
         File file = new File(TEMPLATES_PATH);
         File[] lstFiles = file.listFiles();
-        for(File filePath : lstFiles) {
-            if(filePath.isDirectory()) {
+        for (File filePath : lstFiles) {
+            if (filePath.isDirectory()) {
                 templates.add(filePath.getName());
             }
         }
@@ -91,7 +91,7 @@ public class VmService {
     /**
      * merge image.
      */
-    public ResponseEntity merge(String fileName, String guid) throws IOException {
+    public ResponseEntity merge(String fileName, String guid, String fileType) throws IOException {
         File uploadDir = new File(appHome);
         checkDir(uploadDir);
         File file = new File(fileTempPath + File.separator + guid);
@@ -99,11 +99,10 @@ public class VmService {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files != null && files.length > 0) {
-                String temp = UUID.randomUUID().toString().replace("-", "");
-                String newFileAddress = appHome + File.separator + temp;
+                String newFileAddress = appHome + File.separator + fileType;
                 File partFiles = new File(newFileAddress);
                 checkDir(partFiles);
-                randomPath = temp + File.separator + fileName;
+                randomPath = fileType + File.separator + fileName;
                 String newFileName = partFiles + File.separator + fileName;
                 File partFile = new File(newFileName);
                 for (int i = 1; i <= files.length; i++) {
