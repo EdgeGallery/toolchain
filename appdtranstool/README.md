@@ -119,7 +119,7 @@ Hash: {hash_mep}
 
 #### 应用包模板转换规则
 
-该规则规定转换到目标标准时需要进行哪些操作，如需要生成参数列表generateValues、需要替换文件路径replaceFiles（目前只有docFilePath和deployFilePath）\更新文件列表updateFiles、需要重命名的文件renameFiles，是否需要对文件进行hash校验isNeedHashCheck，如：
+该规则规定转换到目标标准时需要进行哪些操作，如需要生成参数列表generateValues、需要替换文件路径replaceFiles（目前只有docFilePath和deployFilePath）、更新文件列表updateFiles、需要重命名的文件renameFiles，是否需要对文件进行hash校验isNeedHashCheck，如：
 
 ```
 {
