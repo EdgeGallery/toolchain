@@ -348,9 +348,9 @@ public class PortingService {
         OutputStream os = null;
         try {
             if (file.exists()) {
-                //设置Headers
+                //Set upHeaders
                 response.setHeader("Content-Type", "application/octet-stream");
-                //设置下载的文件的名称-该方式已解决中文乱码问题
+                //Set the name of the downloaded file-This method has solved the Chinese garbled problem
                 response.setHeader("Content-Disposition", "attachment;filename=porting-advisor.csv");
                 String src = new StringBuilder(portingParamConfig.getSrcPath()).append(transToUsername(userId))
                     .append(File.separator).append("src").toString();
