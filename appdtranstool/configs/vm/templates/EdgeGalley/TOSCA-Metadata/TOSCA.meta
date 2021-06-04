@@ -6,9 +6,6 @@ Entry-Definitions: APPD/{app_name}.zip
 Name: APPD/{app_name}.zip
 Content-Type: appd
 
-Name: Image/{image_name}.zip
-Content-Type: image
-
 Name: Image/SwImageDesc.json
 Content-Type: SwImageDesc
 

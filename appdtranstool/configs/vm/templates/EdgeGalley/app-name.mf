@@ -9,8 +9,8 @@ app_package_description: {app_package_description}
 
 Source: APPD/{app_name}.zip
 Algorithm: SHA-256
-Hash: {hash_appd}
+Hash: {hash_first}
 
 Source: Image/SwImageDesc.json
 Algorithm: SHA-256
-Hash: {hash_image}
+Hash: {hash_second}

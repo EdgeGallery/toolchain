@@ -1,4 +1,18 @@
 {
+    "generateValues": [
+        {
+            "item": "image_id",
+            "type": "uuid"
+        },
+        {
+            "item": "vnfd_id",
+            "type": "string"
+        }
+    ],
+    "replaceFiles": {
+        "docFilePath": "/Artifacts/Docs/template.md",
+        "deployFilePath": "/APPD/Definition/app-name.yaml"
+    },
     "updateFiles": [
         {
             "file": "/app-name.mf",
@@ -14,8 +28,7 @@
         {
             "file": "/TOSCA-Metadata/TOSCA.meta",
             "envs": [
-                "{app_name}",
-                "{image_name}"
+                "{app_name}"
             ]
         },
         {
@@ -28,15 +41,17 @@
             "file": "/APPD/Definition/app-name.yaml",
             "envs": [
                 "{app_name}",
-                "{app_package_version}",
+                "{vnfd_id}",
                 "{app_provider}",
                 "{app_package_version}",
-                "{vnfd_id}",
                 "{memorysize}",
                 "{vcpu}",
                 "{storagesize}",
+                "{vm_name}",
+                "{az}",
+                "{flavor}",
                 "{image_name}",
-                "{vm_name}"
+                "{bootdata}"
             ]
         },
         {
@@ -49,15 +64,6 @@
             ]
         }
     ],
-    "replaceFiles": [
-        "Artifacts/Docs/template.md"
-    ],
-    "zipFiles": [
-        {
-            "path": "/APPD/",
-            "zipName": "{app_name}"
-        }
-    ],
     "renameFiles": [
         {
             "file": "/app-name.mf",
@@ -68,32 +74,10 @@
             "newName": "{app_name}"
         }
     ],
-    "generateValues": [
+    "zipFiles": [
         {
-            "item": "image_id",
-            "type": "uuid"
-        },
-        {
-            "item": "vnfd_id",
-            "type": "string"
-        }
-    ],
-    "inputs": [
-        {
-            "item": "az",
-            "type": "string"
-        },
-        {
-            "item": "flavor",
-            "type": "string"
-        },
-        {
-            "item": "bootdata",
-            "type": "string"
-        },
-        {
-            "item": "image_path",
-            "type": "string"
+            "path": "/APPD/",
+            "zipName": "{app_name}"
         }
     ],
     "isNeedHashCheck": "true"

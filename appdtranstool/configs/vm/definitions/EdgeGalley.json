@@ -3,7 +3,7 @@
         "app_name": {
             "filePath": "/",
             "fileType": ".mf",
-            "location": "app_product_name",
+            "location": "app_product_name"
         },
         "app_provider": {
             "filePath": "/",
