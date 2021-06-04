@@ -24,13 +24,17 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.edgegallery.tool.appdtrans.controller.dto.request.Chunk;
+import org.edgegallery.tool.appdtrans.controller.dto.request.TransVmPkgReqDto;
 import org.edgegallery.tool.appdtrans.controller.dto.response.ErrorRespDto;
-import org.edgegallery.tool.appdtrans.service.VmService;
+import org.edgegallery.tool.appdtrans.controller.dto.response.ResponseObject;
+import org.edgegallery.tool.appdtrans.facade.VmServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class VmController {
     @Autowired
-    private VmService vmService;
+    private VmServiceFacade vmServiceFacade;
 
     /**
      * get appd templates types.
@@ -51,38 +55,55 @@ public class VmController {
     @GetMapping(value = "/templates", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ResponseEntity.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class)
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class),
+        @ApiResponse(code = 500, message = "resource grant " + "error", response = ResponseObject.class)
     })
     public ResponseEntity<List<String>> getVmTemplates() {
-        return ResponseEntity.ok(vmService.getVmTemplates());
+        return ResponseEntity.ok(vmServiceFacade.getVmTemplates());
     }
 
     /**
-     * upload image.
+     * upload file.
      */
     @ApiOperation(value = "upload image", response = ResponseEntity.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ResponseEntity.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class)
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class),
+        @ApiResponse(code = 500, message = "resource grant " + "error", response = ResponseObject.class)
     })
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ResponseEntity<String> uploadImage(HttpServletRequest request, Chunk chunk) throws Exception {
-        return vmService.uploadImage(ServletFileUpload.isMultipartContent(request), chunk);
+    public ResponseEntity<ResponseObject> uploadFile(HttpServletRequest request, Chunk chunk) {
+        return vmServiceFacade.uploadFile(ServletFileUpload.isMultipartContent(request), chunk);
     }
 
     /**
-     * merge image.
+     * merge file.
      */
     @ApiOperation(value = "merge image", response = ResponseEntity.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ResponseEntity.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class)
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class),
+        @ApiResponse(code = 500, message = "resource grant " + "error", response = ResponseObject.class)
     })
     @RequestMapping(value = "/apps/merge", method = RequestMethod.GET)
-    public ResponseEntity<String> merge(
+    public ResponseEntity<ResponseObject> merge(
         @RequestParam(value = "fileName") String fileName,
         @RequestParam(value = "guid") String guid,
-        @RequestParam(value = "fileType") String fileType) throws Exception {
-        return vmService.merge(fileName, guid, fileType);
+        @RequestParam(value = "fileType") String fileType) {
+        return vmServiceFacade.merge(fileName, guid, fileType);
+    }
+
+    /**
+     * transform app package.
+     */
+    @ApiOperation(value = "transform app package", response = ResponseEntity.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = ResponseEntity.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class),
+        @ApiResponse(code = 500, message = "resource grant " + "error", response = ResponseObject.class)
+    })
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public ResponseEntity<InputStreamResource> transVmPackage(@RequestBody TransVmPkgReqDto dto) {
+        return vmServiceFacade.transVmPackage(dto);
     }
 }

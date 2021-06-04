@@ -119,10 +119,19 @@ Hash: {hash_mep}
 
 #### 应用包模板转换规则
 
-该规则规定转换到目标标准时需要进行哪些操作，如更新文件列表updateFiles、需要重命名的文件renameFiles，需要生成参数列表generateValues、是否需要对文件进行hash校验isNeedHashCheck，如：
+该规则规定转换到目标标准时需要进行哪些操作，如需要生成参数列表generateValues、需要替换文件路径replaceFiles（目前只有docFilePath和deployFilePath）、更新文件列表updateFiles、需要重命名的文件renameFiles，是否需要对文件进行hash校验isNeedHashCheck，如：
 
 ```
 {
+    "generateValues": [
+        {
+            "item": "product_id",
+            "type": "uuid"
+        }
+    ],
+    "replaceFiles": {
+        "deployFilePath": "/MEAD/openstack/values.yaml"
+    },
     "updateFiles": [
         {
             "file": "/app-name.mf",
@@ -159,56 +168,29 @@ Hash: {hash_mep}
             "newName": "{app_name}"
         }
     ],
-    "generateValues": [
-        {
-            "item": "product_id",
-            "type": "uuid"
-        }
-    ],
     "isNeedHashCheck": "true"
 }
 ```
 
-该规则定义了具体需要操作的文件、替换的变量、生成的变量等，还有需要压缩的文件zipFiles、替换的文件replaceFiles、外部输入变量inputs，如：
+该规则定义了具体需要操作的文件、替换的变量、生成的变量等，还有需要压缩的文件zipFiles，如：
 
 ```
-    "replaceFiles": [
-        "Artifacts/Docs/template.md"
-    ],
     "zipFiles": [
         {
             "path": "/APPD/",
             "zipName": "{app_name}"
         }
-    ],
-    "inputs": [
-        {
-            "item": "az",
-            "type": "string"
-        },
-        {
-            "item": "flavor",
-            "type": "string"
-        },
-        {
-            "item": "bootdata",
-            "type": "string"
-        },
-        {
-            "item": "image_path",
-            "type": "string"
-        }
     ]
 ```
 
-各个规则的操作顺序：replaceFiles、generateValues、inputs、updateFiles、renameFiles、zipFiles、hash文件校验（只针对mf文件中配置的source文件）。
+各个规则的操作顺序：generateValues、replaceFiles、updateFiles、renameFiles、zipFiles、hash文件校验（只针对mf文件中配置的source文件）。
 
 根据该规则可以转换为目标标准的应用包。
 
 ### 文件上传
 
 不管大文件还是小文件，都采用分片上传方式，点击上传后，都先将文件保存到本地服务器，后台返回给前台文件路径，文件上传接口参考appstore。
-文件保存路径：/usr/app/transtool, 子级目录有package、doc、image、deploy，分别存放上传的文件。文件转换完后需要清理目录。
+文件保存路径：/usr/app/transtool, 子级目录有package、doc、Image、deploy，分别存放上传的文件。文件转换完后需要清理目录。
 
 ### 接口变更
 
@@ -216,9 +198,9 @@ Hash: {hash_mep}
 | URL                                  | Method | Change Type | request                                                      | response                                                     |
 | ------------------------------------ | ------ | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | /mec/appdtranstool/v1/vm/templates/ | GET   | Add         |  无                                                          | ["ChinaUnicom", "EdgeGallery"]  |
-| /mec/appdtranstool/v1/vm/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />    "upload file success."<br />}  <br />             |
-| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | {<br />    "fileName" : string,<br />    "guid" : string, <br />    "fileType" : string<br />}<br />fileType的取值为：package、doc、image、deploy。 | {<br />    "file address"<br />}                             |
-| /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootdata": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
+| /mec/appdtranstool/v1/vm/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />   "data":  "upload file success."<br />    "retCode": 0,<br />    "params": null,<br />    "message": "upload file success."<br />}  <br /> |
+| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | {<br />    "fileName" : string,<br />    "guid" : string, <br />    "fileType" : string<br />}<br />fileType的取值为：package、doc、image、deploy。 | {<br />    "data":  "file address."<br />    "retCode": 0,<br />    "params": null,<br />    "message": "merge file success."<br />} |
+| /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootData": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
 
 
 ### 界面设计

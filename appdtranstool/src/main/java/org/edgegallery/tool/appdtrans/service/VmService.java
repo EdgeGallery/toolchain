@@ -16,111 +16,480 @@
 
 package org.edgegallery.tool.appdtrans.service;
 
+import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.edgegallery.tool.appdtrans.controller.dto.request.Chunk;
+import org.apache.commons.lang.StringUtils;
+import org.edgegallery.tool.appdtrans.constants.ResponseConst;
+import org.edgegallery.tool.appdtrans.controller.dto.request.TransVmPkgReqDto;
+import org.edgegallery.tool.appdtrans.exception.ToolException;
+import org.edgegallery.tool.appdtrans.model.AppInfo;
+import org.edgegallery.tool.appdtrans.model.AppPkgInfo;
+import org.edgegallery.tool.appdtrans.model.ComputeInfo;
+import org.edgegallery.tool.appdtrans.model.DefinitionInfo;
+import org.edgegallery.tool.appdtrans.model.GenerateValueInfo;
+import org.edgegallery.tool.appdtrans.model.RenameFileInfo;
+import org.edgegallery.tool.appdtrans.model.ReplaceFileInfo;
+import org.edgegallery.tool.appdtrans.model.RuleInfo;
+import org.edgegallery.tool.appdtrans.model.UpdateFileInfo;
+import org.edgegallery.tool.appdtrans.model.ZipFileInfo;
+import org.edgegallery.tool.appdtrans.utils.LocalFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.CollectionUtils;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 @Service("vmService")
 public class VmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmService.class);
 
-    private static final String TEMPLATES_PATH = "/configs/vm/templates";
+    private static final String DEFINE_PATH = "./configs/vm/definitions";
+
+    private static final String RULE_PATH = "./configs/vm/rules";
+
+    private static final String JSON_FILE_EXTENSION = ".json";
+
+    private static final String APP_INFO_DEF = "appInfo";
+
+    private static final String COMPUTE_INFO_DEF = "computeInfo";
+
+    private static final String ZIP_EXTENSION = ".zip";
+
+    private static final String MF_EXTENSION = ".mf";
 
     @Value("${appdtranstool-be.home-path}")
     private String appHome;
 
-    @Value("${appdtranstool-be.temp-path}")
-    private String fileTempPath;
+    @Autowired
+    private LocalFileUtils localFileUtils;
 
     /**
-     * get appd templates types.
+     * get app package info.
+     *
+     * @param filePath app package full path
+     * @param sourceAppd source appd
+     * @return AppPkgInfo
+     */
+    public AppPkgInfo getAppPkgInfo(String filePath, String sourceAppd) {
+        String defFilePath = DEFINE_PATH + File.separator + sourceAppd + JSON_FILE_EXTENSION;
+        File defFile = new File(defFilePath);
+        try {
+            String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
+            JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+            JsonObject jsonAppInfo = jsonObject.get(APP_INFO_DEF).getAsJsonObject();
+            JsonObject jsonComputeInfo = jsonObject.get(COMPUTE_INFO_DEF).getAsJsonObject();
+            AppInfo appInfo = getAppInfo(filePath, jsonAppInfo);
+            ComputeInfo computeInfo = getComputeInfo(filePath, jsonComputeInfo);
+            return new AppPkgInfo(appInfo, computeInfo);
+
+        } catch (IOException e) {
+            throw new ToolException("failed to get package info from file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
+        }
+    }
+
+    /**
+     * get app info.
+     *
+     * @param filePath app package full path
+     * @param jsonAppInfo app definition info
+     * @return AppInfo
+     */
+    public AppInfo getAppInfo(String filePath, JsonObject jsonAppInfo) {
+        String appName = getValueFromMfFile(filePath, jsonAppInfo.get("app_name").getAsString());
+        String appProvider = getValueFromMfFile(filePath, jsonAppInfo.get("app_provider").getAsString());
+        String appVersion = getValueFromMfFile(filePath, jsonAppInfo.get("app_package_version").getAsString());
+        String appTime = getValueFromMfFile(filePath, jsonAppInfo.get("app_release_data_time").getAsString());
+        String appType = getValueFromMfFile(filePath, jsonAppInfo.get("app_type").getAsString());
+        String appDesc = getValueFromMfFile(filePath, jsonAppInfo.get("app_package_description").getAsString());
+        return new AppInfo(appName, appProvider, appVersion, appTime, appType, appDesc);
+    }
+
+    /**
+     * get compute info.
+     *
+     * @param filePath app package full path
+     * @param jsonComputeInfo compute definition info
+     * @return ComputeInfo
+     */
+    public ComputeInfo getComputeInfo(String filePath, JsonObject jsonComputeInfo) {
+        String vmName = getValueFromYamlFile(filePath, jsonComputeInfo.get("vm_name").getAsString());
+        String storageSize = getValueFromYamlFile(filePath, jsonComputeInfo.get("storagesize").getAsString());
+        String memSize = getValueFromYamlFile(filePath, jsonComputeInfo.get("memorysize").getAsString());
+        String vcpu = getValueFromYamlFile(filePath, jsonComputeInfo.get("vcpu").getAsString());
+        String imageName = getValueFromYamlFile(filePath, jsonComputeInfo.get("image_name").getAsString());
+        return new ComputeInfo(vmName, storageSize, memSize, vcpu, imageName);
+    }
+
+    private String getValueFromMfFile(String filePath, String jsonInfo) {
+        Gson g = new Gson();
+        DefinitionInfo itemDef = g.fromJson(jsonInfo, new TypeToken<DefinitionInfo>() { }.getType());
+        if (!itemDef.getFileType().equals(MF_EXTENSION)) {
+            LOGGER.error("file type is wrong, not .mf.");
+            return null;
+        }
+        try (ZipFile zipFile = new ZipFile(filePath)) {
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String fileName = entry.getName();
+                if (fileName.substring(0, fileName.lastIndexOf(File.separator)).equals(itemDef.getFilePath())
+                    && entry.getName().endsWith(itemDef.getFileType())
+                    && !fileName.substring(fileName.lastIndexOf(File.separator) + 1).equals(itemDef.getExcludeFile())) {
+                    try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
+                        String line = "";
+                        while ((line = br.readLine()) != null) {
+                            // prefix: path
+                            if (line.trim().startsWith(itemDef.getLocation())) {
+                                return line.split(":")[1].trim();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ToolException("failed to get value from mf file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
+        }
+        return null;
+    }
+
+    private String getValueFromYamlFile(String filePath, String jsonInfo) {
+        Gson g = new Gson();
+        DefinitionInfo itemDef = g.fromJson(jsonInfo, new TypeToken<DefinitionInfo>() { }.getType());
+        if (!itemDef.getFileType().equals(".yaml")) {
+            LOGGER.error("file type is wrong, not .yaml.");
+            return null;
+        }
+        List<String> location = Arrays.asList(itemDef.getLocation().split("\\."));
+        try (ZipFile zipFile = new ZipFile(filePath)) {
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String fileName = entry.getName();
+                if (fileName.substring(0, fileName.lastIndexOf(File.separator)).equals(itemDef.getFilePath())
+                    && entry.getName().endsWith(itemDef.getFileType())
+                    && !fileName.substring(fileName.lastIndexOf(File.separator) + 1).equals(itemDef.getExcludeFile())) {
+                    try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
+                        String yamlContent = br.toString();
+                        yamlContent = yamlContent.replaceAll("\t", "");
+                        Yaml yaml = new Yaml(new SafeConstructor());
+                        Map<String, Object> loaded = yaml.load(yamlContent);
+                        return getObjectFromMap(loaded, location);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ToolException("failed to get value from yaml file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
+        }
+        return null;
+    }
+
+    /**
+     * get Object From Map.
      *
      */
-    public List<String> getVmTemplates() {
-        List<String> templates = new ArrayList<>();
-        File file = new File(TEMPLATES_PATH);
-        File[] lstFiles = file.listFiles();
-        for (File filePath : lstFiles) {
-            if (filePath.isDirectory()) {
-                templates.add(filePath.getName());
+    private String getObjectFromMap(Map<String, Object> loaded, List<String> location) {
+        LinkedHashMap<String, Object> result = null;
+        for (int i = 1; i < location.size() - 1; i++) {
+            result = (LinkedHashMap<String, Object>) loaded.get(location.get(i));
+            if (result != null) {
+                loaded = result;
             }
         }
-        return templates;
+        if (result != null) {
+            return result.get(location.get(location.size() - 1)).toString();
+        }
+        return null;
     }
 
     /**
-     * upload image.
+     * get rule info.
+     *
+     * @param destAppd dest appd
+     * @return RuleInfo
      */
-    public ResponseEntity<String> uploadImage(boolean isMultipart, Chunk chunk) throws IOException {
-        if (isMultipart) {
-            MultipartFile file = chunk.getFile();
-
-            if (file == null) {
-                LOGGER.error("can not find any needed file");
-                return ResponseEntity.badRequest().build();
-            }
-            File uploadDirTmp = new File(fileTempPath);
-            checkDir(uploadDirTmp);
-
-            Integer chunkNumber = chunk.getChunkNumber();
-            if (chunkNumber == null) {
-                chunkNumber = 0;
-            }
-            File outFile = new File(fileTempPath + File.separator + chunk.getIdentifier(), chunkNumber + ".part");
-            try (InputStream inputStream = file.getInputStream()) {
-                FileUtils.copyInputStreamToFile(inputStream, outFile);
-            }
+    public RuleInfo getRuleInfo(String destAppd) {
+        String defFilePath = RULE_PATH + File.separator + destAppd + JSON_FILE_EXTENSION;
+        File defFile = new File(defFilePath);
+        try {
+            String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
+            Gson g = new Gson();
+            RuleInfo ruleInfo = g.fromJson(fileContent, new TypeToken<RuleInfo>() { }.getType());
+            return ruleInfo;
+        } catch (IOException e) {
+            throw new ToolException("failed to get package info from file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
         }
-
-        return ResponseEntity.ok("upload package block success.");
     }
 
     /**
-     * merge image.
+     * generate needed value.
+     *
      */
-    public ResponseEntity merge(String fileName, String guid, String fileType) throws IOException {
-        File uploadDir = new File(appHome);
-        checkDir(uploadDir);
-        File file = new File(fileTempPath + File.separator + guid);
-        String randomPath = "";
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null && files.length > 0) {
-                String newFileAddress = appHome + File.separator + fileType;
-                File partFiles = new File(newFileAddress);
-                checkDir(partFiles);
-                randomPath = fileType + File.separator + fileName;
-                String newFileName = partFiles + File.separator + fileName;
-                File partFile = new File(newFileName);
-                for (int i = 1; i <= files.length; i++) {
-                    File s = new File(fileTempPath + File.separator + guid, i + ".part");
-                    FileOutputStream destTempfos = new FileOutputStream(partFile, true);
-                    FileUtils.copyFile(s, destTempfos);
-                    destTempfos.close();
+    public void generateValue(GenerateValueInfo genInfo, AppPkgInfo appPkgInfo) {
+        String value;
+        if (genInfo.getType().equals("uuid")) {
+            value = UUID.randomUUID().toString();
+        } else {
+            value = appPkgInfo.getAppInfo().getAppName();
+        }
+        switch (genInfo.getItem()) {
+            case "image_id":
+                appPkgInfo.setImageId(value);
+                break;
+            case "product_id":
+                appPkgInfo.setProductId(value);
+                break;
+            case "vnf_id":
+                appPkgInfo.setVnfId(value);
+                break;
+            default:
+                LOGGER.error("not supported value.");
+        }
+    }
+
+    /**
+     * replace files.
+     */
+
+    public void replaceFiles(TransVmPkgReqDto dto, String parentDir, ReplaceFileInfo replaceFileInfo) {
+        try {
+            if (!StringUtils.isEmpty(dto.getDocFile()) && !StringUtils.isEmpty(replaceFileInfo.getDocFilePath())) {
+                String srcDocFile = appHome  + File.separator + dto.getDocFile();
+                String dstDocFile = parentDir + replaceFileInfo.getDocFilePath();
+                FileUtils.moveFile(new File(srcDocFile), new File(dstDocFile));
+            }
+
+            if (!StringUtils.isEmpty(dto.getDeployFile())
+                && !StringUtils.isEmpty(replaceFileInfo.getDeployFilePath())) {
+                String srcDeployFile = appHome + File.separator + dto.getDeployFile();
+                String dstDeployFile = parentDir + replaceFileInfo.getDeployFilePath();
+                FileUtils.moveFile(new File(srcDeployFile), new File(dstDeployFile));
+            }
+        } catch (Exception e) {
+            throw new ToolException(e.getMessage(), ResponseConst.RET_REPLACE_FILE_FAILED);
+        }
+    }
+
+    /**
+     * add image file to package.
+     * @param imageFile image file
+     * @param parentDir parent dir
+     * @param imageName image name
+     * @param imagePath image path
+     * @return image path
+     */
+    public String addImageFileToPkg(String imageFile, String parentDir, String imageName, String imagePath) {
+        if (!StringUtils.isEmpty(imageFile)
+            && Files.getFileExtension(imageFile.toLowerCase()).equals(ZIP_EXTENSION)) {
+            String imageDir = parentDir + File.separator + "Image";
+            File imgFile = new File(appHome + File.separator + imageFile);
+            try {
+                localFileUtils.checkDir(new File(imageDir));
+                FileUtils.copyToDirectory(imgFile, new File(imageDir));
+            } catch (Exception e) {
+                throw new ToolException(e.getMessage(), ResponseConst.RET_COPY_FILE_FAILED);
+            }
+            if (StringUtils.isEmpty(imagePath)) {
+                return "/Image" + imgFile.getName() + File.separator
+                    + imageName + File.separator + imageName + ".qcow2";
+            }
+        }
+        return imagePath;
+    }
+
+    /**
+     * build envs which be updated in files.
+     *
+     */
+    public Map<String, String> buildUpdateVals(AppPkgInfo appPkgInfo, String imagePath, TransVmPkgReqDto dto) {
+        Map<String, String> updVar2Values = new HashMap<String, String>();
+        updVar2Values.put("{app_name}", appPkgInfo.getAppInfo().getAppName());
+        updVar2Values.put("{app_provider}", appPkgInfo.getAppInfo().getAppProvider());
+        updVar2Values.put("{app_package_version}", appPkgInfo.getAppInfo().getAppVersion());
+        updVar2Values.put("{app_release_data_time}", appPkgInfo.getAppInfo().getAppReleaseTime());
+        updVar2Values.put("{app_type}", appPkgInfo.getAppInfo().getAppType());
+        updVar2Values.put("{app_package_description}", appPkgInfo.getAppInfo().getAppDesc());
+        updVar2Values.put("{vm_name}", appPkgInfo.getComputeInfo().getVmname());
+        updVar2Values.put("{storagesize}", appPkgInfo.getComputeInfo().getStorageSize());
+        updVar2Values.put("{memorysize}", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("{vcpu}", appPkgInfo.getComputeInfo().getVcpu());
+        updVar2Values.put("{image_name}", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("{vnfd_id}", appPkgInfo.getVnfId());
+        updVar2Values.put("image_id", appPkgInfo.getImageId());
+        updVar2Values.put("app_package_version", appPkgInfo.getAppInfo().getAppVersion());
+        updVar2Values.put("image_name", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("{product_id}", appPkgInfo.getProductId());
+        updVar2Values.put("image_path", imagePath);
+        updVar2Values.put("{az}", dto.getAz());
+        updVar2Values.put("{flavor}", dto.getFlavor());
+        updVar2Values.put("{bootdata}", dto.getBootData());
+        return updVar2Values;
+    }
+
+    /**
+     * update files in package.
+     */
+    public void updateFiles(String dstFileDir, List<UpdateFileInfo> updateFileInfos,
+        Map<String, String> env2Values) {
+        try {
+            for (UpdateFileInfo updateFileInfo : updateFileInfos) {
+                File updFile = new File(dstFileDir + updateFileInfo.getFile());
+                for (String env : updateFileInfo.getEnvs()) {
+                    FileUtils.writeStringToFile(updFile,
+                        FileUtils.readFileToString(updFile, StandardCharsets.UTF_8).replace(env, env2Values.get(env)),
+                        StandardCharsets.UTF_8, false);
                 }
-                FileUtils.deleteDirectory(file);
             }
+        } catch (Exception e) {
+            throw new ToolException(e.getMessage(), ResponseConst.RET_UPD_FILE_FAILED);
         }
-
-        return ResponseEntity.ok(randomPath);
     }
 
-    private void checkDir(File fileDir) throws IOException {
-        if (!fileDir.exists() && !fileDir.mkdirs()) {
-            throw new IOException("create folder failed");
+    /**
+     * rename files.
+     */
+    public void renameFiles(String dstFileDir, List<RenameFileInfo> renameFileInfos,
+        Map<String, String> env2Values) {
+        try {
+            for (RenameFileInfo renameFileInfo : renameFileInfos) {
+                String srcFileName = dstFileDir + renameFileInfo.getFile();
+                File renameFile = new File(srcFileName);
+                String newName = env2Values.get(renameFileInfo.getNewName());
+                String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(File.separator)) + newName
+                    + Files.getFileExtension(srcFileName.toLowerCase());
+                renameFile.renameTo(new File(newFileName));
+            }
+        } catch (Exception e) {
+            throw new ToolException(e.getMessage(), ResponseConst.RET_RENAME_FILE_FAILED);
+        }
+    }
+
+    /**
+     * zip files.
+     */
+    public void zipFiles(String dstFileDir, List<ZipFileInfo> zipFileInfos, Map<String, String> env2Values) {
+        for (ZipFileInfo zipFileInfo: zipFileInfos) {
+            String zipDir = dstFileDir + zipFileInfo.getPath();
+            if (!org.springframework.util.StringUtils.isEmpty(zipDir)) {
+                File dir = new File(zipDir);
+                if (dir.isDirectory()) {
+                    File[] files = dir.listFiles();
+                    if (files != null && files.length > 0) {
+                        List<File> subFiles = Arrays.asList(files);
+                        if (!CollectionUtils.isEmpty(subFiles)) {
+                            String zipFile = zipDir + File.separator + env2Values.get(zipFileInfo.getZipName())
+                                + ZIP_EXTENSION;
+                            localFileUtils.zipFiles(subFiles, new File(zipFile));
+                            for (File subFile : subFiles) {
+                                FileUtils.deleteQuietly(subFile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * hash check.
+     */
+    public void hashCheck(String dstFileDir) {
+        File mfFile = localFileUtils.getFile(dstFileDir, MF_EXTENSION);
+        List<String> hashFilePaths = localFileUtils.getHashFilePaths(mfFile);
+        for (int i = 0; i < hashFilePaths.size(); i++) {
+            String fileName = dstFileDir + File.separator + hashFilePaths.get(i);
+            try (FileInputStream fis = new FileInputStream(fileName)) {
+                String hashValue = DigestUtils.sha256Hex(fis);
+                if (i == 1) {
+                    FileUtils.writeStringToFile(mfFile,
+                        FileUtils.readFileToString(mfFile, StandardCharsets.UTF_8).replace("{hash_first}", hashValue));
+                } else {
+                    FileUtils.writeStringToFile(mfFile,
+                        FileUtils.readFileToString(mfFile, StandardCharsets.UTF_8).replace("{hash_second}", hashValue));
+                }
+            } catch (IOException e) {
+                LOGGER.error("replace mf file hash value failed. {}", e.getMessage());
+            }
+        }
+        // add image zip file hash check
+        addImageCheck(dstFileDir, mfFile);
+    }
+
+    private void addImageCheck(String dstFileDir, File mfFile) {
+        File imageFile = localFileUtils.getFile(dstFileDir + File.separator + "Image", ZIP_EXTENSION);
+        if (imageFile != null) {
+            try {
+                String srcFullPath = imageFile.getCanonicalPath();
+                String hashFile = srcFullPath.substring(srcFullPath.indexOf(dstFileDir) + 1);
+                String sourceData =  "Source: " + hashFile + "\n";
+                FileUtils.writeStringToFile(mfFile, sourceData, StandardCharsets.UTF_8, true);
+                FileUtils.writeStringToFile(mfFile, "Algorithm: SHA-256\n", StandardCharsets.UTF_8, true);
+                try (FileInputStream fis = new FileInputStream(srcFullPath)) {
+                    String hashValue = DigestUtils.sha256Hex(fis);
+                    String hashData = "Hash: " + hashValue + "\n";
+                    FileUtils.writeStringToFile(mfFile, hashData, StandardCharsets.UTF_8, true);
+                } catch (IOException e) {
+                    LOGGER.error("add image file hash check failed {}", e.getMessage());
+                }
+
+                // add image zip
+                String toscaMeta = dstFileDir + "/TOSCA-Metadata/TOSCA.meta";
+                File metaFile = new File(toscaMeta);
+                if (metaFile.exists()) {
+                    String contentName = "Name: " + hashFile + "\n";
+                    FileUtils.writeStringToFile(metaFile, contentName, StandardCharsets.UTF_8, true);
+                    FileUtils.writeStringToFile(metaFile, "Content-Type: image\n", StandardCharsets.UTF_8, true);
+                }
+            } catch (Exception e) {
+                LOGGER.error("add image file hash check failed {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * clear env.
+     */
+    public void clearEnv(TransVmPkgReqDto dto) {
+        try {
+            if (!StringUtils.isEmpty(dto.getAppFile())) {
+                FileUtils.forceDelete(new File(appHome + File.separator + dto.getAppFile()));
+            }
+            if (!StringUtils.isEmpty(dto.getDocFile())) {
+                FileUtils.forceDelete(new File(appHome + File.separator + dto.getDocFile()));
+            }
+            if (!StringUtils.isEmpty(dto.getImageFile())) {
+                FileUtils.forceDelete(new File(appHome + File.separator + dto.getImageFile()));
+            }
+            if (!StringUtils.isEmpty(dto.getDeployFile())) {
+                FileUtils.forceDelete(new File(appHome + File.separator + dto.getDeployFile()));
+            }
+        } catch (Exception e) {
+            throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
         }
     }
 }

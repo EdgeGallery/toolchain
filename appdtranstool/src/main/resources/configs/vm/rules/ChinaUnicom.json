@@ -1,4 +1,13 @@
 {
+    "generateValues": [
+        {
+            "item": "product_id",
+            "type": "uuid"
+        }
+    ],
+    "replaceFiles": {
+        "deployFilePath": "/MEAD/openstack/values.yaml"
+    },
     "updateFiles": [
         {
             "file": "/app-name.mf",
@@ -33,12 +42,6 @@
         {
             "file": "/app-name.mf",
             "newName": "{app_name}"
-        }
-    ],
-    "generateValues": [
-        {
-            "item": "product_id",
-            "type": "uuid"
         }
     ],
     "isNeedHashCheck": "true"
