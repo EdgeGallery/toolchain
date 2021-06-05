@@ -34,7 +34,7 @@ public class Chunk implements Serializable {
     private Long id;
 
     /**
-     * Current file block，From1begin.
+     * Current file block，From one begin.
      */
     private Integer chunkNumber;
 
