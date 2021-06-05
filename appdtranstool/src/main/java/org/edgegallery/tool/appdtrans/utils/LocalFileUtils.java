@@ -76,6 +76,7 @@ public class LocalFileUtils {
      * @param localFilePath file full name
      */
     private void unzipPacakge(String localFilePath) {
+        List<File> tempFiles = new ArrayList<>();
         String parentDir = localFilePath.substring(0, localFilePath.lastIndexOf(File.separator));
         try (ZipFile zipFile = new ZipFile(localFilePath)) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -88,25 +89,26 @@ public class LocalFileUtils {
                 }
                 entriesCount++;
                 // sanitize file path
-                String fileName = sanitizeFileName(entry.getName(), parentDir);
-                if (!entry.isDirectory()) {
-                    try (InputStream inputStream = zipFile.getInputStream(entry)) {
-                        if (inputStream.available() > TOO_BIG) {
-                            throw new ToolException("file being unzipped is too big",
-                                ResponseConst.RET_FILE_TOO_BIG, TOO_BIG);
-                        }
-                        FileUtils.copyInputStreamToFile(inputStream, new File(fileName));
-                        LOGGER.info("unzip package... {}", entry.getName());
+                String fileName = sanitizeFileName(entry.getName(), parentDir + "temp");
+                File f = new File(fileName);
+                tempFiles.add(f);
+                if (isDir(entry, f)) {
+                    continue;
+                }
+                try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                    if (inputStream.available() > TOO_BIG) {
+                        throw new ToolException("file being unzipped is too big",
+                            ResponseConst.RET_FILE_TOO_BIG, TOO_BIG);
                     }
-                } else {
-                    File dir = new File(fileName);
-                    boolean dirStatus = dir.mkdirs();
-                    LOGGER.debug("creating dir {}, status {}", fileName, dirStatus);
+                    FileUtils.copyInputStreamToFile(inputStream, f);
+                    LOGGER.info("unzip package... {}", entry.getName());
                 }
             }
         } catch (IOException e) {
             LOGGER.error("Failed to unzip");
             throw new ToolException("Failed to unzip", ResponseConst.RET_UNZIP_FILE_FAILED);
+        } finally {
+            deleteTempFiles(tempFiles);
         }
     }
 
@@ -116,7 +118,7 @@ public class LocalFileUtils {
      * @param entryName entry name.
      * @parm  intendedDir parent dir
      */
-    public String sanitizeFileName(String entryName, String intendedDir) throws IOException {
+    private String sanitizeFileName(String entryName, String intendedDir) throws IOException {
         File f = new File(intendedDir, entryName);
         String canonicalPath = f.getCanonicalPath();
         File intendDir = new File(intendedDir);
@@ -149,17 +151,46 @@ public class LocalFileUtils {
     }
 
     /**
+     * check if entry is directory, if then create dir.
+     *
+     * @param entry entry of next element.
+     * @param f File
+     */
+    private boolean isDir(ZipEntry entry, File f) {
+        if (entry.isDirectory()) {
+            boolean isSuccess = f.mkdirs();
+            if (isSuccess) {
+                return true;
+            } else {
+                return f.exists();
+            }
+        }
+        return false;
+    }
+
+    // delete temp files
+    private void deleteTempFiles(List<File> tempFiles) {
+        try {
+            for (File f : tempFiles) {
+                if (f.exists()) {
+                    FileUtils.forceDelete(f);
+                }
+            }
+        } catch (Exception e) {
+            throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
+        }
+    }
+
+    /**
      * ZIP application package.
      *
      * @param intendedDir application package ID
      */
-    public String compressAppPackage(String intendedDir) throws IOException {
+    public String compressAppPackage(String intendedDir) {
         final Path srcDir = Paths.get(intendedDir);
         String zipFileName = intendedDir.concat(ZIP_EXTENSION);
-        File tempFile = new File(zipFileName);
-        if (tempFile.exists()) {
-            FileUtils.forceDelete(tempFile);
-        }
+        String[] fileName = zipFileName.split("/");
+        String fileStorageAdd = srcDir + "/" + fileName[fileName.length - 1];
         try (ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFileName))) {
             java.nio.file.Files.walkFileTree(srcDir, new SimpleFileVisitor<Path>() {
                 @Override
@@ -179,7 +210,13 @@ public class LocalFileUtils {
         } catch (IOException e) {
             throw new ToolException(ZIP_PACKAGE_ERR_MESSAGES, ResponseConst.RET_COMPRESS_FAILED);
         }
-        return zipFileName;
+        try {
+            FileUtils.deleteDirectory(new File(intendedDir));
+            FileUtils.moveFileToDirectory(new File(zipFileName), new File(intendedDir), true);
+        } catch (IOException e) {
+            throw new ToolException(ZIP_PACKAGE_ERR_MESSAGES, ResponseConst.RET_COMPRESS_FAILED);
+        }
+        return fileStorageAdd;
     }
 
     /**

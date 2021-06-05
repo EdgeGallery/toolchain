@@ -191,7 +191,7 @@ public class VmServiceFacade {
             vmService.hashCheck(dstFileDir);
 
             // 10. zip all package
-            String dstPkgFile = localFileUtils.compressAppPackage(dstFileDir);
+            String dstPkgFile = localFileUtils.compressAppPackage(appHome);
 
             // 11. clear env
             vmService.clearEnv(dto);
