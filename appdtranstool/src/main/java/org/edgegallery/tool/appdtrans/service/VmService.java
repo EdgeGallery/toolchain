@@ -67,9 +67,9 @@ public class VmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmService.class);
 
-    private static final String DEFINE_PATH = "./configs/vm/definitions";
+    private static final String DEFINE_PATH = "/configs/vm/definitions";
 
-    private static final String RULE_PATH = "./configs/vm/rules";
+    private static final String RULE_PATH = "/configs/vm/rules";
 
     private static final String JSON_FILE_EXTENSION = ".json";
 
@@ -77,15 +77,17 @@ public class VmService {
 
     private static final String COMPUTE_INFO_DEF = "computeInfo";
 
-    private static final String ZIP_EXTENSION = ".zip";
+    private static final String ZIP_EXTENSION = "zip";
 
-    private static final String MF_EXTENSION = ".mf";
+    private static final String MF_EXTENSION = "mf";
 
-    @Value("${appdtranstool-be.home-path}")
+    @Value("${appdtranstool.home-path}")
     private String appHome;
 
     @Autowired
     private LocalFileUtils localFileUtils;
+
+    private String userDir = System.getProperty("user.dir");
 
     /**
      * get app package info.
@@ -95,7 +97,7 @@ public class VmService {
      * @return AppPkgInfo
      */
     public AppPkgInfo getAppPkgInfo(String filePath, String sourceAppd) {
-        String defFilePath = DEFINE_PATH + File.separator + sourceAppd + JSON_FILE_EXTENSION;
+        String defFilePath = userDir + DEFINE_PATH + File.separator + sourceAppd + JSON_FILE_EXTENSION;
         File defFile = new File(defFilePath);
         try {
             String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
@@ -147,7 +149,7 @@ public class VmService {
     private String getValueFromMfFile(String filePath, String jsonInfo) {
         Gson g = new Gson();
         DefinitionInfo itemDef = g.fromJson(jsonInfo, new TypeToken<DefinitionInfo>() { }.getType());
-        if (!itemDef.getFileType().equals(MF_EXTENSION)) {
+        if (!itemDef.getFileType().equals(".mf")) {
             LOGGER.error("file type is wrong, not .mf.");
             return null;
         }
@@ -234,10 +236,9 @@ public class VmService {
      * @return RuleInfo
      */
     public RuleInfo getRuleInfo(String destAppd) {
-        String defFilePath = RULE_PATH + File.separator + destAppd + JSON_FILE_EXTENSION;
-        File defFile = new File(defFilePath);
+        String defFilePath = userDir + RULE_PATH + File.separator + destAppd + JSON_FILE_EXTENSION;
         try {
-            String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
+            String fileContent = FileUtils.readFileToString(new File(defFilePath), StandardCharsets.UTF_8);
             Gson g = new Gson();
             RuleInfo ruleInfo = g.fromJson(fileContent, new TypeToken<RuleInfo>() { }.getType());
             return ruleInfo;
@@ -255,7 +256,7 @@ public class VmService {
         if (genInfo.getType().equals("uuid")) {
             value = UUID.randomUUID().toString();
         } else {
-            value = appPkgInfo.getAppInfo().getAppName();
+            value = appPkgInfo.getAppInfo().getAppName() + "_" + appPkgInfo.getComputeInfo().getImageName();
         }
         switch (genInfo.getItem()) {
             case "image_id":
@@ -274,8 +275,8 @@ public class VmService {
 
     /**
      * replace files.
+     *
      */
-
     public void replaceFiles(TransVmPkgReqDto dto, String parentDir, ReplaceFileInfo replaceFileInfo) {
         try {
             if (!StringUtils.isEmpty(dto.getDocFile()) && !StringUtils.isEmpty(replaceFileInfo.getDocFilePath())) {
@@ -290,7 +291,7 @@ public class VmService {
                 String dstDeployFile = parentDir + replaceFileInfo.getDeployFilePath();
                 FileUtils.moveFile(new File(srcDeployFile), new File(dstDeployFile));
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_REPLACE_FILE_FAILED);
         }
     }
@@ -304,8 +305,8 @@ public class VmService {
      * @return image path
      */
     public String addImageFileToPkg(String imageFile, String parentDir, String imageName, String imagePath) {
-        if (!StringUtils.isEmpty(imageFile)
-            && Files.getFileExtension(imageFile.toLowerCase()).equals(ZIP_EXTENSION)) {
+        if (!StringUtils.isEmpty(imageFile)) {
+            localFileUtils.fileCheck(appHome + File.separator + imageFile);
             String imageDir = parentDir + File.separator + "Image";
             File imgFile = new File(appHome + File.separator + imageFile);
             try {
@@ -365,7 +366,7 @@ public class VmService {
                         StandardCharsets.UTF_8, false);
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_UPD_FILE_FAILED);
         }
     }
@@ -375,17 +376,13 @@ public class VmService {
      */
     public void renameFiles(String dstFileDir, List<RenameFileInfo> renameFileInfos,
         Map<String, String> env2Values) {
-        try {
-            for (RenameFileInfo renameFileInfo : renameFileInfos) {
-                String srcFileName = dstFileDir + renameFileInfo.getFile();
-                File renameFile = new File(srcFileName);
-                String newName = env2Values.get(renameFileInfo.getNewName());
-                String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(File.separator)) + newName
-                    + Files.getFileExtension(srcFileName.toLowerCase());
-                renameFile.renameTo(new File(newFileName));
-            }
-        } catch (Exception e) {
-            throw new ToolException(e.getMessage(), ResponseConst.RET_RENAME_FILE_FAILED);
+        for (RenameFileInfo renameFileInfo : renameFileInfos) {
+            String srcFileName = dstFileDir + renameFileInfo.getFile();
+            File renameFile = new File(srcFileName);
+            String newName = env2Values.get(renameFileInfo.getNewName());
+            String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(File.separator) + 1) + newName
+                + "." + Files.getFileExtension(srcFileName.toLowerCase());
+            renameFile.renameTo(new File(newFileName));
         }
     }
 
@@ -403,7 +400,7 @@ public class VmService {
                         List<File> subFiles = Arrays.asList(files);
                         if (!CollectionUtils.isEmpty(subFiles)) {
                             String zipFile = zipDir + File.separator + env2Values.get(zipFileInfo.getZipName())
-                                + ZIP_EXTENSION;
+                                + ".zip";
                             localFileUtils.zipFiles(subFiles, new File(zipFile));
                             for (File subFile : subFiles) {
                                 FileUtils.deleteQuietly(subFile);
@@ -445,7 +442,7 @@ public class VmService {
         if (imageFile != null) {
             try {
                 String srcFullPath = imageFile.getCanonicalPath();
-                String hashFile = srcFullPath.substring(srcFullPath.indexOf(dstFileDir) + 1);
+                String hashFile = srcFullPath.substring(dstFileDir.length() + 1);
                 String sourceData =  "Source: " + hashFile + "\n";
                 FileUtils.writeStringToFile(mfFile, sourceData, StandardCharsets.UTF_8, true);
                 FileUtils.writeStringToFile(mfFile, "Algorithm: SHA-256\n", StandardCharsets.UTF_8, true);
@@ -465,7 +462,7 @@ public class VmService {
                     FileUtils.writeStringToFile(metaFile, contentName, StandardCharsets.UTF_8, true);
                     FileUtils.writeStringToFile(metaFile, "Content-Type: image\n", StandardCharsets.UTF_8, true);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 LOGGER.error("add image file hash check failed {}", e.getMessage());
             }
         }
@@ -488,7 +485,7 @@ public class VmService {
             if (!StringUtils.isEmpty(dto.getDeployFile())) {
                 FileUtils.forceDelete(new File(appHome + File.separator + dto.getDeployFile()));
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
         }
     }
