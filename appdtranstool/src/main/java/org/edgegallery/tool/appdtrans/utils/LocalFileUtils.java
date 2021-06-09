@@ -63,10 +63,14 @@ public class LocalFileUtils {
      */
     public void fileCheck(String fileFullName) {
         String filePosx = Files.getFileExtension(fileFullName.toLowerCase());
-        if (filePosx.equals(".zip") || filePosx.equals(".csar")) {
-            unzipPacakge(fileFullName);
-        } else {
-            throw new ToolException("file extension is invalid.", ResponseConst.RET_FILE_NAME_POSTFIX_INVALID);
+        try {
+            if (filePosx.equals("zip") || filePosx.equals("csar")) {
+                unzipPacakge(fileFullName);
+            } else {
+                throw new ToolException("file extension is invalid.", ResponseConst.RET_FILE_NAME_POSTFIX_INVALID);
+            }
+        } catch (IOException e) {
+            throw new ToolException("delete temp directory failed.", ResponseConst.RET_DEL_FILE_FAILED);
         }
     }
 
@@ -75,9 +79,9 @@ public class LocalFileUtils {
      *
      * @param localFilePath file full name
      */
-    private void unzipPacakge(String localFilePath) {
-        List<File> tempFiles = new ArrayList<>();
-        String parentDir = localFilePath.substring(0, localFilePath.lastIndexOf(File.separator));
+    private void unzipPacakge(String localFilePath) throws IOException {
+        String tempDir = localFilePath.substring(0, localFilePath.lastIndexOf(File.separator)) + "temp";
+        checkDir(new File(tempDir));
         try (ZipFile zipFile = new ZipFile(localFilePath)) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             int entriesCount = 0;
@@ -89,9 +93,8 @@ public class LocalFileUtils {
                 }
                 entriesCount++;
                 // sanitize file path
-                String fileName = sanitizeFileName(entry.getName(), parentDir + "temp");
+                String fileName = sanitizeFileName(entry.getName(), tempDir);
                 File f = new File(fileName);
-                tempFiles.add(f);
                 if (isDir(entry, f)) {
                     continue;
                 }
@@ -108,7 +111,7 @@ public class LocalFileUtils {
             LOGGER.error("Failed to unzip");
             throw new ToolException("Failed to unzip", ResponseConst.RET_UNZIP_FILE_FAILED);
         } finally {
-            deleteTempFiles(tempFiles);
+            FileUtils.deleteDirectory(new File(tempDir));
         }
     }
 
@@ -166,19 +169,6 @@ public class LocalFileUtils {
             }
         }
         return false;
-    }
-
-    // delete temp files
-    private void deleteTempFiles(List<File> tempFiles) {
-        try {
-            for (File f : tempFiles) {
-                if (f.exists()) {
-                    FileUtils.forceDelete(f);
-                }
-            }
-        } catch (Exception e) {
-            throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
-        }
     }
 
     /**
@@ -280,12 +270,8 @@ public class LocalFileUtils {
      * @param fileDir file dir
      */
     public void checkDir(File fileDir) {
-        try {
-            if (!fileDir.exists() && !fileDir.mkdirs()) {
-                throw new ToolException("failed to create directory.", ResponseConst.RET_MAKEDIR_FAILED);
-            }
-        } catch (Exception e) {
-            throw new ToolException(e.getMessage(), ResponseConst.RET_MAKEDIR_FAILED);
+        if (!fileDir.exists() && !fileDir.mkdirs()) {
+            throw new ToolException("failed to create directory.", ResponseConst.RET_MAKEDIR_FAILED);
         }
     }
 
@@ -316,15 +302,11 @@ public class LocalFileUtils {
      * get file by parent directory and file extension.
      */
     public File getFile(String parentDir, String fileExtension) {
-        try {
-            List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
-            for (File fileEntry : files) {
-                if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
-                    return fileEntry;
-                }
+        List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
+        for (File fileEntry : files) {
+            if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
+                return fileEntry;
             }
-        } catch (Exception e) {
-            throw new ToolException(e.getMessage(), ResponseConst.RET_FILE_NOT_FOUND);
         }
         return null;
     }

@@ -102,7 +102,7 @@ public class VmController {
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorRespDto.class),
         @ApiResponse(code = 500, message = "resource grant " + "error", response = ResponseObject.class)
     })
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/trans", method = RequestMethod.POST)
     public ResponseEntity<InputStreamResource> transVmPackage(@RequestBody TransVmPkgReqDto dto) {
         return vmServiceFacade.transVmPackage(dto);
     }

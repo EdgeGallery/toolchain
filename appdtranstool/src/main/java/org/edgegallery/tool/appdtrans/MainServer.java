@@ -28,37 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-@SpringBootApplication(scanBasePackages = "org.edgegallery.tool.appdtrans", exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = "org.edgegallery.tool.appdtrans", exclude = {SecurityAutoConfiguration.class,
+    DataSourceAutoConfiguration.class})
 public class MainServer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainServer.class);
-
     /**
      * Main.
      */
-    public static void main(String[] args) throws NoSuchAlgorithmException, KeyManagementException {
-
-        // do not check host name
-        TrustManager[] trustAllCerts = new TrustManager[] {
-            new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    LOGGER.info("checks client trusted");
-                }
-
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    LOGGER.info("checks server trusted");
-                }
-            }
-        };
-        SSLContext sc = SSLContext.getInstance("TLSv1.2");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+    public static void main(String[] args) {
         SpringApplication.run(MainServer.class, args);
     }
 }

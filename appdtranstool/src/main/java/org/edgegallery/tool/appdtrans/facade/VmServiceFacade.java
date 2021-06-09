@@ -20,6 +20,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,12 +53,12 @@ public class VmServiceFacade {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmServiceFacade.class);
 
-    private static final String TEMPLATES_PATH = "./configs/vm/templates/";
+    private static final String TEMPLATES_PATH = "/configs/vm/templates/";
 
-    @Value("${appdtranstool-be.home-path}")
+    @Value("${appdtranstool.home-path}")
     private String appHome;
 
-    @Value("${appdtranstool-be.temp-path}")
+    @Value("${appdtranstool.temp-path}")
     private String fileTempPath;
 
     @Autowired
@@ -66,13 +67,15 @@ public class VmServiceFacade {
     @Autowired
     private LocalFileUtils localFileUtils;
 
+    private String userDir = System.getProperty("user.dir");
+
     /**
      * get appd templates types.
      *
      */
     public List<String> getVmTemplates() {
         List<String> templates = new ArrayList<>();
-        File file = new File(TEMPLATES_PATH);
+        File file = new File(userDir + TEMPLATES_PATH);
         File[] lstFiles = file.listFiles();
         for (File filePath : lstFiles) {
             if (filePath.isDirectory()) {
@@ -108,7 +111,7 @@ public class VmServiceFacade {
             ErrorMessage errMsg = new ErrorMessage(ResponseConst.RET_SUCCESS, null);
             return ResponseEntity
                 .ok(new ResponseObject("upload file block success.", errMsg, "upload file block success."));
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException("upload file block exception.", ResponseConst.RET_UPLOAD_FILE_FAILED);
         }
     }
@@ -143,7 +146,7 @@ public class VmServiceFacade {
             ErrorMessage errMsg = new ErrorMessage(ResponseConst.RET_SUCCESS, null);
             return ResponseEntity
                 .ok(new ResponseObject(randomPath, errMsg, "merge file success."));
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException("merge file exception.", ResponseConst.RET_MERGE_FILE_FAILED);
         }
     }
@@ -162,7 +165,7 @@ public class VmServiceFacade {
             // 2. copy dest template to specified path
             String dstFileDir = appHome + File.separator + appPkgInfo.getAppInfo().getAppName();
             localFileUtils.checkDir(new File(dstFileDir));
-            FileUtils.copyToDirectory(new File(TEMPLATES_PATH + dto.getDestAppd()), new File(dstFileDir));
+            FileUtils.copyToDirectory(new File(userDir +TEMPLATES_PATH + dto.getDestAppd()), new File(dstFileDir));
 
             // 3. generate values
             RuleInfo ruleInfo = vmService.getRuleInfo(dto.getDestAppd());
@@ -204,7 +207,7 @@ public class VmServiceFacade {
             headers.add("Content-Disposition", "attachment; filename="
                 + appPkgInfo.getAppInfo().getAppName());
             return ResponseEntity.ok().headers(headers).body(new InputStreamResource(ins));
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_TRANS_PKG_FAILED);
         }
     }

@@ -13,41 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-###servicecomb config####
-servicecomb-config-order: 1
-APPLICATION_ID: edgegallery  #应用名
-service_description:
-  name: appdtranstool-be  #微服务名
-  version: 1.0.0   #微服务版本
-  environment: development
-servicecomb:
-  service:
-    registry:
-      address: ${SC_ADDRESS} #连接SC(Service Center,注册中心)的地址
-  rest:
-    address: ${LISTEN_IP:0.0.0.0}:8065  #Rest通信地址
-    servlet:
-      urlPattern: /cse/*  #using spring mvc rest server to handle requests
-  uploads:
-    directory: /home/appdtranstool
-    maxSize: -1
-  handler:
-    chain:
-      Provider:
-        default: bizkeeper-provider
+
 ###spring config######
 server:
   port: 8065
-  ssl:
-    enabled: ${SSL_ENABLED:false}
-    protocol: TLS
-    enabled-protocols: [TLSv1.2]
-    ciphers: [TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-              TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384]
-    key-store: ${SSL_KEY_STORE_PATH:}
-    key-store-password: ${SSL_KEY_STORE_PASSWORD:}
-    key-store-type: ${SSL_KEY_STORE_TYPE:}
-    key-alias: ${SSL_KEY_ALIAS:}
 
 spring:
   main:
@@ -59,6 +28,6 @@ spring:
 
 ###appdtranstool config####
 appdtranstool:
-  temp-path: /usr/app/temp
-  home-path: /usr/app/transtool
+  temp-path: ./appdtranstool/temp
+  home-path: ./appdtranstool/transtool
 
