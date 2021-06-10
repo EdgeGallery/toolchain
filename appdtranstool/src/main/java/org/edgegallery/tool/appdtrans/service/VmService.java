@@ -22,10 +22,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -174,7 +177,7 @@ public class VmService {
                 if (fileName.endsWith(itemDef.getFileType())) {
                     // check the file if in exclude file
                     if (!StringUtils.isEmpty(itemDef.getExcludeFile())
-                        && fileName.substring(fileName.lastIndexOf(FILE_SEPARATOR) + 1).equals(itemDef.getExcludeFile())) {
+                        && fileName.substring(fileName.lastIndexOf("/") + 1).equals(itemDef.getExcludeFile())) {
                         continue;
                     }
                     try (BufferedReader br = new BufferedReader(
@@ -219,17 +222,15 @@ public class VmService {
                 if (fileName.endsWith(itemDef.getFileType())) {
                     // check the file if in exclude file
                     if (!StringUtils.isEmpty(itemDef.getExcludeFile())
-                        && fileName.substring(fileName.lastIndexOf(FILE_SEPARATOR) + 1).equals(itemDef.getExcludeFile())) {
+                        && fileName.substring(fileName.lastIndexOf("/") + 1).equals(itemDef.getExcludeFile())) {
                         continue;
                     }
-                    try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
-                        String yamlContent = br.toString();
-                        yamlContent = yamlContent.replaceAll("\t", "");
-                        Yaml yaml = new Yaml(new SafeConstructor());
-                        Map<String, Object> loaded = yaml.load(yamlContent);
-                        return getObjectFromMap(loaded, location);
-                    }
+
+                    String yamlContent = getYamlContentFromZip(zipFile, entry);
+                    Yaml yaml = new Yaml(new SafeConstructor());
+                    Map<String, Object> loaded;
+                    loaded = yaml.load(yamlContent);
+                    return getObjectFromMap(loaded, location);
                 }
             }
         } catch (IOException e) {
@@ -238,13 +239,32 @@ public class VmService {
         return null;
     }
 
+    private String getYamlContentFromZip(ZipFile zipFile, ZipEntry entry) throws IOException {
+        try (BufferedReader br = new BufferedReader(
+            new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
+            File newYamlFile = new File("deploy.yaml");
+            FileOutputStream out = new FileOutputStream(newYamlFile);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+            String line;
+            while ((line = br.readLine()) != null) {
+                bw.write(line + "\r\n");
+            }
+            br.close();
+            bw.close();
+
+            String yamlContent = FileUtils.readFileToString(newYamlFile, StandardCharsets.UTF_8);
+            yamlContent = yamlContent.replaceAll("\t", "");
+            return yamlContent;
+        }
+    }
+
     /**
      * get Object From Map.
      *
      */
     private String getObjectFromMap(Map<String, Object> loaded, List<String> location) {
         LinkedHashMap<String, Object> result = null;
-        for (int i = 1; i < location.size() - 1; i++) {
+        for (int i = 0; i < location.size() - 1; i++) {
             result = (LinkedHashMap<String, Object>) loaded.get(location.get(i));
             if (result != null) {
                 loaded = result;
@@ -292,7 +312,7 @@ public class VmService {
             case "product_id":
                 appPkgInfo.setProductId(value);
                 break;
-            case "vnf_id":
+            case "vnfd_id":
                 appPkgInfo.setVnfId(value);
                 break;
             default:
@@ -366,17 +386,26 @@ public class VmService {
         updVar2Values.put("{storagesize}", appPkgInfo.getComputeInfo().getStorageSize());
         updVar2Values.put("{memorysize}", appPkgInfo.getComputeInfo().getMemorySize());
         updVar2Values.put("{vcpu}", appPkgInfo.getComputeInfo().getVcpu());
-        updVar2Values.put("{image_name}", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("{image_name}", appPkgInfo.getComputeInfo().getImageName());
         updVar2Values.put("{vnfd_id}", appPkgInfo.getVnfId());
         updVar2Values.put("image_id", appPkgInfo.getImageId());
         updVar2Values.put("app_package_version", appPkgInfo.getAppInfo().getAppVersion());
-        updVar2Values.put("image_name", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("image_name", appPkgInfo.getComputeInfo().getImageName());
         updVar2Values.put("{product_id}", appPkgInfo.getProductId());
-        updVar2Values.put("image_path", imagePath);
-        updVar2Values.put("{az}", dto.getAz());
-        updVar2Values.put("{flavor}", dto.getFlavor());
-        updVar2Values.put("{bootdata}", dto.getBootData());
+        // inputs
+        addInputValue(updVar2Values, "image_path", imagePath);
+        addInputValue(updVar2Values, "{az}", dto.getAz());
+        addInputValue(updVar2Values, "{flavor}", dto.getFlavor());
+        addInputValue(updVar2Values, "{bootdata}", dto.getBootData());
         return updVar2Values;
+    }
+
+    private void addInputValue(Map<String, String> updVar2Values, String key, String value) {
+        if (StringUtils.isEmpty(value)) {
+            updVar2Values.put(key, "");
+        } else {
+            updVar2Values.put(key, value);
+        }
     }
 
     /**
