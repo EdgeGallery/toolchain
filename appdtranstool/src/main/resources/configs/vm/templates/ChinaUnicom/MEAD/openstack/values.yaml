@@ -1,6 +1,0 @@
-description: vm_specs
-APP1:
-  vcpu: {vcpu}
-  vstorage: {storagesize} GB
-  vmemory: {memorysize} MB
-  image_name: {image_name}

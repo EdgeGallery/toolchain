@@ -26,8 +26,3 @@ spring:
       max-file-size: 5120MB
       max-request-size: 5120MB
 
-###appdtranstool config####
-appdtranstool:
-  temp-path: ./appdtranstool/temp
-  home-path: ./appdtranstool/transtool
-

@@ -56,7 +56,6 @@ import org.edgegallery.tool.appdtrans.utils.LocalFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -80,14 +79,15 @@ public class VmService {
     private static final String ZIP_EXTENSION = "zip";
 
     private static final String MF_EXTENSION = "mf";
-
-    @Value("${appdtranstool.home-path}")
-    private String appHome;
+    
+    private static final String FILE_SEPARATOR = "/";
 
     @Autowired
     private LocalFileUtils localFileUtils;
 
     private String userDir = System.getProperty("user.dir");
+
+    private String appHome = userDir + "/transTool";
 
     /**
      * get app package info.
@@ -97,7 +97,7 @@ public class VmService {
      * @return AppPkgInfo
      */
     public AppPkgInfo getAppPkgInfo(String filePath, String sourceAppd) {
-        String defFilePath = userDir + DEFINE_PATH + File.separator + sourceAppd + JSON_FILE_EXTENSION;
+        String defFilePath = userDir + DEFINE_PATH + FILE_SEPARATOR + sourceAppd + JSON_FILE_EXTENSION;
         File defFile = new File(defFilePath);
         try {
             String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
@@ -121,12 +121,15 @@ public class VmService {
      * @return AppInfo
      */
     public AppInfo getAppInfo(String filePath, JsonObject jsonAppInfo) {
-        String appName = getValueFromMfFile(filePath, jsonAppInfo.get("app_name").getAsString());
-        String appProvider = getValueFromMfFile(filePath, jsonAppInfo.get("app_provider").getAsString());
-        String appVersion = getValueFromMfFile(filePath, jsonAppInfo.get("app_package_version").getAsString());
-        String appTime = getValueFromMfFile(filePath, jsonAppInfo.get("app_release_data_time").getAsString());
-        String appType = getValueFromMfFile(filePath, jsonAppInfo.get("app_type").getAsString());
-        String appDesc = getValueFromMfFile(filePath, jsonAppInfo.get("app_package_description").getAsString());
+        String appName = getValueFromMfFile(filePath, jsonAppInfo.get("app_name").getAsJsonObject().toString());
+        String appProvider = getValueFromMfFile(filePath, jsonAppInfo.get("app_provider").getAsJsonObject().toString());
+        String appVersion = getValueFromMfFile(filePath,
+            jsonAppInfo.get("app_package_version").getAsJsonObject().toString());
+        String appTime = getValueFromMfFile(filePath,
+            jsonAppInfo.get("app_release_data_time").getAsJsonObject().toString());
+        String appType = getValueFromMfFile(filePath, jsonAppInfo.get("app_type").getAsJsonObject().toString());
+        String appDesc = getValueFromMfFile(filePath,
+            jsonAppInfo.get("app_package_description").getAsJsonObject().toString());
         return new AppInfo(appName, appProvider, appVersion, appTime, appType, appDesc);
     }
 
@@ -138,11 +141,13 @@ public class VmService {
      * @return ComputeInfo
      */
     public ComputeInfo getComputeInfo(String filePath, JsonObject jsonComputeInfo) {
-        String vmName = getValueFromYamlFile(filePath, jsonComputeInfo.get("vm_name").getAsString());
-        String storageSize = getValueFromYamlFile(filePath, jsonComputeInfo.get("storagesize").getAsString());
-        String memSize = getValueFromYamlFile(filePath, jsonComputeInfo.get("memorysize").getAsString());
-        String vcpu = getValueFromYamlFile(filePath, jsonComputeInfo.get("vcpu").getAsString());
-        String imageName = getValueFromYamlFile(filePath, jsonComputeInfo.get("image_name").getAsString());
+        String vmName = getValueFromYamlFile(filePath, jsonComputeInfo.get("vm_name").getAsJsonObject().toString());
+        String storageSize = getValueFromYamlFile(filePath,
+            jsonComputeInfo.get("storagesize").getAsJsonObject().toString());
+        String memSize = getValueFromYamlFile(filePath, jsonComputeInfo.get("memorysize").getAsJsonObject().toString());
+        String vcpu = getValueFromYamlFile(filePath, jsonComputeInfo.get("vcpu").getAsJsonObject().toString());
+        String imageName = getValueFromYamlFile(filePath,
+            jsonComputeInfo.get("image_name").getAsJsonObject().toString());
         return new ComputeInfo(vmName, storageSize, memSize, vcpu, imageName);
     }
 
@@ -158,9 +163,20 @@ public class VmService {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String fileName = entry.getName();
-                if (fileName.substring(0, fileName.lastIndexOf(File.separator)).equals(itemDef.getFilePath())
-                    && entry.getName().endsWith(itemDef.getFileType())
-                    && !fileName.substring(fileName.lastIndexOf(File.separator) + 1).equals(itemDef.getExcludeFile())) {
+                // check the path of entry if equal to ruled path
+                if (!StringUtils.isEmpty(itemDef.getFilePath())) {
+                    if (!fileName.contains(itemDef.getFilePath())
+                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath())) {
+                        continue;
+                    }
+                }
+                // check the posix of file
+                if (fileName.endsWith(itemDef.getFileType())) {
+                    // check the file if in exclude file
+                    if (!StringUtils.isEmpty(itemDef.getExcludeFile())
+                        && fileName.substring(fileName.lastIndexOf(FILE_SEPARATOR) + 1).equals(itemDef.getExcludeFile())) {
+                        continue;
+                    }
                     try (BufferedReader br = new BufferedReader(
                         new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
                         String line = "";
@@ -192,9 +208,20 @@ public class VmService {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String fileName = entry.getName();
-                if (fileName.substring(0, fileName.lastIndexOf(File.separator)).equals(itemDef.getFilePath())
-                    && entry.getName().endsWith(itemDef.getFileType())
-                    && !fileName.substring(fileName.lastIndexOf(File.separator) + 1).equals(itemDef.getExcludeFile())) {
+                // check the path of entry if equal to ruled path
+                if (!StringUtils.isEmpty(itemDef.getFilePath())) {
+                    if (!fileName.contains(itemDef.getFilePath())
+                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath())) {
+                        continue;
+                    }
+                }
+                // check the posix of file
+                if (fileName.endsWith(itemDef.getFileType())) {
+                    // check the file if in exclude file
+                    if (!StringUtils.isEmpty(itemDef.getExcludeFile())
+                        && fileName.substring(fileName.lastIndexOf(FILE_SEPARATOR) + 1).equals(itemDef.getExcludeFile())) {
+                        continue;
+                    }
                     try (BufferedReader br = new BufferedReader(
                         new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
                         String yamlContent = br.toString();
@@ -236,7 +263,7 @@ public class VmService {
      * @return RuleInfo
      */
     public RuleInfo getRuleInfo(String destAppd) {
-        String defFilePath = userDir + RULE_PATH + File.separator + destAppd + JSON_FILE_EXTENSION;
+        String defFilePath = userDir + RULE_PATH + FILE_SEPARATOR + destAppd + JSON_FILE_EXTENSION;
         try {
             String fileContent = FileUtils.readFileToString(new File(defFilePath), StandardCharsets.UTF_8);
             Gson g = new Gson();
@@ -280,14 +307,14 @@ public class VmService {
     public void replaceFiles(TransVmPkgReqDto dto, String parentDir, ReplaceFileInfo replaceFileInfo) {
         try {
             if (!StringUtils.isEmpty(dto.getDocFile()) && !StringUtils.isEmpty(replaceFileInfo.getDocFilePath())) {
-                String srcDocFile = appHome  + File.separator + dto.getDocFile();
+                String srcDocFile = appHome  + FILE_SEPARATOR + dto.getDocFile();
                 String dstDocFile = parentDir + replaceFileInfo.getDocFilePath();
                 FileUtils.moveFile(new File(srcDocFile), new File(dstDocFile));
             }
 
             if (!StringUtils.isEmpty(dto.getDeployFile())
                 && !StringUtils.isEmpty(replaceFileInfo.getDeployFilePath())) {
-                String srcDeployFile = appHome + File.separator + dto.getDeployFile();
+                String srcDeployFile = appHome + FILE_SEPARATOR + dto.getDeployFile();
                 String dstDeployFile = parentDir + replaceFileInfo.getDeployFilePath();
                 FileUtils.moveFile(new File(srcDeployFile), new File(dstDeployFile));
             }
@@ -306,9 +333,9 @@ public class VmService {
      */
     public String addImageFileToPkg(String imageFile, String parentDir, String imageName, String imagePath) {
         if (!StringUtils.isEmpty(imageFile)) {
-            localFileUtils.fileCheck(appHome + File.separator + imageFile);
-            String imageDir = parentDir + File.separator + "Image";
-            File imgFile = new File(appHome + File.separator + imageFile);
+            localFileUtils.fileCheck(appHome + FILE_SEPARATOR + imageFile);
+            String imageDir = parentDir + FILE_SEPARATOR + "Image";
+            File imgFile = new File(appHome + FILE_SEPARATOR + imageFile);
             try {
                 localFileUtils.checkDir(new File(imageDir));
                 FileUtils.copyToDirectory(imgFile, new File(imageDir));
@@ -316,8 +343,8 @@ public class VmService {
                 throw new ToolException(e.getMessage(), ResponseConst.RET_COPY_FILE_FAILED);
             }
             if (StringUtils.isEmpty(imagePath)) {
-                return "/Image" + imgFile.getName() + File.separator
-                    + imageName + File.separator + imageName + ".qcow2";
+                return "/Image" + imgFile.getName() + FILE_SEPARATOR
+                    + imageName + FILE_SEPARATOR + imageName + ".qcow2";
             }
         }
         return imagePath;
@@ -380,7 +407,7 @@ public class VmService {
             String srcFileName = dstFileDir + renameFileInfo.getFile();
             File renameFile = new File(srcFileName);
             String newName = env2Values.get(renameFileInfo.getNewName());
-            String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(File.separator) + 1) + newName
+            String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(FILE_SEPARATOR) + 1) + newName
                 + "." + Files.getFileExtension(srcFileName.toLowerCase());
             renameFile.renameTo(new File(newFileName));
         }
@@ -399,7 +426,7 @@ public class VmService {
                     if (files != null && files.length > 0) {
                         List<File> subFiles = Arrays.asList(files);
                         if (!CollectionUtils.isEmpty(subFiles)) {
-                            String zipFile = zipDir + File.separator + env2Values.get(zipFileInfo.getZipName())
+                            String zipFile = zipDir + FILE_SEPARATOR + env2Values.get(zipFileInfo.getZipName())
                                 + ".zip";
                             localFileUtils.zipFiles(subFiles, new File(zipFile));
                             for (File subFile : subFiles) {
@@ -419,7 +446,7 @@ public class VmService {
         File mfFile = localFileUtils.getFile(dstFileDir, MF_EXTENSION);
         List<String> hashFilePaths = localFileUtils.getHashFilePaths(mfFile);
         for (int i = 0; i < hashFilePaths.size(); i++) {
-            String fileName = dstFileDir + File.separator + hashFilePaths.get(i);
+            String fileName = dstFileDir + FILE_SEPARATOR + hashFilePaths.get(i);
             try (FileInputStream fis = new FileInputStream(fileName)) {
                 String hashValue = DigestUtils.sha256Hex(fis);
                 if (i == 1) {
@@ -438,7 +465,7 @@ public class VmService {
     }
 
     private void addImageCheck(String dstFileDir, File mfFile) {
-        File imageFile = localFileUtils.getFile(dstFileDir + File.separator + "Image", ZIP_EXTENSION);
+        File imageFile = localFileUtils.getFile(dstFileDir + FILE_SEPARATOR + "Image", ZIP_EXTENSION);
         if (imageFile != null) {
             try {
                 String srcFullPath = imageFile.getCanonicalPath();
@@ -474,16 +501,16 @@ public class VmService {
     public void clearEnv(TransVmPkgReqDto dto) {
         try {
             if (!StringUtils.isEmpty(dto.getAppFile())) {
-                FileUtils.forceDelete(new File(appHome + File.separator + dto.getAppFile()));
+                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getAppFile()));
             }
             if (!StringUtils.isEmpty(dto.getDocFile())) {
-                FileUtils.forceDelete(new File(appHome + File.separator + dto.getDocFile()));
+                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getDocFile()));
             }
             if (!StringUtils.isEmpty(dto.getImageFile())) {
-                FileUtils.forceDelete(new File(appHome + File.separator + dto.getImageFile()));
+                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getImageFile()));
             }
             if (!StringUtils.isEmpty(dto.getDeployFile())) {
-                FileUtils.forceDelete(new File(appHome + File.separator + dto.getDeployFile()));
+                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getDeployFile()));
             }
         } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
