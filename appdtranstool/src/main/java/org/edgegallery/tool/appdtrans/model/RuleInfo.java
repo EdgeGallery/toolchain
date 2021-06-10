@@ -30,7 +30,7 @@ public class RuleInfo {
 
     private List<GenerateValueInfo> generateValues;
 
-    private ReplaceFileInfo replaceFileInfo;
+    private ReplaceFileInfo replaceFiles;
 
     private List<UpdateFileInfo> updateFiles;
 

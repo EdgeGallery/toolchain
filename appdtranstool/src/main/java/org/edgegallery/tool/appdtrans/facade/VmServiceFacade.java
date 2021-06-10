@@ -162,9 +162,10 @@ public class VmServiceFacade {
             AppPkgInfo appPkgInfo = vmService.getAppPkgInfo(appSourcePkgFile, dto.getSourceAppd());
 
             // 2. copy dest template to specified path
-            String dstFileDir = appHome + FILE_SEPARATOR + appPkgInfo.getAppInfo().getAppName();
-            localFileUtils.checkDir(new File(dstFileDir));
-            FileUtils.copyToDirectory(new File(userDir +TEMPLATES_PATH + dto.getDestAppd()), new File(dstFileDir));
+            String dstFileDir = appHome + FILE_SEPARATOR + dto.getDestAppd();
+            FileUtils.deleteDirectory(new File(dstFileDir));
+            localFileUtils.checkDir(new File(appHome));
+            FileUtils.copyToDirectory(new File(userDir + TEMPLATES_PATH + dto.getDestAppd()), new File(appHome));
 
             // 3. generate values
             RuleInfo ruleInfo = vmService.getRuleInfo(dto.getDestAppd());
@@ -173,7 +174,7 @@ public class VmServiceFacade {
             }
 
             // 4. replace file
-            vmService.replaceFiles(dto, dstFileDir, ruleInfo.getReplaceFileInfo());
+            vmService.replaceFiles(dto, dstFileDir, ruleInfo.getReplaceFiles());
 
             // 5. add image file
             String imagePath = vmService.addImageFileToPkg(dto.getImageFile(), dstFileDir,
@@ -193,11 +194,10 @@ public class VmServiceFacade {
             vmService.hashCheck(dstFileDir);
 
             // 10. zip all package
-            String dstPkgFile = localFileUtils.compressAppPackage(appHome);
+            String dstPkgFile = localFileUtils.compressAppPackage(dstFileDir, appPkgInfo.getAppInfo().getAppName());
 
             // 11. clear env
             vmService.clearEnv(dto);
-            FileUtils.deleteDirectory(new File(dstFileDir));
 
             // 12. return zip package
             InputStream ins = new BufferedInputStream(new FileInputStream(dstPkgFile));

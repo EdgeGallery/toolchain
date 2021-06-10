@@ -312,7 +312,7 @@ public class VmService {
             case "product_id":
                 appPkgInfo.setProductId(value);
                 break;
-            case "vnf_id":
+            case "vnfd_id":
                 appPkgInfo.setVnfId(value);
                 break;
             default:
@@ -386,17 +386,26 @@ public class VmService {
         updVar2Values.put("{storagesize}", appPkgInfo.getComputeInfo().getStorageSize());
         updVar2Values.put("{memorysize}", appPkgInfo.getComputeInfo().getMemorySize());
         updVar2Values.put("{vcpu}", appPkgInfo.getComputeInfo().getVcpu());
-        updVar2Values.put("{image_name}", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("{image_name}", appPkgInfo.getComputeInfo().getImageName());
         updVar2Values.put("{vnfd_id}", appPkgInfo.getVnfId());
         updVar2Values.put("image_id", appPkgInfo.getImageId());
         updVar2Values.put("app_package_version", appPkgInfo.getAppInfo().getAppVersion());
-        updVar2Values.put("image_name", appPkgInfo.getComputeInfo().getMemorySize());
+        updVar2Values.put("image_name", appPkgInfo.getComputeInfo().getImageName());
         updVar2Values.put("{product_id}", appPkgInfo.getProductId());
-        updVar2Values.put("image_path", imagePath);
-        updVar2Values.put("{az}", dto.getAz());
-        updVar2Values.put("{flavor}", dto.getFlavor());
-        updVar2Values.put("{bootdata}", dto.getBootData());
+        // inputs
+        addInputValue(updVar2Values, "image_path", imagePath);
+        addInputValue(updVar2Values, "{az}", dto.getAz());
+        addInputValue(updVar2Values, "{flavor}", dto.getFlavor());
+        addInputValue(updVar2Values, "{bootdata}", dto.getBootData());
         return updVar2Values;
+    }
+
+    private void addInputValue(Map<String, String> updVar2Values, String key, String value) {
+        if (StringUtils.isEmpty(value)) {
+            updVar2Values.put(key, "");
+        } else {
+            updVar2Values.put(key, value);
+        }
     }
 
     /**

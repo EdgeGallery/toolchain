@@ -178,9 +178,9 @@ public class LocalFileUtils {
      *
      * @param intendedDir application package ID
      */
-    public String compressAppPackage(String intendedDir) {
+    public String compressAppPackage(String intendedDir, String zipName) {
         final Path srcDir = Paths.get(intendedDir);
-        String zipFileName = intendedDir.concat(ZIP_EXTENSION);
+        String zipFileName = zipName + ZIP_EXTENSION;
         String[] fileName = zipFileName.split("/");
         String fileStorageAdd = srcDir + "/" + fileName[fileName.length - 1];
         try (ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFileName))) {
