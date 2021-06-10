@@ -56,15 +56,17 @@ public class LocalFileUtils {
 
     private static final String ZIP_PACKAGE_ERR_MESSAGES = "failed to compress file";
 
+    private static final String FILE_SEPARATOR = "/";
+
     /**
      * file check.
      *
      * @param fileFullName file full name
      */
     public void fileCheck(String fileFullName) {
-        String filePosx = Files.getFileExtension(fileFullName.toLowerCase());
+        String filePosix = Files.getFileExtension(fileFullName.toLowerCase());
         try {
-            if (filePosx.equals("zip") || filePosx.equals("csar")) {
+            if (filePosix.equals("zip") || filePosix.equals("csar")) {
                 unzipPacakge(fileFullName);
             } else {
                 throw new ToolException("file extension is invalid.", ResponseConst.RET_FILE_NAME_POSTFIX_INVALID);
@@ -80,7 +82,7 @@ public class LocalFileUtils {
      * @param localFilePath file full name
      */
     private void unzipPacakge(String localFilePath) throws IOException {
-        String tempDir = localFilePath.substring(0, localFilePath.lastIndexOf(File.separator)) + "temp";
+        String tempDir = localFilePath.substring(0, localFilePath.lastIndexOf(FILE_SEPARATOR) + 1) + "temp";
         checkDir(new File(tempDir));
         try (ZipFile zipFile = new ZipFile(localFilePath)) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();

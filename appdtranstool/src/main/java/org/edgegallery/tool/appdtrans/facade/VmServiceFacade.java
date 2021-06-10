@@ -41,7 +41,6 @@ import org.edgegallery.tool.appdtrans.utils.LocalFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -55,12 +54,6 @@ public class VmServiceFacade {
 
     private static final String TEMPLATES_PATH = "/configs/vm/templates/";
 
-    @Value("${appdtranstool.home-path}")
-    private String appHome;
-
-    @Value("${appdtranstool.temp-path}")
-    private String fileTempPath;
-
     @Autowired
     private VmService vmService;
 
@@ -68,6 +61,12 @@ public class VmServiceFacade {
     private LocalFileUtils localFileUtils;
 
     private String userDir = System.getProperty("user.dir");
+
+    private String appHome = userDir +  "/transTool";
+
+    private String fileTempPath = userDir + "/temp";
+
+    private static final String FILE_SEPARATOR = "/";
 
     /**
      * get appd templates types.
@@ -103,7 +102,7 @@ public class VmServiceFacade {
                 if (chunkNumber == null) {
                     chunkNumber = 0;
                 }
-                File outFile = new File(fileTempPath + File.separator + chunk.getIdentifier(), chunkNumber + ".part");
+                File outFile = new File(fileTempPath + FILE_SEPARATOR + chunk.getIdentifier(), chunkNumber + ".part");
                 try (InputStream inputStream = file.getInputStream()) {
                     FileUtils.copyInputStreamToFile(inputStream, outFile);
                 }
@@ -123,19 +122,19 @@ public class VmServiceFacade {
         try {
             File uploadDir = new File(appHome);
             localFileUtils.checkDir(uploadDir);
-            File file = new File(fileTempPath + File.separator + guid);
+            File file = new File(fileTempPath + FILE_SEPARATOR + guid);
             String randomPath = "";
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
                 if (files != null && files.length > 0) {
-                    String newFileAddress = appHome + File.separator + fileType;
+                    String newFileAddress = appHome + FILE_SEPARATOR + fileType;
                     File partFiles = new File(newFileAddress);
                     localFileUtils.checkDir(partFiles);
-                    randomPath = fileType + File.separator + fileName;
-                    String newFileName = partFiles + File.separator + fileName;
+                    randomPath = fileType + FILE_SEPARATOR + fileName;
+                    String newFileName = partFiles + FILE_SEPARATOR + fileName;
                     File partFile = new File(newFileName);
                     for (int i = 1; i <= files.length; i++) {
-                        File s = new File(fileTempPath + File.separator + guid, i + ".part");
+                        File s = new File(fileTempPath + FILE_SEPARATOR + guid, i + ".part");
                         FileOutputStream destTempfos = new FileOutputStream(partFile, true);
                         FileUtils.copyFile(s, destTempfos);
                         destTempfos.close();
@@ -158,12 +157,12 @@ public class VmServiceFacade {
     public ResponseEntity<InputStreamResource> transVmPackage(TransVmPkgReqDto dto) {
         try {
             // 1. zip bomb check and get package main info
-            String appSourcePkgFile = appHome + File.separator + dto.getAppFile();
+            String appSourcePkgFile = appHome + FILE_SEPARATOR + dto.getAppFile();
             localFileUtils.fileCheck(appSourcePkgFile);
             AppPkgInfo appPkgInfo = vmService.getAppPkgInfo(appSourcePkgFile, dto.getSourceAppd());
 
             // 2. copy dest template to specified path
-            String dstFileDir = appHome + File.separator + appPkgInfo.getAppInfo().getAppName();
+            String dstFileDir = appHome + FILE_SEPARATOR + appPkgInfo.getAppInfo().getAppName();
             localFileUtils.checkDir(new File(dstFileDir));
             FileUtils.copyToDirectory(new File(userDir +TEMPLATES_PATH + dto.getDestAppd()), new File(dstFileDir));
 
