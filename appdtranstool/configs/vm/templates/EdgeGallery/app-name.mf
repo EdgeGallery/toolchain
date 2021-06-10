@@ -14,3 +14,4 @@ Hash: {hash_first}
 Source: Image/SwImageDesc.json
 Algorithm: SHA-256
 Hash: {hash_second}
+

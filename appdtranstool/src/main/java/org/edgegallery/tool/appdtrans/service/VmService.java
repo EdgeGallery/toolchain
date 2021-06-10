@@ -329,14 +329,14 @@ public class VmService {
             if (!StringUtils.isEmpty(dto.getDocFile()) && !StringUtils.isEmpty(replaceFileInfo.getDocFilePath())) {
                 String srcDocFile = appHome  + FILE_SEPARATOR + dto.getDocFile();
                 String dstDocFile = parentDir + replaceFileInfo.getDocFilePath();
-                FileUtils.moveFile(new File(srcDocFile), new File(dstDocFile));
+                FileUtils.copyFile(new File(srcDocFile), new File(dstDocFile));
             }
 
             if (!StringUtils.isEmpty(dto.getDeployFile())
                 && !StringUtils.isEmpty(replaceFileInfo.getDeployFilePath())) {
                 String srcDeployFile = appHome + FILE_SEPARATOR + dto.getDeployFile();
                 String dstDeployFile = parentDir + replaceFileInfo.getDeployFilePath();
-                FileUtils.moveFile(new File(srcDeployFile), new File(dstDeployFile));
+                FileUtils.copyFile(new File(srcDeployFile), new File(dstDeployFile));
             }
         } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_REPLACE_FILE_FAILED);
@@ -363,7 +363,7 @@ public class VmService {
                 throw new ToolException(e.getMessage(), ResponseConst.RET_COPY_FILE_FAILED);
             }
             if (StringUtils.isEmpty(imagePath)) {
-                return "/Image" + imgFile.getName() + FILE_SEPARATOR
+                return "/Image/" + imgFile.getName() + FILE_SEPARATOR
                     + imageName + FILE_SEPARATOR + imageName + ".qcow2";
             }
         }
@@ -478,7 +478,7 @@ public class VmService {
             String fileName = dstFileDir + FILE_SEPARATOR + hashFilePaths.get(i);
             try (FileInputStream fis = new FileInputStream(fileName)) {
                 String hashValue = DigestUtils.sha256Hex(fis);
-                if (i == 1) {
+                if (i == 0) {
                     FileUtils.writeStringToFile(mfFile,
                         FileUtils.readFileToString(mfFile, StandardCharsets.UTF_8).replace("{hash_first}", hashValue));
                 } else {
@@ -497,12 +497,12 @@ public class VmService {
         File imageFile = localFileUtils.getFile(dstFileDir + FILE_SEPARATOR + "Image", ZIP_EXTENSION);
         if (imageFile != null) {
             try {
-                String srcFullPath = imageFile.getCanonicalPath();
-                String hashFile = srcFullPath.substring(dstFileDir.length() + 1);
+                String imagePath = imageFile.getCanonicalPath();
+                String hashFile = imagePath.substring(dstFileDir.length() + 1).replace(File.separator, FILE_SEPARATOR);
                 String sourceData =  "Source: " + hashFile + "\n";
                 FileUtils.writeStringToFile(mfFile, sourceData, StandardCharsets.UTF_8, true);
                 FileUtils.writeStringToFile(mfFile, "Algorithm: SHA-256\n", StandardCharsets.UTF_8, true);
-                try (FileInputStream fis = new FileInputStream(srcFullPath)) {
+                try (FileInputStream fis = new FileInputStream(imagePath)) {
                     String hashValue = DigestUtils.sha256Hex(fis);
                     String hashData = "Hash: " + hashValue + "\n";
                     FileUtils.writeStringToFile(mfFile, hashData, StandardCharsets.UTF_8, true);
