@@ -44,32 +44,32 @@ When applying package conversion，Defined by application package，You can get 
 {
     "appInfo": {
         "app_name": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_name"
         },
         "app_provider": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_provider"
         },
         "app_package_version": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_version"
         },
         "app_release_data_time": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_release_data_time"
         },
         "app_type": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_type"
         },
         "app_package_description": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_description"
         }
