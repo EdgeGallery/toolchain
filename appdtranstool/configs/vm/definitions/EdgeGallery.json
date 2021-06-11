@@ -33,34 +33,44 @@
     },
     "computeInfo": {
         "vm_name": {
-            "filePath": "APPD/Definition",
+            "filePath": "APPD",
             "fileType": ".yaml",
             "location": "topology_template.node_templates.EMS_VDU1.properties.name",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         },
         "storagesize": {
-            "filePath": "APPD/Definition",
+            "filePath": "APPD",
             "fileType": ".yaml",
             "location": "topology_template.node_templates.EMS_VDU1.capabilities.virtual_compute.properties.virtual_local_storage.size_of_storage",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         },
         "memorysize": {
-            "filePath": "APPD/Definition",
+            "filePath": "APPD",
             "fileType": ".yaml",
             "location": "topology_template.node_templates.EMS_VDU1.capabilities.virtual_compute.properties.virtual_memory.virtual_mem_size",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         },
         "vcpu": {
-            "filePath": "APPD/Definition",
+            "filePath": "APPD",
             "fileType": ".yaml",
             "location": "topology_template.node_templates.EMS_VDU1.capabilities.virtual_compute.properties.virtual_cpu.num_virtual_cpu",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         },
         "image_name": {
-            "filePath": "APPD/Definition",
+            "filePath": "APPD",
             "fileType": ".yaml",
             "location": "topology_template.node_templates.EMS_VDU1.properties.sw_image_data.name",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         }
     }
 }
