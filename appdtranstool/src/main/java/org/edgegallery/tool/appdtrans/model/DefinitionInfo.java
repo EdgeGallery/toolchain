@@ -33,4 +33,8 @@ public class DefinitionInfo {
     private String location;
 
     private String excludeFile;
+
+    private boolean isZip;
+
+    private String subPath;
 }

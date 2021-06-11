@@ -42,6 +42,7 @@ import java.util.zip.ZipFile;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.edgegallery.tool.appdtrans.constants.ResponseConst;
 import org.edgegallery.tool.appdtrans.controller.dto.request.TransVmPkgReqDto;
 import org.edgegallery.tool.appdtrans.exception.ToolException;
@@ -216,6 +217,13 @@ public class VmService {
                     if (!fileName.contains(itemDef.getFilePath())
                         || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath())) {
                         continue;
+                    } else if (itemDef.isZip()
+                        && Files.getFileExtension(fileName.toLowerCase()).equals(ZIP_EXTENSION)) {
+                        File tempFile = File.createTempFile("tempFile", "zip");
+                        FileOutputStream  tempOut = new FileOutputStream(tempFile);
+                        IOUtils.copy(zipFile.getInputStream(new ZipEntry(fileName)), tempOut);
+                        ZipFile innerZipFile = new ZipFile(tempFile);
+                        return getValueFromInnerZip(innerZipFile, itemDef, location);
                     }
                 }
                 // check the posix of file
@@ -227,6 +235,40 @@ public class VmService {
                     }
 
                     String yamlContent = getYamlContentFromZip(zipFile, entry);
+                    Yaml yaml = new Yaml(new SafeConstructor());
+                    Map<String, Object> loaded;
+                    loaded = yaml.load(yamlContent);
+                    return getObjectFromMap(loaded, location);
+                }
+            }
+        } catch (IOException e) {
+            throw new ToolException("failed to get value from yaml file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
+        }
+        return null;
+    }
+
+    private String getValueFromInnerZip(ZipFile innerZipFile, DefinitionInfo defInfo, List<String> location) {
+        try {
+            Enumeration<? extends ZipEntry> entries = innerZipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String fileName = entry.getName();
+                // check the path of entry if equal to ruled path
+                if (!StringUtils.isEmpty(defInfo.getSubPath())) {
+                    if (!fileName.contains(defInfo.getSubPath())
+                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(defInfo.getSubPath())) {
+                        continue;
+                    }
+                }
+                // check the posix of file
+                if (fileName.endsWith(defInfo.getFileType())) {
+                    // check the file if in exclude file
+                    if (!StringUtils.isEmpty(defInfo.getExcludeFile())
+                        && fileName.substring(fileName.lastIndexOf("/") + 1).equals(defInfo.getExcludeFile())) {
+                        continue;
+                    }
+
+                    String yamlContent = getYamlContentFromZip(innerZipFile, entry);
                     Yaml yaml = new Yaml(new SafeConstructor());
                     Map<String, Object> loaded;
                     loaded = yaml.load(yamlContent);

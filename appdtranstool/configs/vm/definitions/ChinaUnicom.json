@@ -35,27 +35,32 @@
         "vm_name": {
             "filePath": "MEAD/openstack/templates",
             "fileType": ".yaml",
-            "location": "topology_template.node_templates.APP1.properties.name"
+            "location": "topology_template.node_templates.APP1.properties.name",
+            "isZip": "false"
         },
         "storagesize": {
             "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vstorage"
+            "location": "APP1.vstorage",
+            "isZip": "false"
         },
         "memorysize": {
             "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vmemory"
+            "location": "APP1.vmemory",
+            "isZip": "false"
         },
         "vcpu": {
             "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vcpu"
+            "location": "APP1.vcpu",
+            "isZip": "false"
         },
         "image_name": {
             "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.image_name"
+            "location": "APP1.image_name",
+            "isZip": "false"
         }
     }
 }
