@@ -16,6 +16,7 @@
 
 package org.edgegallery.tool.appdtrans.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,11 +33,11 @@ public class RuleInfo {
 
     private ReplaceFileInfo replaceFiles;
 
-    private List<UpdateFileInfo> updateFiles;
+    private List<UpdateFileInfo> updateFiles = new ArrayList<>();
 
-    private List<RenameFileInfo> renameFiles;
+    private List<RenameFileInfo> renameFiles = new ArrayList<>();
 
-    private List<ZipFileInfo> zipFiles;
+    private List<ZipFileInfo> zipFiles = new ArrayList<>();
 
     private String isNeedHashCheck;
 }

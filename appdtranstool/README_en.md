@@ -44,74 +44,81 @@ When applying package conversion，Defined by application package，You can get 
 {
     "appInfo": {
         "app_name": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_name"
         },
         "app_provider": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_provider"
         },
         "app_package_version": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_version"
         },
         "app_release_data_time": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_release_data_time"
         },
         "app_type": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_type"
         },
         "app_package_description": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_description"
         }
     },
     "computeInfo": {
         "vm_name": {
-            "filePath": "/MEAD/openstack/template",
+            "filePath": "MEAD/openstack/templates",
             "fileType": ".yaml",
-            "location": "topology_template.node_templates.APP1.properties.name"
+            "location": "topology_template.node_templates.APP1.properties.name",
+            "isZip": "false"
         },
         "storagesize": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vstorage"
+            "location": "APP1.vstorage",
+            "isZip": "false"
         },
         "memorysize": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vmemory"
+            "location": "APP1.vmemory",
+            "isZip": "false"
         },
         "vcpu": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vcpu"
+            "location": "APP1.vcpu",
+            "isZip": "false"
         },
         "image_name": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.image_name"
+            "location": "APP1.image_name",
+            "isZip": "false"
         }
     }
 }
 ```
 
-The package definition mainly contains application informationappInfoAnd virtual machine resource informationcomputeInfo，The path of the file where the parameter is located is specified in the definition、File type and location in the file，If there are multiple files of the same type under the same path，Can have an exclusive listexcludeFile，Such as：
+The package definition mainly contains application informationappInfoAnd virtual machine resource informationcomputeInfo，The path of the file where the parameter is located is specified in the definition、File type and location in the file，If there are multiple files of the same type under the same path, Can have an exclusive excludeFile, if the file exists in a zip file, sub path need to be known, Such as：
 
 ```
-        "image_name": {
-            "filePath": "/APPD/Definition",
+        "vm_name": {
+            "filePath": "APPD",
             "fileType": ".yaml",
-            "location": "topology_template.node_templates.EMS_VDU1.properties.sw_image_data.name",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "location": "topology_template.node_templates.EMS_VDU1.properties.name",
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         }
 ```
 

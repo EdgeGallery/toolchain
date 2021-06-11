@@ -16,6 +16,7 @@
 
 package org.edgegallery.tool.appdtrans.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,5 +27,5 @@ public class UpdateFileInfo {
 
     private String file;
 
-    private List<String> envs;
+    private List<String> envs = new ArrayList<>();
 }

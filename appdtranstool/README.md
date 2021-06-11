@@ -44,74 +44,81 @@ Hash: {hash_mep}
 {
     "appInfo": {
         "app_name": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_name"
         },
         "app_provider": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_provider"
         },
         "app_package_version": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_version"
         },
         "app_release_data_time": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_release_data_time"
         },
         "app_type": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_type"
         },
         "app_package_description": {
-            "filePath": "/",
+            "filePath": "",
             "fileType": ".mf",
             "location": "app_package_description"
         }
     },
     "computeInfo": {
         "vm_name": {
-            "filePath": "/MEAD/openstack/template",
+            "filePath": "MEAD/openstack/templates",
             "fileType": ".yaml",
-            "location": "topology_template.node_templates.APP1.properties.name"
+            "location": "topology_template.node_templates.APP1.properties.name",
+            "isZip": "false"
         },
         "storagesize": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vstorage"
+            "location": "APP1.vstorage",
+            "isZip": "false"
         },
         "memorysize": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vmemory"
+            "location": "APP1.vmemory",
+            "isZip": "false"
         },
         "vcpu": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.vcpu"
+            "location": "APP1.vcpu",
+            "isZip": "false"
         },
         "image_name": {
-            "filePath": "/MEAD/openstack",
+            "filePath": "MEAD/openstack",
             "fileType": ".yaml",
-            "location": "APP1.image_name"
+            "location": "APP1.image_name",
+            "isZip": "false"
         }
     }
 }
 ```
 
-包定义中主要包含应用信息appInfo和虚机资源信息computeInfo，定义中指定了该参数所在文件的路径、文件类型以及在文件中的位置，如果同一个路径下有同类型的多个文件，可以有排他列表excludeFile，如：
+包定义中主要包含应用信息appInfo和虚机资源信息computeInfo，定义中指定了该参数所在文件的路径、文件类型以及在文件中的位置，如果同一个路径下有同类型的多个文件，可以有排他列表excludeFile，如果文件在压缩包中，需要指定内层路径，如：
 
 ```
-        "image_name": {
-            "filePath": "/APPD/Definition",
+        "vm_name": {
+            "filePath": "APPD",
             "fileType": ".yaml",
-            "location": "topology_template.node_templates.EMS_VDU1.properties.sw_image_data.name",
-            "excludeFile": "nfv_vnfd_types_v1_0.yaml"
+            "location": "topology_template.node_templates.EMS_VDU1.properties.name",
+            "excludeFile": "nfv_vnfd_types_v1_0.yaml",
+            "isZip": "true",
+            "subPath": "Definition"
         }
 ```
 
