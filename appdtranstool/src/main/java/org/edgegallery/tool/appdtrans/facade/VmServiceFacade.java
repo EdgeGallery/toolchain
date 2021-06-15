@@ -76,6 +76,9 @@ public class VmServiceFacade {
         List<String> templates = new ArrayList<>();
         File file = new File(userDir + TEMPLATES_PATH);
         File[] lstFiles = file.listFiles();
+        if (lstFiles == null) {
+            return null;
+        }
         for (File filePath : lstFiles) {
             if (filePath.isDirectory()) {
                 templates.add(filePath.getName());
