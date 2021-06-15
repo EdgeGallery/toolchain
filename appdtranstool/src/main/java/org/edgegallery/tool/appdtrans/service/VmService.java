@@ -286,7 +286,7 @@ public class VmService {
             new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
             File newYamlFile = new File("deploy.yaml");
             FileOutputStream out = new FileOutputStream(newYamlFile);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out,  StandardCharsets.UTF_8));
             String line;
             while ((line = br.readLine()) != null) {
                 bw.write(line + "\r\n");
@@ -480,7 +480,9 @@ public class VmService {
             String newName = env2Values.get(renameFileInfo.getNewName());
             String newFileName = srcFileName.substring(0, srcFileName.lastIndexOf(FILE_SEPARATOR) + 1) + newName
                 + "." + Files.getFileExtension(srcFileName.toLowerCase());
-            renameFile.renameTo(new File(newFileName));
+            if (renameFile.renameTo(new File(newFileName))) {
+                LOGGER.info("rename {} to {}  success.", srcFileName, newName);
+            }
         }
     }
 
