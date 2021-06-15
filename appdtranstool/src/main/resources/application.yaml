@@ -16,7 +16,7 @@
 
 ###spring config######
 server:
-  port: 8065
+  port: 8765
 
 spring:
   main:
