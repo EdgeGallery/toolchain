@@ -409,7 +409,7 @@ public class VmService {
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory()) {
-                        return "/Image/" + entry.getName();
+                        return "/Image/" + imgFile.getName() + FILE_SEPARATOR + entry.getName();
                     }
                 }
             } catch (IOException e) {
