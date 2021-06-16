@@ -389,24 +389,32 @@ public class VmService {
      * add image file to package.
      * @param imageFile image file
      * @param parentDir parent dir
-     * @param imageName image name
      * @param imagePath image path
      * @return image path
      */
-    public String addImageFileToPkg(String imageFile, String parentDir, String imageName, String imagePath) {
+    public String addImageFileToPkg(String imageFile, String parentDir, String imagePath) {
         if (!StringUtils.isEmpty(imageFile)) {
-            localFileUtils.fileCheck(appHome + FILE_SEPARATOR + imageFile);
+            String imageFilePath = appHome + FILE_SEPARATOR + imageFile;
+            localFileUtils.fileCheck(imageFilePath);
             String imageDir = parentDir + FILE_SEPARATOR + "Image";
-            File imgFile = new File(appHome + FILE_SEPARATOR + imageFile);
+            File imgFile = new File(imageFilePath);
             try {
                 localFileUtils.checkDir(new File(imageDir));
                 FileUtils.copyToDirectory(imgFile, new File(imageDir));
             } catch (Exception e) {
                 throw new ToolException(e.getMessage(), ResponseConst.RET_COPY_FILE_FAILED);
             }
-            if (StringUtils.isEmpty(imagePath)) {
-                return "/Image/" + imgFile.getName() + FILE_SEPARATOR
-                    + imageName + FILE_SEPARATOR + imageName + ".qcow2";
+            try (ZipFile zipFile = new ZipFile(imageFilePath)) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory()) {
+                        return "/Image/" + entry.getName();
+                    }
+                }
+            } catch (IOException e) {
+                throw new ToolException("failed to get image path from image file.",
+                    ResponseConst.RET_PARSE_FILE_EXCEPTION);
             }
         }
         return imagePath;

@@ -180,8 +180,7 @@ public class VmServiceFacade {
             vmService.replaceFiles(dto, dstFileDir, ruleInfo.getReplaceFiles());
 
             // 5. add image file
-            String imagePath = vmService.addImageFileToPkg(dto.getImageFile(), dstFileDir,
-                appPkgInfo.getComputeInfo().getImageName(), dto.getImagePath());
+            String imagePath = vmService.addImageFileToPkg(dto.getImageFile(), dstFileDir, dto.getImagePath());
 
             // 6. update file
             Map<String, String> updVar2Values = vmService.buildUpdateVals(appPkgInfo, imagePath, dto);
