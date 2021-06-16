@@ -38,8 +38,9 @@ const cn = {
     submit: '确认',
     imageAddr: '镜像地址',
     imageAddrTip: '请填写镜像下载地址，或者在应用包中的路径',
-    imageUploadTip: '支持上传镜像，并将此镜像打包到应用中，只能上传.zip格式的文件，镜像存放在应用包的/lmag目录下',
+    imageUploadTip: '支持上传镜像，并将此镜像打包到应用中，只能上传.zip格式的文件，镜像存放在应用包的/Image目录下',
     imageUpload: '上传镜像',
+    templateUpload: '上传模板',
     showConfig: '可视化配置',
     editOnLine: '在线编辑',
     uploadFile: '上传',
@@ -63,7 +64,13 @@ const cn = {
     errorCode100013: '合并文件失败。',
     errorCode100014: '转换包失败。',
     errorCode100015: '删除文件失败。',
-    errorCode100016: '替换文件失败。'
+    errorCode100016: '替换文件失败。',
+    chooseOneleast: '镜像地址和镜像包请至少选择一个。',
+    sourceAppdNoEmpty: '源APPD标准不能为空',
+    targetAppdNoEmpty: '目标APPD标准不能为空',
+    appPackageNoEmpty: '请上传应用包',
+    appdTransTool: '应用包转换工具',
+    appdTransDes: '应用包转换工具目前支持联通和EdgeGallery的虚机转换，后面会扩展支持更多应用包标准的转换'
   },
   about: {},
   ...zhLocale

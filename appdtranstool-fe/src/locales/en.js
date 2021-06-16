@@ -38,8 +38,9 @@ const en = {
     submit: 'Confirm',
     imageAddr: 'Image address',
     imageAddrTip: 'Please fill in the URL of the image download address, or the path in the app package',
-    imageUploadTip: 'Supports uploading images and packaging this image into the app. Only files in .zip format can be uploaded. The image is stored in the /lmag directory of the app package.',
+    imageUploadTip: 'Supports uploading images and packaging this image into the app. Only files in .zip format can be uploaded. The image is stored in the /Image directory of the app package.',
     imageUpload: 'Upload image',
+    templateUpload: 'Upload template',
     showConfig: 'Visual configuration',
     editOnLine: 'Online editing',
     uploadFile: 'Upload',
@@ -63,7 +64,13 @@ const en = {
     errorCode100013: 'merge file failed.',
     errorCode100014: 'transform package failed.',
     errorCode100015: 'delete file failed.',
-    errorCode100016: 'replace file failed.'
+    errorCode100016: 'replace file failed.',
+    chooseOneleast: 'Please select at least one of the image address and the image package.',
+    sourceAppdNoEmpty: 'The source APPD standard cannot be empty',
+    targetAppdNoEmpty: 'The target APPD standard cannot be empty',
+    appPackageNoEmpty: 'Please upload the App package',
+    appdTransTool: 'App package transfer tool',
+    appdTransDes: 'The app package transfer tool currently supports Unicom and VM transfer, and will be expanded to support transfer of more app package standards'
   },
   about: {
   },
