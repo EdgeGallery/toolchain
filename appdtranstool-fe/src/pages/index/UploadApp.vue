@@ -47,12 +47,15 @@
       >
         <el-select
           v-model="appUploadInfo.sourceAppd"
+          clearable
+          @change="changSelect(appUploadInfo.sourceAppd)"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
             :key="index"
             :label="item.label"
             :value="item.value"
+            :disabled="item.disabled"
             @click.native="getSelectSourceAppd(item)"
           />
         </el-select>
@@ -63,12 +66,15 @@
       >
         <el-select
           v-model="appUploadInfo.destAppd"
+          clearable
+          @change="changSelect(appUploadInfo.destAppd)"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
             :key="index"
             :label="item.label"
             :value="item.value"
+            :disabled="item.disabled"
             @click.native="getSelectTargetAppd(item)"
           />
         </el-select>
@@ -178,7 +184,8 @@ export default {
           console.log(item)
           let selectItem = {
             label: item,
-            value: item
+            value: item,
+            disabled: false
           }
           this.appdStandardTypes.push(selectItem)
         }
@@ -225,6 +232,19 @@ export default {
             type: 'warning'
           })
         }
+      })
+    },
+    changSelect (value) {
+      let allSelect = [this.appUploadInfo.sourceAppd, this.appUploadInfo.destAppd]
+      this.appdStandardTypes.forEach((ele) => {
+        ele.disabled = false
+      })
+      this.appdStandardTypes.forEach((ele) => {
+        allSelect.forEach((element) => {
+          if (element === ele.value) {
+            ele.disabled = true
+          }
+        })
       })
     }
   },

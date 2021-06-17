@@ -146,6 +146,13 @@ export default {
         this.removeSessionStory()
         this.active++
         this.handleStep()
+        if (this.checkChinaUnicomDest()) {
+          setTimeout(() => {
+            this.submitTrans('ChinaUnicom')
+            this.active = 1
+            this.handleStep()
+          }, 1000)
+        }
       } else {
         this.active = 1
         this.handleStep()
@@ -153,6 +160,15 @@ export default {
           this.submitTrans()
         }, 1000)
       }
+    },
+    checkChinaUnicomDest () {
+      if (this.active === 2) {
+        let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
+        if (targetAppdType === 'ChinaUnicom') {
+          return true
+        }
+      }
+      return false
     },
     checkStep1 () {
       if (this.active === 1) {
@@ -217,18 +233,34 @@ export default {
     getStepData (data) {
       this.allStepData[data.step] = data
     },
-    submitTrans () {
-      let param = {
-        sourceAppd: this.allStepData.step1.sourceAppd,
-        destAppd: this.allStepData.step1.destAppd,
-        appFile: this.allStepData.step1.appFile.data,
-        docFile: this.allStepData.step1.docFile.data,
-        imageFile: this.allStepData.step2.imageFile.data,
-        imagePath: this.allStepData.step2.imageAddr,
-        az: this.allStepData.step3.az,
-        flavor: this.allStepData.step3.flavor,
-        bootData: this.allStepData.step3.bootData,
-        deployFile: this.allStepData.step3.deployFile.data
+    submitTrans (type) {
+      let param = {}
+      if (type) {
+        param = {
+          sourceAppd: this.allStepData.step1.sourceAppd,
+          destAppd: this.allStepData.step1.destAppd,
+          appFile: this.allStepData.step1.appFile.data,
+          docFile: this.allStepData.step1.docFile.data,
+          imageFile: null,
+          imagePath: '',
+          az: '',
+          flavor: '',
+          bootData: '',
+          deployFile: null
+        }
+      } else {
+        param = {
+          sourceAppd: this.allStepData.step1.sourceAppd,
+          destAppd: this.allStepData.step1.destAppd,
+          appFile: this.allStepData.step1.appFile.data,
+          docFile: this.allStepData.step1.docFile.data,
+          imageFile: this.allStepData.step2.imageFile.data,
+          imagePath: this.allStepData.step2.imageAddr,
+          az: this.allStepData.step3.az,
+          flavor: this.allStepData.step3.flavor,
+          bootData: this.allStepData.step3.bootData,
+          deployFile: this.allStepData.step3.deployFile.data
+        }
       }
       appdTransAction(param).then((res) => {
         let blob = res.data
@@ -249,7 +281,7 @@ export default {
         a.click()
         this.$message({
           duration: 2000,
-          message: this.$t('appdRes.errorCode0'),
+          message: this.$t('appdRes.transformSuccess'),
           type: 'success'
         })
       }).catch(error => {
