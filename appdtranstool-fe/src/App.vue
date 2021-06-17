@@ -19,7 +19,6 @@
     id="app"
     style="overflow-x:hidden"
   >
-    <Navcomp />
     <router-view
       class="view"
       :key="$route.fullPath"
@@ -28,11 +27,9 @@
 </template>
 
 <script>
-import Navcomp from './components/layout/Nav.vue'
 export default {
   name: 'App',
   components: {
-    Navcomp
   },
   data () {
     return {

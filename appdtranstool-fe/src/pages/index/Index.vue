@@ -16,6 +16,28 @@
 
 <template>
   <div class="appdTrans">
+    <div class="logoTitleLan">
+      <div class="logo">
+        <img
+          src="../../assets/images/logo.png"
+          class="curp"
+          alt
+        >
+      </div>
+      <div class="appdTransTittle">
+        <h3>{{ $t('appdRes.appdTransTool') }}</h3>
+        <span class="descDetail">{{ $t('appdRes.appdTransDes') }}</span>
+      </div>
+      <div class="languageChange">
+        <span
+          @click="changeLanguage"
+          class="curp"
+        >
+          {{ getLanguage }}
+        </span>
+      </div>
+    </div>
+
     <div
       class="appdTrans-content"
     >
@@ -92,7 +114,8 @@ export default {
       az: '',
       flavor: '',
       bootData: '',
-      deployFile: ''
+      deployFile: '',
+      language: 'cn'
     }
   },
 
@@ -114,6 +137,13 @@ export default {
     },
     next () {
       if (this.active < 3) {
+        if (!this.checkStep1()) {
+          return
+        }
+        if (!this.checkStep2()) {
+          return
+        }
+        this.removeSessionStory()
         this.active++
         this.handleStep()
       } else {
@@ -123,6 +153,58 @@ export default {
           this.submitTrans()
         }, 1000)
       }
+    },
+    checkStep1 () {
+      if (this.active === 1) {
+        let hasSourceAppd = JSON.parse(sessionStorage.getItem('hasSourceAppd'))
+        let hasTargetAppd = JSON.parse(sessionStorage.getItem('hasTargetAppd'))
+        let hasAppPackage = JSON.parse(sessionStorage.getItem('hasAppPackage'))
+        if (!hasSourceAppd) {
+          this.$message({
+            duration: 2000,
+            type: 'warning',
+            message: this.$t('appdRes.sourceAppdNoEmpty')
+          })
+          return false
+        } else if (!hasTargetAppd) {
+          this.$message({
+            duration: 2000,
+            type: 'warning',
+            message: this.$t('appdRes.targetAppdNoEmpty')
+          })
+          return false
+        } else if (!hasAppPackage) {
+          this.$message({
+            duration: 2000,
+            type: 'warning',
+            message: this.$t('appdRes.appPackageNoEmpty')
+          })
+          return false
+        }
+      }
+      return true
+    },
+    checkStep2 () {
+      if (this.active === 2) {
+        let imageUrl = JSON.parse(sessionStorage.getItem('isImageUrl'))
+        let isImagePackage = JSON.parse(sessionStorage.getItem('isImagePackage'))
+        if (!imageUrl && !isImagePackage) {
+          this.$message({
+            duration: 2000,
+            message: this.$t('appdRes.chooseOneleast'),
+            type: 'warning'
+          })
+          return false
+        }
+      }
+      return true
+    },
+    removeSessionStory () {
+      window.sessionStorage.removeItem('isImageUrl')
+      window.sessionStorage.removeItem('isImagePackage')
+      window.sessionStorage.removeItem('hasSourceAppd')
+      window.sessionStorage.removeItem('hasTargetAppd')
+      window.sessionStorage.removeItem('hasAppPackage')
     },
 
     previous () {
@@ -142,18 +224,28 @@ export default {
         appFile: this.allStepData.step1.appFile.data,
         docFile: this.allStepData.step1.docFile.data,
         imageFile: this.allStepData.step2.imageFile.data,
-        imagePath: '',
+        imagePath: this.allStepData.step2.imageAddr,
         az: this.allStepData.step3.az,
         flavor: this.allStepData.step3.flavor,
         bootData: this.allStepData.step3.bootData,
-        deployFile: ''
+        deployFile: this.allStepData.step3.deployFile.data
       }
       appdTransAction(param).then((res) => {
         let blob = res.data
+        let filename = res.headers['content-disposition']
+        if (filename) {
+          console.log(filename)
+          let index = filename.indexOf('filename=')
+          filename = filename.substring(index + 9)
+          console.log(filename)
+          console.log(param.appFile)
+          let suffix = param.appFile.split('.')[1]
+          filename = decodeURI(filename) + '.' + suffix
+        }
         let objectUrl = URL.createObjectURL(blob)
         let a = document.createElement('a')
         a.href = objectUrl
-        a.download = 'transFile.zip'
+        a.download = filename
         a.click()
         this.$message({
           duration: 2000,
@@ -176,9 +268,24 @@ export default {
           })
         }
       })
+    },
+    changeLanguage () {
+      if (this.language === 'cn') {
+        this.language = 'en'
+      } else {
+        this.language = 'cn'
+      }
+      localStorage.setItem('language', this.language)
+      this.$i18n.locale = this.language
+      this.$store.commit('changeLaguage', { language: this.language })
     }
   },
   computed: {
+    getLanguage () {
+      let language
+      this.language === 'cn' ? language = 'English' : language = '中文'
+      return language
+    }
   },
   watch: {
   },
@@ -192,7 +299,42 @@ export default {
   width: 70%;
   height: 100%;
   background: #FFFFFF;
-  margin: 150px auto;
+  margin: 50px auto;
+  padding-top: 20px;
+  .logoTitleLan{
+    text-align: center;
+    .logo {
+      height: 65px;
+      line-height: 65px;
+      margin-left: 15px;
+      float: left;
+      display: inline-block;
+      img {
+        height: 65px;
+      }
+      span {
+        font-size: 18px;
+        vertical-align: text-bottom;
+      }
+    }
+    .appdTransTittle{
+      display: inline-block;
+      margin: 0px 80px 40px 0px;
+      .descDetail{
+        color: #B4B7BF;
+        width: 800px !important;
+        float: left !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: normal !important;
+      }
+    }
+    .languageChange{
+      display: inline-block;
+      float: right;
+      margin-right: 15px;
+    }
+  }
   .appdTrans-content{
     width: 100%;
     height: 90%;

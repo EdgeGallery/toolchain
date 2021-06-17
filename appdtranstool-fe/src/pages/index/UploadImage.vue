@@ -21,7 +21,8 @@
       <span class="span_right">
         <el-input
           id="imageAddr"
-          v-model="imageAddr"
+          v-model="appUploadImage.imageAddr"
+          @change="inputValueChange"
           class="imagePath"
         />
         <em class="el-icon-question" />
@@ -56,7 +57,8 @@ export default {
       appdStandardTypes: STANDARDTYPE,
       appUploadImage: {
         step: 'step2',
-        imageFile: ''
+        imageFile: '',
+        imageAddr: ''
       },
       radio: '1',
       options: {
@@ -66,8 +68,7 @@ export default {
         simultaneousUploads: 5,
         chunkSize: 8 * 1024 * 1024
       },
-      mergerUrl: '',
-      fileAddress: ''
+      mergerUrl: ''
     }
   },
   created () {
@@ -78,11 +79,15 @@ export default {
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },
   methods: {
+    inputValueChange (val) {
+      sessionStorage.setItem('isImageUrl', JSON.stringify(true))
+    },
     fileComplete (fileType) {
       const file = arguments[0].file
       let url = this.mergerUrl + file.name + '&guid=' + arguments[0].uniqueIdentifier + '&fileType=image'
       axios.get(url).then(response => {
         this.appUploadImage.imageFile = response.data
+        sessionStorage.setItem('isImagePackage', JSON.stringify(true))
       }).catch(error => {
         if (error.response.data.code === 500) {
           let errCode = 'appdRes.errorCode' + error.response.data.retCode

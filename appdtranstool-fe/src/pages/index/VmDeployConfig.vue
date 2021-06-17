@@ -52,11 +52,11 @@
               />
             </el-form-item>
             <el-form-item
-              label="bootdata"
+              label="bootData"
             >
               <el-input
-                id="bootdata"
-                v-model="configInfo.bootdata"
+                id="bootData"
+                v-model="configInfo.bootData"
               />
             </el-form-item>
           </el-form>
@@ -75,9 +75,16 @@
         >
           <uploader-unsupport />
           <uploader-drop>
-            <uploader-btn>{{ $t('appdRes.imageUpload') }}</uploader-btn>
+            <uploader-btn>{{ $t('appdRes.templateUpload') }}</uploader-btn>
             <em class="el-icon-question" />
-            <span class="imageUploadTipDesc">{{ $t('appdRes.imageUploadTip') }}</span>
+            <span class="imageUploadTipDesc">{{ $t('appdRes.upoadYaml') }}</span>
+            <a
+              :href="currentTemplate"
+              download="demo.yaml"
+              class="down-demo"
+            >
+              {{ $t('appdRes.downloadTemplate') }}
+            </a>
           </uploader-drop>
           <uploader-list />
         </uploader>
@@ -155,7 +162,8 @@
 </template>
 
 <script>
-import demoYaml from '@/assets/file/demo.yaml'
+import chinaunicomTemplate from '@/assets/file/chinaunicomTemplate.yaml'
+import edgegalleryTemplate from '@/assets/file/edgegalleryTemplate.yaml'
 import axios from 'axios'
 import { getCookie } from '../../tools/request.js'
 export default {
@@ -168,12 +176,13 @@ export default {
         step: 'step3',
         az: '',
         flavor: '',
-        bootdata: ''
+        bootData: '',
+        deployFile: ''
       },
       activeName: 'first',
       yamlFileList: [],
       uploadYamlLoading: false,
-      demoYaml: demoYaml,
+      currentTemplate: chinaunicomTemplate,
       showResult: true,
       checkFlag: {},
       options: {
@@ -199,7 +208,7 @@ export default {
       const file = arguments[0].file
       let url = this.mergerUrl + file.name + '&guid=' + arguments[0].uniqueIdentifier + '&fileType=deploy'
       axios.get(url).then(response => {
-        this.fileAddress = response.data
+        this.configInfo.deployFile = response.data
       }).catch(error => {
         console.log(error)
       })
@@ -232,6 +241,14 @@ export default {
       this.uploadYamlLoading = true
       let fd = new FormData()
       fd.append('file', yamlFileList[0])
+    }
+  },
+  mounted () {
+    let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
+    if (targetAppdType === 'ChinaUnicom') {
+      this.currentTemplate = chinaunicomTemplate
+    } else if (targetAppdType === 'EdgeGallery') {
+      this.currentTemplate = edgegalleryTemplate
     }
   },
   beforeDestroy () {

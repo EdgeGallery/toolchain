@@ -20,6 +20,7 @@
       v-model="appUploadInfo"
       ref="form"
       label-width="200px"
+      :rules="rules"
     >
       <el-form-item
         :label="$t('appdRes.appDpMode')"
@@ -42,6 +43,7 @@
       </el-form-item>
       <el-form-item
         :label="$t('appdRes.sourceAppdStandard')"
+        prop="sourceAppStandard"
       >
         <el-select
           v-model="appUploadInfo.sourceAppd"
@@ -51,11 +53,13 @@
             :key="index"
             :label="item.label"
             :value="item.value"
+            @click.native="getSelectSourceAppd(item)"
           />
         </el-select>
       </el-form-item>
       <el-form-item
         :label="$t('appdRes.targetAppdStandard')"
+        prop="targetAppStandard"
       >
         <el-select
           v-model="appUploadInfo.destAppd"
@@ -65,11 +69,13 @@
             :key="index"
             :label="item.label"
             :value="item.value"
+            @click.native="getSelectTargetAppd(item)"
           />
         </el-select>
       </el-form-item>
       <el-form-item
         :label="$t('appdRes.appPackage')"
+        prop="appPackage"
       >
         <uploader
           :options="options"
@@ -137,7 +143,18 @@ export default {
         chunkSize: 8 * 1024 * 1024
       },
       mergerUrl: '',
-      uploadFileType: ''
+      uploadFileType: '',
+      rules: {
+        sourceAppStandard: [
+          { required: true, message: '源APPD标准不能为空', trigger: 'blur' }
+        ],
+        targetAppStandard: [
+          { required: true, message: '目标APPD标准不能为空', trigger: 'blur' }
+        ],
+        appPackage: [
+          { required: true, message: '请上传应用包', trigger: 'blur' }
+        ]
+      }
     }
   },
   created () {
@@ -148,6 +165,13 @@ export default {
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },
   methods: {
+    getSelectSourceAppd (item) {
+      sessionStorage.setItem('hasSourceAppd', JSON.stringify(true))
+    },
+    getSelectTargetAppd (item) {
+      sessionStorage.setItem('hasTargetAppd', JSON.stringify(true))
+      sessionStorage.setItem('targetAppdType', JSON.stringify(item.value))
+    },
     getTemplates () {
       getTemplates().then((res) => {
         for (let item of res.data) {
@@ -182,6 +206,7 @@ export default {
       axios.get(url).then(response => {
         if (this.uploadFileType === 'package') {
           this.appUploadInfo.appFile = response.data
+          sessionStorage.setItem('hasAppPackage', JSON.stringify(true))
         } else {
           this.appUploadInfo.docFile = response.data
         }
