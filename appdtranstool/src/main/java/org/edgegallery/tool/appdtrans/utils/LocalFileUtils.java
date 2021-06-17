@@ -26,11 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -249,7 +246,7 @@ public class LocalFileUtils {
     }
 
     private static void addFolderToZip(ZipOutputStream out, File file, List<String> entryPaths) throws IOException {
-        out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, "/") + "/"));
+        out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, FILE_SEPARATOR) + FILE_SEPARATOR));
         out.closeEntry();
         File[] files = file.listFiles();
         if (files == null || files.length == 0) {
@@ -270,7 +267,8 @@ public class LocalFileUtils {
         byte[] buf = new byte[1024];
         try (FileInputStream in = new FileInputStream(file)) {
             if (entryPaths.size() > 0) {
-                out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, "/") + "/" + file.getName()));
+                out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, FILE_SEPARATOR)
+                    + FILE_SEPARATOR + file.getName()));
             } else {
                 out.putNextEntry(new ZipEntry(file.getName()));
             }
