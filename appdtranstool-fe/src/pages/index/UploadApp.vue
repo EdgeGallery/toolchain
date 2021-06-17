@@ -170,9 +170,6 @@ export default {
   },
   methods: {
     getSelectSourceAppd (item) {
-      // if (this.appUploadInfo.sourceAppd === item.value) {
-      //   this.appUploadInfo.sourceAppd = ''
-      // }
       sessionStorage.setItem('hasSourceAppd', JSON.stringify(true))
     },
     getSelectTargetAppd (item) {
