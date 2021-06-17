@@ -20,16 +20,14 @@ import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -181,24 +179,10 @@ public class LocalFileUtils {
     public String compressAppPackage(String intendedDir, String zipName) {
         final Path srcDir = Paths.get(intendedDir);
         String zipFileName = zipName + ZIP_EXTENSION;
-        String[] fileName = zipFileName.split("/");
-        String fileStorageAdd = srcDir + "/" + fileName[fileName.length - 1];
-        try (ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFileName))) {
-            java.nio.file.Files.walkFileTree(srcDir, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-                    try {
-                        Path targetFile = srcDir.relativize(file);
-                        os.putNextEntry(new ZipEntry(targetFile.toString()));
-                        byte[] bytes = java.nio.file.Files.readAllBytes(file);
-                        os.write(bytes, 0, bytes.length);
-                        os.closeEntry();
-                    } catch (IOException e) {
-                        throw new ToolException(ZIP_PACKAGE_ERR_MESSAGES, ResponseConst.RET_COMPRESS_FAILED);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+        String[] fileName = zipFileName.split(FILE_SEPARATOR);
+        String fileStorageAdd = srcDir + FILE_SEPARATOR + fileName[fileName.length - 1];
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFileName))) {
+            createCompressedFile(out, new File(intendedDir), "");
         } catch (IOException e) {
             throw new ToolException(ZIP_PACKAGE_ERR_MESSAGES, ResponseConst.RET_COMPRESS_FAILED);
         }
@@ -209,6 +193,34 @@ public class LocalFileUtils {
             throw new ToolException(ZIP_PACKAGE_ERR_MESSAGES, ResponseConst.RET_COMPRESS_FAILED);
         }
         return fileStorageAdd;
+    }
+
+    private void createCompressedFile(ZipOutputStream out, File file, String dir) throws IOException {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (!dir.equals("")) {
+                out.putNextEntry(new ZipEntry(dir + FILE_SEPARATOR));
+            }
+
+            dir = dir.length() == 0 ? "" : dir + FILE_SEPARATOR;
+            if (files != null && files.length > 0) {
+                for (int i = 0; i < files.length; i++) {
+                    createCompressedFile(out, files[i], dir + files[i].getName());
+                }
+            }
+        } else {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                out.putNextEntry(new ZipEntry(dir));
+                int j = 0;
+                byte[] buffer = new byte[1024];
+                while ((j = fis.read(buffer)) > 0) {
+                    out.write(buffer, 0, j);
+                }
+            } catch (FileNotFoundException e) {
+                LOGGER.error("createCompressedFile: can not find param file, {}", e.getMessage());
+                throw new ToolException("can not find file", ResponseConst.RET_COMPRESS_FAILED);
+            }
+        }
     }
 
     /**
@@ -234,7 +246,7 @@ public class LocalFileUtils {
     }
 
     private static void addFolderToZip(ZipOutputStream out, File file, List<String> entryPaths) throws IOException {
-        out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, "/") + "/"));
+        out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, FILE_SEPARATOR) + FILE_SEPARATOR));
         out.closeEntry();
         File[] files = file.listFiles();
         if (files == null || files.length == 0) {
@@ -255,7 +267,8 @@ public class LocalFileUtils {
         byte[] buf = new byte[1024];
         try (FileInputStream in = new FileInputStream(file)) {
             if (entryPaths.size() > 0) {
-                out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, "/") + "/" + file.getName()));
+                out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, FILE_SEPARATOR)
+                    + FILE_SEPARATOR + file.getName()));
             } else {
                 out.putNextEntry(new ZipEntry(file.getName()));
             }
