@@ -47,6 +47,7 @@
       >
         <el-select
           v-model="appUploadInfo.sourceAppd"
+          clearable
           @change="changSelect(appUploadInfo.sourceAppd)"
         >
           <el-option
@@ -65,6 +66,7 @@
       >
         <el-select
           v-model="appUploadInfo.destAppd"
+          clearable
           @change="changSelect(appUploadInfo.destAppd)"
         >
           <el-option
