@@ -16,7 +16,7 @@
 
 package org.edgegallery.tool.appdtrans.constants;
 
-public interface ResponseConst {
+public class ResponseConst {
     /**
      * the success code.
      */
