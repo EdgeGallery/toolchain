@@ -37,7 +37,7 @@ const cn = {
     preStep: '上一步',
     submit: '转换',
     imageAddr: '镜像地址',
-    imageAddrTip: '请填写镜像下载地址，或者在应用包中的路径',
+    imageAddrTip: '请填写镜像下载地址。',
     imageUploadTip: '支持上传镜像，并将此镜像打包到应用中，只能上传.zip格式的文件，镜像存放在应用包的/Image目录下',
     imageUpload: '上传镜像',
     templateUpload: '上传APPD文件',

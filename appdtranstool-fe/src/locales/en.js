@@ -37,7 +37,7 @@ const en = {
     preStep: 'Previous',
     submit: 'Transform',
     imageAddr: 'Image address',
-    imageAddrTip: 'Please fill in the URL of the image download address, or the path in the app package',
+    imageAddrTip: 'Please fill in the URL of the image download address.',
     imageUploadTip: 'Supports uploading images and packaging this image into the app. Only files in .zip format can be uploaded. The image is stored in the /Image directory of the app package.',
     imageUpload: 'Upload image',
     templateUpload: 'Upload APPD file',
