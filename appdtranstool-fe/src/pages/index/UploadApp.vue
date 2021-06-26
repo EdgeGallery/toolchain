@@ -87,11 +87,14 @@
           :options="options"
           class="uploader-example"
           @file-complete="fileComplete"
+          @file-added="onFileAdded"
           :limit="1"
         >
           <uploader-unsupport />
           <uploader-drop>
-            <uploader-btn>
+            <uploader-btn
+              :single="true"
+            >
               {{ $t('appdRes.uploadAppPackage') }}
             </uploader-btn>
             <em class="el-icon-question" />
@@ -107,6 +110,7 @@
           :options="options"
           class="uploader-example"
           @file-complete="fileComplete"
+          @file-added="onMdFileAdded"
           :limit="1"
         >
           <uploader-unsupport />
@@ -204,6 +208,24 @@ export default {
         this.uploadFileType = 'package'
       } else {
         this.uploadFileType = 'doc'
+      }
+    },
+    onFileAdded (file) {
+      let fileSize = file.file.size / 1024 / 1024 / 1024
+      let typeName = file.file.name.substring(file.file.name.lastIndexOf('.') + 1)
+      let typeArr = ['csar', 'zip']
+      if (typeArr.indexOf(typeName) === -1 || fileSize > 5) {
+        file.ignored = true
+        this.$message.warning(this.$t('appdRes.uploadPackageTip'))
+      }
+    },
+    onMdFileAdded (file) {
+      let fileSize = file.file.size / 1024 / 1024 / 1024
+      let typeName = file.file.name.substring(file.file.name.lastIndexOf('.') + 1)
+      let typeArr = ['md', 'MD']
+      if (typeArr.indexOf(typeName) === -1 || fileSize > 5) {
+        file.ignored = true
+        this.$message.warning(this.$t('appdRes.uploadMdTip'))
       }
     },
     fileComplete (fileType) {

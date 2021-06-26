@@ -213,6 +213,15 @@ export default {
         console.log(error)
       })
     },
+    onFileAdded (file) {
+      let fileSize = file.file.size / 1024 / 1024 / 1024
+      let typeName = file.file.name.substring(file.file.name.lastIndexOf('.') + 1)
+      let typeArr = ['yaml', 'YAML']
+      if (typeArr.indexOf(typeName) === -1 || fileSize > 5) {
+        file.ignored = true
+        this.$message.warning(this.$t('appdRes.uploadYamlTip'))
+      }
+    },
     handleClick (tab, event) {
       this.activeTabIndex = tab.index
     },
