@@ -113,10 +113,12 @@ export default {
         file.ignored = true
         this.$message.warning(this.$t('appdRes.uploadZipTip'))
       }
+    },
+    parentMsg: function (active) {
+      if (active === 2) {
+        this.$emit('getStepData', this.appUploadImage)
+      }
     }
-  },
-  beforeDestroy () {
-    this.$emit('getStepData', this.appUploadImage)
   }
 }
 </script>
