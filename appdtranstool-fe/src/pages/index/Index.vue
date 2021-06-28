@@ -154,10 +154,10 @@ export default {
         if (!this.checkStep2()) {
           return
         }
-        if(this.active === 1){
+        if (this.active === 1) {
           this.$refs.uploadApp.parentMsg(this.active)
         }
-        if(this.active === 2){
+        if (this.active === 2) {
           this.$refs.uploadImage.parentMsg(this.active)
         }
         this.active++
