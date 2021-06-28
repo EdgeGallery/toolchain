@@ -40,6 +40,7 @@
 
     <div
       class="appdTrans-content"
+      v-if="hackReset"
     >
       <div class="stepNavProcess">
         <el-steps
@@ -52,13 +53,31 @@
           <el-step :title="$t('appdRes.vmDeployConfig')" />
         </el-steps>
       </div>
-      <div class="elSteps">
-        <component
-          :is="currentComponent"
-          :active="active"
+      <div
+        v-show="active===1"
+        class="elSteps"
+      >
+        <uploadApp
           @getStepData="getStepData"
-          :all-step-data="allStepData"
-          ref="currentComponet"
+          ref="uploadApp"
+        />
+      </div>
+      <div
+        v-show="active===2"
+        class="elSteps"
+      >
+        <uploadImage
+          @getStepData="getStepData"
+          ref="uploadImage"
+        />
+      </div>
+      <div
+        v-show="active===3"
+        class="elSteps"
+      >
+        <vmDeployConfig
+          @getStepData="getStepData"
+          ref="vmDeployConfig"
         />
       </div>
       <div class="elButton">
@@ -87,16 +106,16 @@
 
 <script>
 
-import UploadApp from './UploadApp.vue'
-import UploadImage from './UploadImage.vue'
-import VmDeployConfig from './VmDeployConfig.vue'
+import uploadApp from './UploadApp.vue'
+import uploadImage from './UploadImage.vue'
+import vmDeployConfig from './VmDeployConfig.vue'
 import { appdTransAction } from '../../tools/api.js'
 export default {
   name: 'Home',
   components: {
-    UploadApp,
-    UploadImage,
-    VmDeployConfig
+    uploadApp,
+    uploadImage,
+    vmDeployConfig
   },
   data () {
     return {
@@ -115,25 +134,17 @@ export default {
       flavor: '',
       bootData: '',
       deployFile: '',
-      language: 'cn'
+      language: 'cn',
+      hackReset: true
     }
   },
 
   methods: {
-    changeComponent () {
-      switch (this.active) {
-        case 1:
-          this.currentComponent = 'UploadApp'
-          break
-        case 2:
-          this.currentComponent = 'UploadImage'
-          break
-        case 3:
-          this.currentComponent = 'VmDeployConfig'
-          break
-        default:
-          this.currentComponent = 'UploadApp'
-      }
+    rebuileComponents () {
+      this.hackReset = false
+      this.$nextTick(() => {
+        this.hackReset = true
+      })
     },
     next () {
       if (this.active < 3) {
@@ -143,22 +154,29 @@ export default {
         if (!this.checkStep2()) {
           return
         }
-        this.removeSessionStory()
+        if(this.active === 1){
+          this.$refs.uploadApp.parentMsg(this.active)
+        }
+        if(this.active === 2){
+          this.$refs.uploadImage.parentMsg(this.active)
+        }
         this.active++
-        this.handleStep()
         if (this.checkChinaUnicomDest()) {
           setTimeout(() => {
             this.submitTrans('ChinaUnicom')
+            this.removeSessionStory()
             this.active = 1
-            this.handleStep()
-          }, 1000)
+            this.rebuileComponents()
+          }, 500)
         }
       } else {
+        this.$refs.vmDeployConfig.parentMsg(this.active)
         this.active = 1
-        this.handleStep()
         setTimeout(() => {
           this.submitTrans()
-        }, 1000)
+          this.removeSessionStory()
+          this.rebuileComponents()
+        }, 500)
       }
     },
     checkChinaUnicomDest () {
@@ -225,10 +243,6 @@ export default {
 
     previous () {
       this.active--
-      this.handleStep()
-    },
-    handleStep () {
-      this.changeComponent()
     },
     getStepData (data) {
       this.allStepData[data.step] = data

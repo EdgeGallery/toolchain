@@ -204,6 +204,11 @@ export default {
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },
   methods: {
+    parentMsg: function (active) {
+      if (active === 3) {
+        this.$emit('getStepData', this.configInfo)
+      }
+    },
     fileComplete (fileType) {
       const file = arguments[0].file
       let url = this.mergerUrl + file.name + '&guid=' + arguments[0].uniqueIdentifier + '&fileType=deploy'
@@ -251,6 +256,7 @@ export default {
       let fd = new FormData()
       fd.append('file', yamlFileList[0])
     }
+
   },
   mounted () {
     let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
@@ -259,9 +265,6 @@ export default {
     } else if (targetAppdType === 'EdgeGallery') {
       this.currentTemplate = edgegalleryTemplate
     }
-  },
-  beforeDestroy () {
-    this.$emit('getStepData', this.configInfo)
   }
 }
 </script>

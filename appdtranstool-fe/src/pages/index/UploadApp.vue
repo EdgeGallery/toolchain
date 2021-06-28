@@ -268,13 +268,15 @@ export default {
           }
         })
       })
+    },
+    parentMsg: function (active) {
+      if (active === 1) {
+        this.$emit('getStepData', this.appUploadInfo)
+      }
     }
   },
   mounted () {
     this.getTemplates()
-  },
-  beforeDestroy () {
-    this.$emit('getStepData', this.appUploadInfo)
   }
 }
 </script>
