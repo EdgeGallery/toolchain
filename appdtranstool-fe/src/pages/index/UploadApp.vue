@@ -105,6 +105,7 @@
       </el-form-item>
       <el-form-item
         :label="$t('appdRes.appDescription')"
+        v-show="appUploadInfo.destAppd==='ChinaUnicom'?false:true"
       >
         <uploader
           :options="options"
