@@ -160,15 +160,14 @@ export default {
         if (this.active === 2) {
           this.$refs.uploadImage.parentMsg(this.active)
         }
-        this.active++
         if (this.checkChinaUnicomDest()) {
-          setTimeout(() => {
-            this.submitTrans('ChinaUnicom')
-            this.removeSessionStory()
-            this.active = 1
-            this.rebuileComponents()
-          }, 500)
+          this.submitTrans('ChinaUnicom')
+          this.removeSessionStory()
+          this.active = 1
+          this.rebuileComponents()
+          return
         }
+        this.active++
       } else {
         this.$refs.vmDeployConfig.parentMsg(this.active)
         this.active = 1
@@ -176,11 +175,11 @@ export default {
           this.submitTrans()
           this.removeSessionStory()
           this.rebuileComponents()
-        }, 500)
+        }, 100)
       }
     },
     checkChinaUnicomDest () {
-      if (this.active === 2) {
+      if (this.active === 1) {
         let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
         if (targetAppdType === 'ChinaUnicom') {
           return true
