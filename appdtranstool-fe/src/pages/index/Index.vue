@@ -54,16 +54,17 @@
         </el-steps>
       </div>
       <div
-        v-show="active===1"
+        v-show="active===0"
         class="elSteps"
       >
         <uploadApp
           @getStepData="getStepData"
+          @isChinaUnicomDest="isChinaUnicomDest"
           ref="uploadApp"
         />
       </div>
       <div
-        v-show="active===2"
+        v-show="active===1"
         class="elSteps"
       >
         <uploadImage
@@ -72,7 +73,7 @@
         />
       </div>
       <div
-        v-show="active===3"
+        v-show="active===2"
         class="elSteps"
       >
         <vmDeployConfig
@@ -85,7 +86,7 @@
           id="prevBtn"
           type="text"
           @click="previous"
-          v-if="active>1"
+          v-if="active>0"
           :disabled="isDeploying"
         >
           <strong>{{ $t('appdRes.preStep') }}</strong>
@@ -94,9 +95,9 @@
           id="nextBtn"
           type="primary"
           @click="next"
-          v-if="active<4"
+          v-if="active<3"
         >
-          <strong v-if="active!==3">{{ $t('appdRes.nextStep') }}</strong>
+          <strong v-if="active!==2 && noChinaUnicomDest">{{ $t('appdRes.nextStep') }}</strong>
           <strong v-else>{{ $t('appdRes.submit') }}</strong>
         </el-button>
       </div>
@@ -119,7 +120,7 @@ export default {
   },
   data () {
     return {
-      active: 1,
+      active: 0,
       currentComponent: 'UploadApp',
       allStepData: {
         ifNext: false
@@ -135,7 +136,8 @@ export default {
       bootData: '',
       deployFile: '',
       language: 'cn',
-      hackReset: true
+      hackReset: true,
+      noChinaUnicomDest: true
     }
   },
 
@@ -146,31 +148,38 @@ export default {
         this.hackReset = true
       })
     },
+    isChinaUnicomDest (flag) {
+      if (flag) {
+        this.noChinaUnicomDest = false
+      } else {
+        this.noChinaUnicomDest = true
+      }
+    },
     next () {
-      if (this.active < 3) {
+      if (this.active < 2) {
         if (!this.checkStep1()) {
           return
         }
         if (!this.checkStep2()) {
           return
         }
-        if (this.active === 1) {
+        if (this.active === 0) {
           this.$refs.uploadApp.parentMsg(this.active)
         }
-        if (this.active === 2) {
+        if (this.active === 1) {
           this.$refs.uploadImage.parentMsg(this.active)
         }
         if (this.checkChinaUnicomDest()) {
           this.submitTrans('ChinaUnicom')
           this.removeSessionStory()
-          this.active = 1
+          this.active = 0
           this.rebuileComponents()
           return
         }
         this.active++
       } else {
         this.$refs.vmDeployConfig.parentMsg(this.active)
-        this.active = 1
+        this.active = 0
         setTimeout(() => {
           this.submitTrans()
           this.removeSessionStory()
@@ -179,7 +188,7 @@ export default {
       }
     },
     checkChinaUnicomDest () {
-      if (this.active === 1) {
+      if (this.active === 0) {
         let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
         if (targetAppdType === 'ChinaUnicom') {
           return true
@@ -188,7 +197,7 @@ export default {
       return false
     },
     checkStep1 () {
-      if (this.active === 1) {
+      if (this.active === 0) {
         let hasSourceAppd = JSON.parse(sessionStorage.getItem('hasSourceAppd'))
         let hasTargetAppd = JSON.parse(sessionStorage.getItem('hasTargetAppd'))
         let hasAppPackage = JSON.parse(sessionStorage.getItem('hasAppPackage'))
@@ -218,7 +227,7 @@ export default {
       return true
     },
     checkStep2 () {
-      if (this.active === 2) {
+      if (this.active === 1) {
         let imageUrl = JSON.parse(sessionStorage.getItem('isImageUrl'))
         let isImagePackage = JSON.parse(sessionStorage.getItem('isImagePackage'))
         if (!imageUrl && !isImagePackage) {
@@ -345,7 +354,7 @@ export default {
   height: 100%;
   background: #FFFFFF;
   margin: 50px auto;
-  padding-top: 20px;
+  padding-top: 15px;
   .logoTitleLan{
     text-align: center;
     .logo {
