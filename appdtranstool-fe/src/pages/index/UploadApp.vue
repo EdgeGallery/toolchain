@@ -48,7 +48,7 @@
         <el-select
           v-model="appUploadInfo.sourceAppd"
           clearable
-          @change="changSelect(appUploadInfo.sourceAppd)"
+          @change="changSelect(appUploadInfo.sourceAppd, 0)"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
@@ -67,7 +67,7 @@
         <el-select
           v-model="appUploadInfo.destAppd"
           clearable
-          @change="changSelect(appUploadInfo.destAppd)"
+          @change="changSelect(appUploadInfo.destAppd, 1)"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
@@ -257,7 +257,7 @@ export default {
         }
       })
     },
-    changSelect (value) {
+    changSelect (value, selectType) {
       let allSelect = [this.appUploadInfo.sourceAppd, this.appUploadInfo.destAppd]
       this.appdStandardTypes.forEach((ele) => {
         ele.disabled = false
@@ -269,9 +269,16 @@ export default {
           }
         })
       })
+      if (selectType === 1) {
+        if (value === 'ChinaUnicom') {
+          this.$emit('isChinaUnicomDest', true)
+        } else {
+          this.$emit('isChinaUnicomDest', false)
+        }
+      }
     },
     parentMsg: function (active) {
-      if (active === 1) {
+      if (active === 0) {
         this.$emit('getStepData', this.appUploadInfo)
       }
     }
@@ -286,7 +293,7 @@ export default {
 .UploadApp{
   width: 80%;
   margin-left: 8%;
-  margin-top: 5%;
+  margin-top: 3%;
   background: #FFFFFF;
   .radioStyle{
     margin-top: 12px;

@@ -115,7 +115,7 @@ export default {
       }
     },
     parentMsg: function (active) {
-      if (active === 2) {
+      if (active === 1) {
         this.$emit('getStepData', this.appUploadImage)
       }
     }
@@ -127,7 +127,7 @@ export default {
 .UploadImage{
   width: 80%;
   margin-left: 8%;
-  margin-top: 5%;
+  margin-top: 3%;
   background: #FFFFFF;
   .image_title{
     // font-size: 16px;

@@ -205,7 +205,7 @@ export default {
   },
   methods: {
     parentMsg: function (active) {
-      if (active === 3) {
+      if (active === 2) {
         this.$emit('getStepData', this.configInfo)
       }
     },
