@@ -190,7 +190,8 @@ export default {
         headers: {},
         forceChunkSize: true,
         simultaneousUploads: 5,
-        chunkSize: 8 * 1024 * 1024
+        chunkSize: 8 * 1024 * 1024,
+        singleFile: true
       },
       mergerUrl: '',
       fileAddress: ''
@@ -199,7 +200,6 @@ export default {
   created () {
     this.options.headers = { 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') }
     let url = window.location.origin
-    url = url.replace('8083', '9082')
     this.options.target = url + '/mec/appdtranstool/v1/vm/upload'
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },
@@ -229,34 +229,7 @@ export default {
     },
     handleClick (tab, event) {
       this.activeTabIndex = tab.index
-    },
-    handleExceed (file, fileList) {
-      if (fileList.length === 1) {
-        this.$message.warning(this.$t('appdRes.uploadFile'))
-      }
-    },
-    handleChangeYaml (file, fileList) {
-      let yamlFileList = []
-      yamlFileList.push(file.raw)
-      this.yamlFileList = []
-      const fileType = file.raw.name.substring(file.raw.name.lastIndexOf('.') + 1)
-      const fileTypeArr = ['yaml']
-      if (!fileTypeArr.includes(fileType)) {
-        this.$message.warning(this.$t('appdRes.uploadFile'))
-        yamlFileList = []
-      }
-      if (yamlFileList.length > 0) {
-        this.submitYamlFile(yamlFileList)
-      }
-    },
-    removeUploadyaml (file, fileList) {
-    },
-    submitYamlFile (yamlFileList) {
-      this.uploadYamlLoading = true
-      let fd = new FormData()
-      fd.append('file', yamlFileList[0])
     }
-
   },
   mounted () {
     let targetAppdType = JSON.parse(sessionStorage.getItem('targetAppdType'))
