@@ -66,7 +66,8 @@ export default {
         headers: {},
         forceChunkSize: true,
         simultaneousUploads: 5,
-        chunkSize: 8 * 1024 * 1024
+        chunkSize: 8 * 1024 * 1024,
+        singleFile: true
       },
       mergerUrl: ''
     }
@@ -74,7 +75,6 @@ export default {
   created () {
     this.options.headers = { 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') }
     let url = window.location.origin
-    url = url.replace('8083', '9082')
     this.options.target = url + '/mec/appdtranstool/v1/vm/upload'
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },

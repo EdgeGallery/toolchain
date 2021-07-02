@@ -288,11 +288,8 @@ export default {
         let blob = res.data
         let filename = res.headers['content-disposition']
         if (filename) {
-          console.log(filename)
           let index = filename.indexOf('filename=')
           filename = filename.substring(index + 9)
-          console.log(filename)
-          console.log(param.appFile)
           let suffix = param.appFile.split('.')[1]
           filename = decodeURI(filename) + '.' + suffix
         }
@@ -340,10 +337,6 @@ export default {
       this.language === 'cn' ? language = 'English' : language = '中文'
       return language
     }
-  },
-  watch: {
-  },
-  mounted () {
   }
 }
 </script>
