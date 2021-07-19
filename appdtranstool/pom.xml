@@ -179,6 +179,7 @@
     </dependencies>
 
     <build>
+        <finalName>appPkgTransTool</finalName>
         <plugins>
             <plugin><configuration>
                 <compilerArgument>-Xlint:all</compilerArgument>
