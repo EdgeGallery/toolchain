@@ -41,6 +41,7 @@ import org.edgegallery.tool.appdtrans.utils.LocalFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,9 @@ public class VmServiceFacade {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmServiceFacade.class);
 
-    private static final String TEMPLATES_PATH = "/configs/vm/templates/";
+    private static final String TEMPLATES_PATH = "/vm/templates/";
+
+    private static final String FILE_SEPARATOR = "/";
 
     @Autowired
     private VmService vmService;
@@ -60,13 +63,14 @@ public class VmServiceFacade {
     @Autowired
     private LocalFileUtils localFileUtils;
 
-    private String userDir = System.getProperty("user.dir");
+    @Value("${transTool.tool-path}")
+    private String toolHome;
 
-    private String appHome = userDir +  "/transTool";
+    @Value("${transTool.upload-path}")
+    private String fileTempPath;
 
-    private String fileTempPath = userDir + "/temp";
-
-    private static final String FILE_SEPARATOR = "/";
+    @Value("${transTool.appd-configs}")
+    private String configDir;
 
     /**
      * get appd templates types.
@@ -74,7 +78,7 @@ public class VmServiceFacade {
      */
     public List<String> getVmTemplates() {
         List<String> templates = new ArrayList<>();
-        File file = new File(userDir + TEMPLATES_PATH);
+        File file = new File(configDir + TEMPLATES_PATH);
         File[] lstFiles = file.listFiles();
         if (lstFiles == null) {
             return null;
@@ -123,14 +127,14 @@ public class VmServiceFacade {
      */
     public ResponseEntity<ResponseObject> merge(String fileName, String guid, String fileType) {
         try {
-            File uploadDir = new File(appHome);
+            File uploadDir = new File(toolHome);
             localFileUtils.checkDir(uploadDir);
             File file = new File(fileTempPath + FILE_SEPARATOR + guid);
             String randomPath = "";
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
                 if (files != null && files.length > 0) {
-                    String newFileAddress = appHome + FILE_SEPARATOR + fileType;
+                    String newFileAddress = toolHome + FILE_SEPARATOR + fileType;
                     File partFiles = new File(newFileAddress);
                     localFileUtils.checkDir(partFiles);
                     randomPath = fileType + FILE_SEPARATOR + fileName;
@@ -160,15 +164,15 @@ public class VmServiceFacade {
     public ResponseEntity<InputStreamResource> transVmPackage(TransVmPkgReqDto dto) {
         try {
             // 1. zip bomb check and get package main info
-            String appSourcePkgFile = appHome + FILE_SEPARATOR + dto.getAppFile();
+            String appSourcePkgFile = toolHome + FILE_SEPARATOR + dto.getAppFile();
             localFileUtils.fileCheck(appSourcePkgFile);
             AppPkgInfo appPkgInfo = vmService.getAppPkgInfo(appSourcePkgFile, dto.getSourceAppd());
 
             // 2. copy dest template to specified path
-            String dstFileDir = appHome + FILE_SEPARATOR + dto.getDestAppd();
+            String dstFileDir = toolHome + FILE_SEPARATOR + dto.getDestAppd();
             FileUtils.deleteDirectory(new File(dstFileDir));
-            localFileUtils.checkDir(new File(appHome));
-            FileUtils.copyToDirectory(new File(userDir + TEMPLATES_PATH + dto.getDestAppd()), new File(appHome));
+            localFileUtils.checkDir(new File(toolHome));
+            FileUtils.copyToDirectory(new File(configDir + TEMPLATES_PATH + dto.getDestAppd()), new File(toolHome));
 
             // 3. generate values
             RuleInfo ruleInfo = vmService.getRuleInfo(dto.getDestAppd());

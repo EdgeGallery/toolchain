@@ -356,7 +356,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-http</artifactId>
-            <version>9.4.38.v20210224</version>
+            <version>9.4.42.v20210604</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jetty-util</artifactId>
@@ -367,7 +367,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>9.4.33.v20201020</version>
+            <version>9.4.42.v20210604</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>

@@ -198,20 +198,20 @@ public class LocalFileUtils {
     private void createCompressedFile(ZipOutputStream out, File file, String dir) throws IOException {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
-            if (!dir.equals("")) {
+            if (!StringUtils.isEmpty(dir)) {
                 out.putNextEntry(new ZipEntry(dir + FILE_SEPARATOR));
             }
 
-            dir = dir.length() == 0 ? "" : dir + FILE_SEPARATOR;
+            String parentDir = dir.length() == 0 ? "" : dir + FILE_SEPARATOR;
             if (files != null && files.length > 0) {
                 for (int i = 0; i < files.length; i++) {
-                    createCompressedFile(out, files[i], dir + files[i].getName());
+                    createCompressedFile(out, files[i], parentDir + files[i].getName());
                 }
             }
         } else {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.putNextEntry(new ZipEntry(dir));
-                int j = 0;
+                int j;
                 byte[] buffer = new byte[1024];
                 while ((j = fis.read(buffer)) > 0) {
                     out.write(buffer, 0, j);
@@ -317,15 +317,11 @@ public class LocalFileUtils {
      * get file by parent directory and file extension.
      */
     public File getFile(String parentDir, String fileExtension) {
-        try {
-            List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
-            for (File fileEntry : files) {
-                if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
-                    return fileEntry;
-                }
+        List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
+        for (File fileEntry : files) {
+            if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
+                return fileEntry;
             }
-        } catch (Exception e) {
-            LOGGER.error("get file hash failed.{}", e.getMessage());
         }
         return null;
     }

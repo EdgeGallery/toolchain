@@ -60,6 +60,7 @@ import org.edgegallery.tool.appdtrans.utils.LocalFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -70,9 +71,9 @@ public class VmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmService.class);
 
-    private static final String DEFINE_PATH = "/configs/vm/definitions";
+    private static final String DEFINE_PATH = "/vm/definitions";
 
-    private static final String RULE_PATH = "/configs/vm/rules";
+    private static final String RULE_PATH = "/vm/rules";
 
     private static final String JSON_FILE_EXTENSION = ".json";
 
@@ -89,9 +90,11 @@ public class VmService {
     @Autowired
     private LocalFileUtils localFileUtils;
 
-    private String userDir = System.getProperty("user.dir");
+    @Value("${transTool.tool-path}")
+    private String toolHome;
 
-    private String appHome = userDir + "/transTool";
+    @Value("${transTool.appd-configs}")
+    private String configDir;
 
     /**
      * get app package info.
@@ -101,7 +104,7 @@ public class VmService {
      * @return AppPkgInfo
      */
     public AppPkgInfo getAppPkgInfo(String filePath, String sourceAppd) {
-        String defFilePath = userDir + DEFINE_PATH + FILE_SEPARATOR + sourceAppd + JSON_FILE_EXTENSION;
+        String defFilePath = configDir + DEFINE_PATH + FILE_SEPARATOR + sourceAppd + JSON_FILE_EXTENSION;
         File defFile = new File(defFilePath);
         try {
             String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
@@ -325,7 +328,7 @@ public class VmService {
      * @return RuleInfo
      */
     public RuleInfo getRuleInfo(String destAppd) {
-        String defFilePath = userDir + RULE_PATH + FILE_SEPARATOR + destAppd + JSON_FILE_EXTENSION;
+        String defFilePath = configDir + RULE_PATH + FILE_SEPARATOR + destAppd + JSON_FILE_EXTENSION;
         try {
             String fileContent = FileUtils.readFileToString(new File(defFilePath), StandardCharsets.UTF_8);
             Gson g = new Gson();
@@ -369,14 +372,14 @@ public class VmService {
     public void replaceFiles(TransVmPkgReqDto dto, String parentDir, ReplaceFileInfo replaceFileInfo) {
         try {
             if (!StringUtils.isEmpty(dto.getDocFile()) && !StringUtils.isEmpty(replaceFileInfo.getDocFilePath())) {
-                String srcDocFile = appHome  + FILE_SEPARATOR + dto.getDocFile();
+                String srcDocFile = toolHome  + FILE_SEPARATOR + dto.getDocFile();
                 String dstDocFile = parentDir + replaceFileInfo.getDocFilePath();
                 FileUtils.copyFile(new File(srcDocFile), new File(dstDocFile));
             }
 
             if (!StringUtils.isEmpty(dto.getDeployFile())
                 && !StringUtils.isEmpty(replaceFileInfo.getDeployFilePath())) {
-                String srcDeployFile = appHome + FILE_SEPARATOR + dto.getDeployFile();
+                String srcDeployFile = toolHome + FILE_SEPARATOR + dto.getDeployFile();
                 String dstDeployFile = parentDir + replaceFileInfo.getDeployFilePath();
                 FileUtils.copyFile(new File(srcDeployFile), new File(dstDeployFile));
             }
@@ -394,7 +397,7 @@ public class VmService {
      */
     public String addImageFileToPkg(String imageFile, String parentDir, String imagePath) {
         if (!StringUtils.isEmpty(imageFile)) {
-            String imageFilePath = appHome + FILE_SEPARATOR + imageFile;
+            String imageFilePath = toolHome + FILE_SEPARATOR + imageFile;
             localFileUtils.fileCheck(imageFilePath);
             String imageDir = parentDir + FILE_SEPARATOR + "Image";
             File imgFile = new File(imageFilePath);
@@ -582,16 +585,16 @@ public class VmService {
     public void clearEnv(TransVmPkgReqDto dto) {
         try {
             if (!StringUtils.isEmpty(dto.getAppFile())) {
-                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getAppFile()));
+                FileUtils.forceDelete(new File(toolHome + FILE_SEPARATOR + dto.getAppFile()));
             }
             if (!StringUtils.isEmpty(dto.getDocFile())) {
-                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getDocFile()));
+                FileUtils.forceDelete(new File(toolHome + FILE_SEPARATOR + dto.getDocFile()));
             }
             if (!StringUtils.isEmpty(dto.getImageFile())) {
-                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getImageFile()));
+                FileUtils.forceDelete(new File(toolHome + FILE_SEPARATOR + dto.getImageFile()));
             }
             if (!StringUtils.isEmpty(dto.getDeployFile())) {
-                FileUtils.forceDelete(new File(appHome + FILE_SEPARATOR + dto.getDeployFile()));
+                FileUtils.forceDelete(new File(toolHome + FILE_SEPARATOR + dto.getDeployFile()));
             }
         } catch (IOException e) {
             throw new ToolException(e.getMessage(), ResponseConst.RET_DEL_FILE_FAILED);
