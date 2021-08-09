@@ -1,3 +1,4 @@
 FROM nginx:latest
-MAINTAINER ck01060722@163.com
+# 邮箱地址
+MAINTAINER xxxx 
 COPY dist/ /usr/share/nginx/html/
