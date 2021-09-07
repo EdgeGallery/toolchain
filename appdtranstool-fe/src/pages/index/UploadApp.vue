@@ -290,24 +290,12 @@ export default {
 
 <style lang="less">
 .UploadApp{
-  width: 80%;
-  margin-left: 8%;
-  margin-top: 3%;
-  background: #FFFFFF;
+  width: 100%;
+  margin-top: 50px;
+  padding: 40px 0 0 0px;
   .radioStyle{
     margin-top: 12px;
   }
-  .uploader-example{
-    width: 100%;
-    .imageUploadTipDesc{
-      font-size: 14px;
-      color: #606266;
-    }
-  }
 }
-.el-icon-question{
-  margin-left: 15px;
-  font-size: 14px;
-  color: #688ef3;
-}
+
 </style>

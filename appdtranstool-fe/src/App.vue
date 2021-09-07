@@ -45,11 +45,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   min-width: 1200px;
-  background: #F0F2F5;
   overflow: auto;
 }
 .view{
-  margin-top: 65px;
-  height:calc(100% - 65px);
+  width: 100%;
+  height: 632px;
 }
 </style>
