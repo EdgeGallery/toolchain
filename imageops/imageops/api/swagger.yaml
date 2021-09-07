@@ -1,0 +1,200 @@
+#
+#   Copyright 2021 Huawei Technologies Co., Ltd.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+swagger: "2.0"
+info:
+  description: "This is the dovetail API."
+  version: "1.0.0"
+  title: "Dovetail API"
+  contact:
+    email: "xudan16@huawei.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: localhost:5000
+basePath: "/api/v1"
+tags:
+- name: "vmimage"
+  description: "Operations provided for OpenStack VM images"
+schemes:
+- "http"
+paths:
+  /vmimage/check/{fileName}:
+    get:
+      tags:
+      - "vmimage"
+      summary: "Consistency check on an OpenStack VM image"
+      description: "This could only work for qcow2 image format"
+      operationId: "checkVMImage"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "fileName"
+        in: "path"
+        description: "File name of the VM image given"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CheckResponse"
+        500:
+          description: "internal error"
+        default:
+          description: Unexpected error
+  /vmimage/compress:
+    post:
+      tags:
+      - "vmimage"
+      summary: "Compress an OpenStack VM image"
+      description: "This could work for qcow2 or raw image and get the compressed image with qcow2 fromat"
+      operationId: "compressVMImage"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "body"
+        in: "body"
+        description: "All info used to compress image"
+        required: true
+        schema:
+          $ref: "#/definitions/CompressBody"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CompressResponse"
+        500:
+          description: "internal error"
+        default:
+          description: Unexpected error
+  /vmimage/compress/{requestId}:
+    get:
+      tags:
+      - "vmimage"
+      summary: "Get the status of compressing an OpenStack VM image"
+      description: "Get the status of compressing by requestId which is got from the compress POST API"
+      operationId: "getCompressStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "requestId"
+        in: "path"
+        description: "requestId got from the compress POST API"
+        required: true
+        schema:
+          type: "integer"
+          format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CompressStatusResponse"
+        500:
+          description: "internal error"
+        default:
+          description: Unexpected error
+
+definitions:
+  CheckResponse:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        enum:
+        - 0
+        - 1
+        - 2
+        example: 0
+      msg:
+        type: "string"
+        enum:
+        - "Check completed, the image is (now) consistent"
+        - "Check completed, image is corrupted"
+        - "Check completed, image has leaked clusters, but is not corrupted"
+        example: "Check completed, the image is (now) consistent"
+      imageInfo:
+        $ref: "#/definitions/ImageInfo"
+      requestId:
+        type: "integer"
+        format: "uuid"
+        example: "4619204e-0fad-11ec-b9ed-fa163eea3e94"
+  CompressBody:
+    type: "object"
+    properties:
+      inputImageName:
+        type: "string"
+        example: "vm1-snapshot.img"
+      outputImageName:
+        type: "string"
+        example: "vm1-snapshot-compress.img"
+  CompressResponse:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        enum:
+        - 0
+        - 1
+        example: 0
+      msg:
+        type: "string"
+        enum:
+        - "Compress In Progress"
+        - "Compress Failed"
+        example: "Compress In Progress"
+      requestId:
+        type: "integer"
+        format: "uuid"
+        example: "4619204e-0fad-11ec-b9ed-fa163eea3e94"
+  CompressStatusResponse:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        enum:
+        - 0
+        - 1
+        - 2
+        example: 0
+      msg:
+        type: "string"
+        enum:
+        - "Compress Completed"
+        - "Compress In Progress"
+        - "Compress Failed"
+        example: "Compress Completed"
+  ImageInfo:
+    type: "object"
+    properties:
+      image-end-offset:
+        type: "integer"
+        example: 564330496
+      check-errors:
+        type: "integer"
+        example: 0
+      format:
+        type: "string"
+        example: "qcow2"
+      filename:
+        type: "string"
+        example: "ubuntu-20.4.img"
