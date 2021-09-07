@@ -494,15 +494,13 @@ export default {
     font-family: HarmonyHeiTi  !important;
     font-weight: 300 !important;
     color: #FFFFFF !important;
-    background: #7f77b3 !important;
+    background: #59508f !important;
     border-radius: 8px !important;
     padding: 6px 14px !important;
     margin-right: 20px !important;
     margin-top: -10px !important;
 }
-.uploader-btn:hover{
-  background: #59508f !important;
-}
+
 .uploader-drop {
  padding-left:0px !important;
  background: #F1F2F6 !important;
