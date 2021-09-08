@@ -16,97 +16,120 @@
 
 <template>
   <div class="appdTrans">
-    <div class="logoTitleLan">
-      <div class="logo">
-        <img
-          src="../../assets/images/logo.png"
-          class="curp"
-          alt
-        >
-      </div>
-      <div class="appdTransTittle">
-        <h3>{{ $t('appdRes.appdTransTool') }}</h3>
-        <span class="descDetail">{{ $t('appdRes.appdTransDes') }}</span>
-      </div>
-      <div class="languageChange">
-        <span
-          @click="changeLanguage"
-          class="curp"
-        >
-          {{ getLanguage }}
-        </span>
-      </div>
-    </div>
-
+    <p
+      class="languageChange"
+      @click="changeLanguage"
+    >
+      {{ getLanguage }}
+    </p>
     <div
       class="appdTrans-content"
       v-if="hackReset"
     >
       <div class="stepNavProcess">
-        <el-steps
-          :active="active"
-          finish-status="success"
-          align-center
+        <div class="appChangTop">
+          <div class="topLeft">
+            <div class="steps">
+              <img
+                :src=" finished"
+                alt=""
+              >
+              <p>............</p>
+              <img
+                :src="active === 1 || active === 2 ? finished: notFinished"
+                alt=""
+              >
+              <p>............</p>
+              <img
+                :src="active === 2 ? finished: notFinished"
+                alt=""
+              >
+            </div>
+            <div class="stepName">
+              <p>{{ $t('appdRes.uploadApp') }}</p>
+              <p
+                class="stepName2"
+                :class="{'stepName2en':(this.getLanguage==='中文')}"
+              >
+                {{ $t('appdRes.uploadAppImage') }}
+              </p>
+              <p
+                class="stepName3"
+                :class="{'stepName3en':(this.getLanguage==='中文')}"
+              >
+                {{ $t('appdRes.vmDeployConfig') }}
+              </p>
+            </div>
+          </div>
+          <div class="topRight">
+            <img
+              src="../../assets/images/careful.png"
+              alt=""
+            >
+            <p>{{ $t('appdRes.appdTransDes') }}</p>
+          </div>
+        </div>
+        <div
+          v-show="active===0"
+          class="elSteps"
         >
-          <el-step :title="$t('appdRes.uploadApp')" />
-          <el-step :title="$t('appdRes.uploadAppImage')" />
-          <el-step :title="$t('appdRes.vmDeployConfig')" />
-        </el-steps>
-      </div>
-      <div
-        v-show="active===0"
-        class="elSteps"
-      >
-        <uploadApp
-          @getStepData="getStepData"
-          @isChinaUnicomDest="isChinaUnicomDest"
-          ref="uploadApp"
-        />
-      </div>
-      <div
-        v-show="active===1"
-        class="elSteps"
-      >
-        <uploadImage
-          @getStepData="getStepData"
-          ref="uploadImage"
-        />
-      </div>
-      <div
-        v-show="active===2"
-        class="elSteps"
-      >
-        <vmDeployConfig
-          @getStepData="getStepData"
-          ref="vmDeployConfig"
-        />
-      </div>
-      <div class="elButton">
-        <el-button
-          id="prevBtn"
-          type="text"
-          @click="previous"
-          v-if="active>0"
-          :disabled="isDeploying"
+          <uploadApp
+            @getStepData="getStepData"
+            @isChinaUnicomDest="isChinaUnicomDest"
+            ref="uploadApp"
+          />
+        </div>
+        <div
+          v-show="active===1"
+          class="elSteps elStepsImage"
         >
-          <strong>{{ $t('appdRes.preStep') }}</strong>
-        </el-button>
-        <el-button
-          id="nextBtn"
-          type="primary"
-          @click="next"
-          v-if="active<3"
+          <uploadImage
+            @getStepData="getStepData"
+            ref="uploadImage"
+            :language="getLanguage"
+          />
+        </div>
+        <div
+          v-show="active===2"
+          class="elSteps elStepsDeloy"
+          id="deploy"
         >
-          <strong v-if="active!==2 && noChinaUnicomDest">{{ $t('appdRes.nextStep') }}</strong>
-          <strong v-else>{{ $t('appdRes.submit') }}</strong>
-        </el-button>
+          <vmDeployConfig
+            :language="getLanguage"
+            @getStepData="getStepData"
+            @child-event="parentEvent"
+            @child-event2="parentEvent2"
+            ref="vmDeployConfig"
+          />
+        </div>
+        <div class="elButton">
+          <el-button
+            id="prevBtn"
+            type="text"
+            @click="previous"
+            v-if="active>0"
+            :disabled="isDeploying"
+          >
+            <strong>{{ $t('appdRes.preStep') }}</strong>
+          </el-button>
+          <el-button
+            id="nextBtn"
+            type="primary"
+            @click="next"
+            v-if="active<3"
+          >
+            <strong v-if="active!==2 && noChinaUnicomDest">{{ $t('appdRes.nextStep') }}</strong>
+            <strong v-else>{{ $t('appdRes.submit') }}</strong>
+          </el-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
+import finished from '@/assets/images/finished.png'
+import notFinished from '@/assets/images/notFinished.png'
 import uploadApp from './UploadApp.vue'
 import uploadImage from './UploadImage.vue'
 import vmDeployConfig from './VmDeployConfig.vue'
@@ -125,6 +148,8 @@ export default {
       allStepData: {
         ifNext: false
       },
+      finished: finished,
+      notFinished: notFinished,
       sourceAppd: '',
       destAppd: '',
       appFile: '',
@@ -142,6 +167,16 @@ export default {
   },
 
   methods: {
+    parentEvent (data) {
+      if (data === 2) {
+        document.getElementById('deploy').style.height = '276px'
+      }
+    },
+    parentEvent2 (data) {
+      if (data === 1) {
+        document.getElementById('deploy').style.height = '361px'
+      }
+    },
     rebuileComponents () {
       this.hackReset = false
       this.$nextTick(() => {
@@ -343,78 +378,183 @@ export default {
 
 <style lang="less">
 .appdTrans{
-  width: 70%;
-  height: 100%;
+  width: 73.64%;
+  margin: 0px auto;
+  min-width: 1200px;
+  height: 632px;
   background: #FFFFFF;
-  margin: 50px auto;
-  padding-top: 15px;
-  .logoTitleLan{
-    text-align: center;
-    .logo {
-      height: 65px;
-      line-height: 65px;
-      margin-left: 15px;
-      float: left;
-      display: inline-block;
-      img {
-        height: 65px;
-      }
-      span {
-        font-size: 18px;
-        vertical-align: text-bottom;
-      }
-    }
-    .appdTransTittle{
-      display: inline-block;
-      margin: 0px 80px 40px 0px;
-      .descDetail{
-        color: #B4B7BF;
-        width: 800px !important;
-        float: left !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: normal !important;
-      }
-    }
-    .languageChange{
-      display: inline-block;
-      float: right;
-      margin-right: 15px;
-    }
+  padding: 8px 3.1% 0px 3.1%;
+  p{
+    margin: 0;
+  }
+  .languageChange{
+    color: #000;
+    font-size: 16px;
+    line-height: 30px;
+    float:right ;
+  }
+  .languageChange:hover{
+    cursor: pointer;
+    color: #5E40C8;
   }
   .appdTrans-content{
     width: 100%;
-    height: 90%;
     background: #FFFFFF;
     padding-top: 1px;
     .stepNavProcess{
-      margin-top: 20px;
+      margin-top: 30px;
+      .appChangTop{
+        height: 50px;
+        display: flex;
+        justify-content: space-between;
+        .topLeft{
+          .steps{
+            display: flex;
+            justify-content: flex-start;
+            margin-left: 10px;
+            img{
+              margin: 10px 10px 0 6px;
+              width: 30px;
+              height: 30px;
+            }
+            p{
+              font-size: 24px;
+              font-family: HarmonyHeiTi;
+              font-weight: bold;
+              letter-spacing: 6px;
+              color: #380879;
+            }
+          }
+          .stepName{
+             display: flex;
+            justify-content:space-between;
+            p{
+              font-size: 14px;
+              font-family: HarmonyHeiTi;
+              font-weight: 300;
+              color: #380879;
+              line-height: 56px;
+            }
+            .stepName2{
+              margin-left: 16px;
+            }
+            .stepName2.stepName2en{
+              margin-left: 41px;
+            }
+            .stepName3{
+              margin-right: -20px;
+            }
+            .stepName3.stepName3en{
+              margin-right: -80px;
+            }
+          }
+        }
+        .topRight{
+          margin-top: 16px;
+          display: flex;
+          justify-content: flex-start;
+          width: 350px;
+          img{
+            width: 30px;
+            height: 30px;
+            margin-right: 4px;
+          }
+          p{
+            font-size: 12px;
+            font-family: HarmonyHeiTi;
+            font-weight: 200;
+            color: #5E40C8;
+            line-height: 20px;
+          }
+        }
+      }
     }
     .elSteps {
-      margin: 0px 10% 0;
-      width: 80%;
-      padding: 20px 0;
+      width: 100%;
       box-sizing: border-box;
-      border-bottom:  1px dashed #dfe1e6;
+      background: #F1F2F6;
+      border-radius: 16px;
+      height: 340px;
+    }
+    .elStepsImage{
+      height: 200px;
+    }
+    .elStepsDeloy{
+      height: 361px;
     }
     .elButton {
-      width: 80%;
-      margin: 30px 10% 25px;
+      width: 100%;
+      margin-top: 60px;
       text-align: right;
-      button {
-        height: 30px;
-        width: 110px;
-        line-height: 30px;
-        padding: 0;
-      }
-      .el-button--text {
-        border: 1px solid #688ef3;
-      }
-      .el-button--primary {
-        background-color: #688ef3;
-        color: #fff;
-      }
     }
   }
+}
+.uploader-btn {
+    font-size: 16px !important;
+    font-family: HarmonyHeiTi  !important;
+    font-weight: 300 !important;
+    color: #FFFFFF !important;
+    background: #59508f !important;
+    border-radius: 8px !important;
+    padding: 6px 14px !important;
+    margin-right: 20px !important;
+    margin-top: -10px !important;
+}
+
+.uploader-drop {
+ padding-left:0px !important;
+ background: #F1F2F6 !important;
+}
+.el-icon-question{
+    display: none;
+}
+.imageUploadTipDesc{
+  font-size: 14px ;
+  font-family: HarmonyHeiTi  !important;
+  font-weight: 300  !important;
+  color: #380879  !important;
+}
+.el-form{
+    background: #F1F2F6;
+}
+.el-form-item {
+    margin-bottom: 6px !important;
+}
+.uploader-drop{
+  border: none !important;
+}
+.el-form-item__label {
+  font-size: 16px !important;
+  font-family: HarmonyHeiTi !important;
+  font-weight: 400 !important;
+  color: #380879 !important;
+}
+.el-select {
+    width: 600px;
+}
+.el-radio__label {
+    color: #380879 !important;
+}
+.el-select > .el-input {
+    border-radius: 8px;
+}
+.el-select .el-input .el-select__caret {
+    color: #380879;
+}
+.el-input__inner{
+  border: 1px solid #fff !important;
+}
+.el-radio__input.is-checked .el-radio__inner{
+  background: url(../../assets/images/oneClick.png) 50% no-repeat !important;
+  width: 19px;
+  height: 19px;
+}
+.el-radio__input.is-disabled .el-radio__inner{
+  background: url(../../assets/images/oneUnclick.png) 50% no-repeat !important;
+  width: 19px;
+  height: 19px;
+}
+.el-radio__inner::after {
+  display: none;
 }
 </style>

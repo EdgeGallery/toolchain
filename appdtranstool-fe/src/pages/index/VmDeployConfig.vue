@@ -16,7 +16,162 @@
 
 <template>
   <div class="VmDeployConfig">
-    <el-tabs
+    <div
+      class="look"
+      @click="click1"
+    >
+      <img
+        :src="activeTabIndex === 1 ? oneClick : oneUnclick"
+        class="clicks"
+        alt=""
+      >
+      <p class="title">
+        {{ $t('appdRes.showConfig') }}
+      </p>
+    </div>
+    <div
+      v-if="activeTabIndex===1"
+      class="showConfigDiv"
+    >
+      <el-form
+        class="formConfing"
+        label-position="left"
+        v-model="configInfo"
+        ref="form"
+        label-width="110px"
+      >
+        <el-form-item
+          label="AZ"
+        >
+          <el-input
+            id="az"
+            v-model="configInfo.az"
+          />
+        </el-form-item>
+        <el-form-item
+          label="flavor"
+        >
+          <el-input
+            id="flavor"
+            v-model="configInfo.flavor"
+          />
+        </el-form-item>
+        <el-form-item
+          label="bootData"
+        >
+          <el-input
+            id="bootData"
+            v-model="configInfo.bootData"
+          />
+        </el-form-item>
+      </el-form>
+    </div>
+    <div
+      class="look look2"
+      @click="click2"
+    >
+      <img
+        :src="activeTabIndex === 1 ? oneUnclick : oneClick"
+        class="clicks"
+        alt=""
+      >
+      <p class="title">
+        {{ $t('appdRes.editOnLine') }}
+      </p>
+    </div>
+    <div v-if="activeTabIndex === 2">
+      <uploader
+        :options="options"
+        class="uploader-example"
+        @file-complete="fileComplete"
+        @file-added="onFileAdded"
+        accept=".zip"
+      >
+        <uploader-unsupport />
+        <span class="imageUploadTipDesc UploadTipDesc">{{ $t('appdRes.upoadYaml') }}</span>
+        <uploader-drop>
+          <uploader-btn>{{ $t('appdRes.templateUpload') }}</uploader-btn>
+          <a
+            :href="currentTemplate"
+            download="demo.yaml"
+            class="down-demo"
+          >
+            {{ $t('appdRes.downloadTemplate') }}
+          </a>
+        </uploader-drop>
+        <uploader-list />
+      </uploader>
+      <div v-show="hasValidate">
+        <div :class="appYamlFileId ? 'green test tit' : 'red test tit'">
+          {{ appYamlFileId ? $t('appdRes.uploadFile') : $t('appdRes.uploadFile') }}
+        </div>
+        <div
+          class="test tit"
+          v-show="showResult"
+        >
+          <div :class="checkFlag.formatSuccess ? 'green test' : 'red test'">
+            <em
+              v-show="checkFlag.formatSuccess"
+              class="el-icon-circle-check"
+            />
+            <em
+              v-show="!checkFlag.formatSuccess"
+              class="el-icon-circle-close"
+            />
+            {{ $t('appdRes.uploadFile') }}
+          </div>
+          <div :class="checkFlag.imageSuccess ? 'green test' : 'red test'">
+            <em
+              v-show="checkFlag.imageSuccess"
+              class="el-icon-circle-check"
+            />
+            <em
+              v-show="!checkFlag.imageSuccess"
+              class="el-icon-circle-close"
+            />
+            {{ $t('appdRes.uploadFile') }}
+          </div>
+          <div :class="checkFlag.serviceSuccess ? 'green test' : 'red test'">
+            <em
+              v-show="checkFlag.serviceSuccess"
+              class="el-icon-circle-check"
+            />
+            <em
+              v-show="!checkFlag.serviceSuccess"
+              class="el-icon-circle-close"
+            />
+            {{ $t('appdRes.uploadFile') }}
+          </div>
+          <div :class="checkFlag.mepAgentSuccess ? 'green test' : 'yellow test'">
+            <em
+              v-show="checkFlag.mepAgentSuccess"
+              class="el-icon-circle-check"
+            />
+            <em
+              v-show="!checkFlag.mepAgentSuccess"
+              class="el-icon-warning-outline"
+            />
+            {{ $t('appdRes.uploadFile') }}
+          </div>
+        </div>
+      </div>
+      <div
+        class="yaml_content"
+        v-if="fileUploadSuccess"
+      >
+        <mavon-editor
+          v-model="markdownSource"
+          :toolbars-flag="false"
+          :editable="false"
+          :subfield="false"
+          default-open="preview"
+          :box-shadow="false"
+          preview-background="#ffffff"
+        />
+      </div>
+    </div>
+
+    <!-- <el-tabs
       v-model="activeName"
       @tab-click="handleClick"
     >
@@ -66,102 +221,15 @@
         :label="$t('appdRes.editOnLine')"
         name="second"
       >
-        <uploader
-          :options="options"
-          class="uploader-example"
-          @file-complete="fileComplete"
-          @file-added="onFileAdded"
-          accept=".zip"
-        >
-          <uploader-unsupport />
-          <uploader-drop>
-            <uploader-btn>{{ $t('appdRes.templateUpload') }}</uploader-btn>
-            <em class="el-icon-question" />
-            <span class="imageUploadTipDesc">{{ $t('appdRes.upoadYaml') }}</span>
-            <a
-              :href="currentTemplate"
-              download="demo.yaml"
-              class="down-demo"
-            >
-              {{ $t('appdRes.downloadTemplate') }}
-            </a>
-          </uploader-drop>
-          <uploader-list />
-        </uploader>
-        <div v-show="hasValidate">
-          <div :class="appYamlFileId ? 'green test tit' : 'red test tit'">
-            {{ appYamlFileId ? $t('appdRes.uploadFile') : $t('appdRes.uploadFile') }}
-          </div>
-          <div
-            class="test tit"
-            v-show="showResult"
-          >
-            <div :class="checkFlag.formatSuccess ? 'green test' : 'red test'">
-              <em
-                v-show="checkFlag.formatSuccess"
-                class="el-icon-circle-check"
-              />
-              <em
-                v-show="!checkFlag.formatSuccess"
-                class="el-icon-circle-close"
-              />
-              {{ $t('appdRes.uploadFile') }}
-            </div>
-            <div :class="checkFlag.imageSuccess ? 'green test' : 'red test'">
-              <em
-                v-show="checkFlag.imageSuccess"
-                class="el-icon-circle-check"
-              />
-              <em
-                v-show="!checkFlag.imageSuccess"
-                class="el-icon-circle-close"
-              />
-              {{ $t('appdRes.uploadFile') }}
-            </div>
-            <div :class="checkFlag.serviceSuccess ? 'green test' : 'red test'">
-              <em
-                v-show="checkFlag.serviceSuccess"
-                class="el-icon-circle-check"
-              />
-              <em
-                v-show="!checkFlag.serviceSuccess"
-                class="el-icon-circle-close"
-              />
-              {{ $t('appdRes.uploadFile') }}
-            </div>
-            <div :class="checkFlag.mepAgentSuccess ? 'green test' : 'yellow test'">
-              <em
-                v-show="checkFlag.mepAgentSuccess"
-                class="el-icon-circle-check"
-              />
-              <em
-                v-show="!checkFlag.mepAgentSuccess"
-                class="el-icon-warning-outline"
-              />
-              {{ $t('appdRes.uploadFile') }}
-            </div>
-          </div>
-        </div>
-        <div
-          class="yaml_content"
-          v-if="fileUploadSuccess"
-        >
-          <mavon-editor
-            v-model="markdownSource"
-            :toolbars-flag="false"
-            :editable="false"
-            :subfield="false"
-            default-open="preview"
-            :box-shadow="false"
-            preview-background="#ffffff"
-          />
-        </div>
+
       </el-tab-pane>
-    </el-tabs>
+    </el-tabs> -->
   </div>
 </template>
 
 <script>
+import oneClick from '@/assets/images/oneClick.png'
+import oneUnclick from '@/assets/images/oneUnclick.png'
 import chinaunicomTemplate from '@/assets/file/chinaunicomTemplate.yaml'
 import edgegalleryTemplate from '@/assets/file/edgegalleryTemplate.yaml'
 import axios from 'axios'
@@ -171,7 +239,9 @@ export default {
   },
   data () {
     return {
-      activeTabIndex: '0',
+      activeTabIndex: 1,
+      oneClick: oneClick,
+      oneUnclick: oneUnclick,
       configInfo: {
         step: 'step3',
         az: '',
@@ -204,6 +274,15 @@ export default {
     this.mergerUrl = url + '/mec/appdtranstool/v1/vm/apps/merge?fileName='
   },
   methods: {
+
+    click1 () {
+      this.activeTabIndex = 1
+      this.$emit('child-event2', this.activeTabIndex)
+    },
+    click2 () {
+      this.activeTabIndex = 2
+      this.$emit('child-event', this.activeTabIndex)
+    },
     parentMsg: function (active) {
       if (active === 2) {
         this.$emit('getStepData', this.configInfo)
@@ -244,60 +323,44 @@ export default {
 
 <style lang="less">
 .VmDeployConfig{
-  .el-tabs{
-    .el-tabs__item{
-      height: 15px;
-      line-height: 15px;
-      padding: 0 20px;
+  width: 100%;
+  margin-top: 50px;
+  padding-top: 30px;
+  padding-left:60px;
+  .uploader-drop {
+  margin-left: 60px;
+}
+  .look2{
+    margin-top: 16px;
+  }
+  .look:hover{
+    cursor: pointer;
+  }
+  .look{
+    width: 1093px;
+    height: 47px;
+    display: flex;
+    justify-content: flex-start;
+    border-radius: 12px;
+    background-image: linear-gradient(to right, #fff , #F1F2F6);
+    box-shadow: 0px 7px 21px 0px rgba(40, 12, 128, 0.08);
+    .clicks{
+      margin: 14px 0 0 32px;
+      width: 19px;
+      height: 19px;
+    }
+    .title{
+      margin-left:16px;
+      line-height: 47px;
       font-size: 18px;
-      margin:10px 0 18px 0;
-      border-right: 1px solid #ddd;
-      border-radius: 0;
-    }
-    .el-tabs__item:last-child{
-      border-right: 0;
-    }
-    .el-tabs__item.is-active{
-      color: #688ef3;
-    }
-    .el-tabs__item.is-disabled{
-      cursor: not-allowed;
-    }
-    .el-tabs__active-bar{
-      height: 4px;
-    }
-    .el-tab-pane{
-      padding: 20px 0;
-    }
-    .upload-demo{
-      .el-upload{
-        float: left;
-      }
-      .el-upload__tip{
-        font-size: 16px;
-        float: left;
-      }
-      .el-upload-list{
-        float: left;
-        width: 100%;
-      }
-    }
-    .down-demo {
-      display: inline-block;
-      margin: 5px 0 0 15px;
-      font-size: 16px;
-      cursor: pointer;
-      color: #688ef3;
+      font-family: HarmonyHeiTi;
+      font-weight: 400;
+      color: #380879;
     }
   }
-  width: 80%;
-  margin-left: 8%;
-  margin-top: 5%;
-  background: #FFFFFF;
+
   .showConfigDiv{
     width: 100%;
-    height: 200px;
-    background: #FFFFFF;
     .formConfing{
       text-align: left;
     }
@@ -316,11 +379,20 @@ export default {
     }
   }
   .down-demo {
+    text-decoration: none;
     display: inline-block;
-    margin: 5px 0 0 15px;
-    font-size: 16px;
-    cursor: pointer;
-    color: #688ef3;
+    font-size: 16px !important;
+    font-family: HarmonyHeiTi !important;
+    font-weight: 300 !important;
+    color: #FFFFFF !important;
+    background: #8278B7 !important;
+    border-radius: 8px !important;
+    padding: 6px 20px !important;
+    margin-right: 20px !important;
+    margin-top: -10px !important;
+  }
+  .down-demo:hover{
+     background: #59508f !important;
   }
   .test {
     font-size: 14px;
@@ -358,9 +430,20 @@ export default {
     }
   }
 }
-.el-icon-question{
-  margin-left: 15px;
-  font-size: 14px;
-  color: #688ef3;
+.UploadTipDesc{
+  display: block;
+  font-size: 16px !important;
+  font-family: HarmonyHeiTi;
+  font-weight: 300;
+  color: #380879;
+  margin: 20px 0 10px 66px;
 }
+.el-input__inner {
+    width: 600px;
+}
+.el-form-item {
+    margin-left: 70px !important;
+    margin-top: 16px;
+}
+
 </style>

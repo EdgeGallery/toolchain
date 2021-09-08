@@ -25,10 +25,14 @@
           @change="inputValueChange"
           class="imagePath"
         />
-        <em class="el-icon-question" />
-        {{ $t('appdRes.imageAddrTip') }}
       </span>
     </h3>
+    <p
+      class="careful"
+      :class="{'carefulen':(this.language==='中文')}"
+    >
+      {{ $t('appdRes.imageAddrTip') }}
+    </p>
     <uploader
       :options="options"
       class="uploader-example"
@@ -37,11 +41,17 @@
       accept=".zip"
     >
       <uploader-unsupport />
-      <uploader-drop>
-        <uploader-btn>{{ $t('appdRes.imageUpload') }}</uploader-btn>
-        <em class="el-icon-question" />
-        <span class="imageUploadTipDesc">{{ $t('appdRes.imageUploadTip') }}</span>
-      </uploader-drop>
+      <div style="display:flex;">
+        <span
+          class="span_lefts lefts2"
+          :class="{'lefts2en':(this.language==='中文')}"
+        >{{ $t('appdRes.imageAddr') }}</span>
+        <uploader-drop class="uploadBtn">
+          <uploader-btn>{{ $t('appdRes.imageUpload') }}</uploader-btn>
+          <em class="el-icon-question" />
+          <span class="imageUploadTipDesc">{{ $t('appdRes.imageUploadTip') }}</span>
+        </uploader-drop>
+      </div>
       <uploader-list />
     </uploader>
   </div>
@@ -52,6 +62,12 @@ import { STANDARDTYPE } from '../../tools/constant.js'
 import axios from 'axios'
 import { getCookie } from '../../tools/request.js'
 export default {
+  props: {
+    language: {
+      type: String,
+      required: true
+    }
+  },
   data () {
     return {
       appdStandardTypes: STANDARDTYPE,
@@ -125,24 +141,31 @@ export default {
 
 <style lang="less">
 .UploadImage{
-  width: 80%;
-  margin-left: 8%;
-  margin-top: 3%;
-  background: #FFFFFF;
+  margin-top: 50px;
+  width: 100%;
+  padding: 25px 0 0 100px;
+  span.span_lefts{
+      font-size: 16px;
+      font-family: HarmonyHeiTi;
+      font-weight: 400;
+      color: #380879;
+      line-height: 24px;
+    }
+    .lefts2{
+      margin-top: 10px;
+    }
+    .span_lefts.lefts2en{
+       width: 147px;
+    }
   .image_title{
-    // font-size: 16px;
     margin-top: 20px;
     width: 100%;
     span{
       margin-bottom: 10px;
     }
-    span.span_lefts{
-      width: 65px;
-      margin-right: 10px;
-      font-size: 16px;
-    }
     span.span_right{
-      width: calc( 80% - 72px);
+      width: 600px;
+      margin-left: 65px;
       font-size: 14px;
       color: #606266;
     }
@@ -150,6 +173,20 @@ export default {
       width: 300px;
     }
   }
+  .careful{
+      font-size: 14px;
+      font-family: HarmonyHeiTi;
+      font-weight: 300;
+      color: #380879;
+      margin-left: 130px;
+      margin-bottom: 10px;
+    }
+   .careful.carefulen{
+     margin-left: 178px;
+   }
+    .uploadBtn{
+      margin-left: 65px;
+    }
   .uploader-example{
     width: 100%;
     .imageUploadTipDesc{
@@ -162,5 +199,18 @@ export default {
   margin-left: 15px;
   font-size: 14px;
   color: #688ef3;
+}
+ .el-button {
+    width: 174px !important;
+    height: 46px !important;
+    background-color: #fff !important;
+    color: #380879 !important;
+    border: 1px solid #380879;
+    border-radius: 8px !important;
+    font-size: 20px !important;
+}
+.el-button:hover{
+   background: #5E40C8 !important;
+   color: #fff !important;
 }
 </style>
