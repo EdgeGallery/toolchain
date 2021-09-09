@@ -385,14 +385,11 @@ export default {
     font-family: HarmonyHeiTi !important;
     font-weight: 300 !important;
     color: #FFFFFF !important;
-    background: #8278B7 !important;
+    background: #59508f !important;
     border-radius: 8px !important;
     padding: 6px 20px !important;
     margin-right: 20px !important;
     margin-top: -10px !important;
-  }
-  .down-demo:hover{
-     background: #59508f !important;
   }
   .test {
     font-size: 14px;
