@@ -38,7 +38,7 @@ class Server(object):
             raise Exception('No IMAGE_PATH found in env.\n')
 
         self.check_record_file = 'check_info.json'
-        self.compress_record_file = 'compress_status.json'
+        self.compress_record_file = 'compress_status.log'
 
     def check_vm_image(self, input_image=None):
         if not input_image:
@@ -60,10 +60,13 @@ class Server(object):
             Utils.write_json_file(check_record_file, check_info)
 
             status = 0
-            msg = "Check In Progress"
+            msg = 'Check In Progress'
         except Exception as e:
             status = 1
-            msg = str(e)
+            msg = 'Check Failed'
+            check_info = {}
+            check_info['checkResult'] = 99
+            Utils.write_json_file(check_record_file, check_info)
 
         return status, msg
 
@@ -79,24 +82,49 @@ class Server(object):
                 return 2, 'Check completed, image has leaked clusters, but is not corrupted', check_info
             return 3, 'Check failed', check_info
 
+        if check_info.get('checkResult') == 99:
+            return 3, 'Check failed', check_info
         return 4, "Check in Progress", check_info
 
-    def compressVMImage(self, inputImage=None, outputImage=None):
-        if not inputImage:
+    def compress_vm_image(self, input_image=None, output_image=None):
+        if not input_image:
             raise Exception('No image is given\n')
-        if not outputImage:
+        if not output_image:
             raise Exception('No output image path is given\n')
 
-        image = Path(inputImage)
+        image = Path(input_image)
         if not image.is_file():
-            raise Exception('Given image {} is not exist\n'.format(inputImage))
+            raise Exception('Image {} is not exist\n'.format(input_image))
 
-        status = 0
-        msg = "Compress In Progress"
+        try:
+            compress_record_path = os.path.join(self.tmp_path, self.request_id)
+            os.makedirs(compress_record_path)
+            compress_record_file = os.path.join(compress_record_path, self.compress_record_file)
+
+            data = 'Start to compress...\n'
+            Utils.append_write_plain_file(compress_record_file, data)
+            Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
+
+            status = 0
+            msg = 'Compress In Progress'
+        except Exception as e:
+            status = 1
+            msg = 'Compress Failed\n'
+            Utils.append_write_plain_file(compress_record_file, msg)
+
         return status, msg
 
-    def getCompressStatus(self):
-        status = 0
-        msg = "Compress Completed"
-        rate = 1
-        return status, msg, rate
+    def get_compress_status(self):
+        try:
+            compress_record_file = os.path.join(self.tmp_path,
+                                                self.request_id,
+                                                self.compress_record_file)
+            with open(compress_record_file, 'r') as f:
+                for line in f:
+                    if 'Compress Completed' in line:
+                        return 0, 'Compress Completed', 1
+                    if 'Compress Failed' in line:
+                        return 2, 'Compress Failed', 0
+            return 1, 'Compress In Progress', 0.5
+        except Exception as e:
+            return 2, 'Compress Failed', 0

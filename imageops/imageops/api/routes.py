@@ -55,36 +55,31 @@ def get_check_status(request_id):
 
 
 @app.route('/api/v1/vmimage/compress', methods=['POST'])
-def compressVMImage():
-    if os.getenv('IMAGE_PATH'):
-        imagePath = os.getenv('IMAGE_PATH')
-    else:
-        return 'No IMAGE_PATH found in env.\n', 500
-
-    inputImageName = request.json.get('inputImageName')
-    if not inputImageName:
+def compress_vm_image():
+    input_image_name = request.json.get('inputImageName')
+    if not input_image_name:
         return 'Lacking inputImageName in request body.\n', 500
 
-    outputImageName = request.json.get('outputImageName')
-    if not outputImageName:
+    output_image_name = request.json.get('outputImageName')
+    if not output_image_name:
         return 'Lacking outputImageName in request body.\n', 500
 
     try:
         request_id = uuid.uuid1()
-        inputImage = os.path.join(imagePath, inputImageName)
-        outputImage = os.path.join(imagePath, outputImageName)
         server = Server(request_id)
-        status, msg = server.compressVMImage(inputImage, outputImage)
+        input_image = os.path.join(server.image_path, input_image_name)
+        output_image = os.path.join(server.image_path, output_image_name)
+        status, msg = server.compress_vm_image(input_image, output_image)
         return jsonify({'status': status, 'msg': msg, 'requestId': request_id}), 200
     except Exception as e:
         return str(e), 500
 
 
 @app.route('/api/v1/vmimage/compress/<request_id>', methods=['GET'])
-def getCompressStatus(request_id):
+def get_compress_status(request_id):
     try:
         server = Server(request_id)
-        status, msg, rate = server.getCompressStatus()
+        status, msg, rate = server.get_compress_status()
         return jsonify({'status': status, 'msg': msg, 'rate': rate}), 200
     except Exception as e:
         return str(e), 500

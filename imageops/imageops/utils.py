@@ -48,14 +48,20 @@ class Utils(object):
         return m.hexdigest()
 
     @staticmethod
-    def read_json_file(jsonFile):
-        with open(jsonFile, 'rb') as f:
+    def read_json_file(json_file):
+        with open(json_file, 'rb') as f:
             return json.load(f)
 
     @staticmethod
-    def write_json_file(jsonFile, data):
-        with open(jsonFile, 'w') as f:
+    def write_json_file(json_file, data):
+        with open(json_file, 'w') as f:
             f.write(json.dumps(data))
+        return
+
+    @staticmethod
+    def append_write_plain_file(plain_file, data):
+        with open(plain_file, 'a') as f:
+            f.write(data)
         return
 
     @classmethod
@@ -88,3 +94,26 @@ class Utils(object):
         cls.write_json_file(check_record_file, check_data)
 
         return image_info
+
+    @classmethod
+    @async
+    def compress_cmd_exec(cls, input_image, output_image, compress_record_file):
+        cmd = 'virt-sparsify {} --compress --convert qcow2 {} --machine-readable'.format(input_image, output_image)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+
+        for line in iter(p.stdout.readline, b''):
+            data = line.decode('unicode-escape')
+            with open(compress_record_file, 'a') as f:
+                f.write(data)
+
+        return_code = p.wait()
+        p.stdout.close()
+        if return_code == 0:
+            compress_output = 'Compress Completed\n'
+        else:
+            compress_output = 'Compress Failed\n'
+
+        cls.append_write_plain_file(compress_record_file, compress_output)
+
+        return

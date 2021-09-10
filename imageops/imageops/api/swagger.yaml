@@ -255,6 +255,3 @@ definitions:
       filename:
         type: "string"
         example: "ubuntu-20.4.img"
-      checksum:
-        type: "string"
-        example: "e0aeaee8caffe0126c1982818c8d0ada"
