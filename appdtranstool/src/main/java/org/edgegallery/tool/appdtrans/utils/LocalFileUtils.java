@@ -28,13 +28,16 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
 import org.edgegallery.tool.appdtrans.constants.ResponseConst;
 import org.edgegallery.tool.appdtrans.exception.ToolException;
@@ -324,5 +327,74 @@ public class LocalFileUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * sign package.
+     */
+    public void signPackage(String dstFileDir, String keyPath, String keyPwd) {
+        File mfFile = getFile(dstFileDir, "mf");
+        String cmsEncrypted = "";
+        if (mfFile != null) {
+            List<String> rules = new ArrayList<>();
+            rules.add("[Ss]ource\\s*:");
+            rules.add("[Aa]lgorithm\\s*:");
+            rules.add("[Hh]ash\\s*:");
+            String srcMsg = readMatchLineContent(mfFile.getAbsolutePath(), rules);
+            Signature signature = new Signature();
+            Optional<byte[]> signBytes = signature.signMessage(srcMsg.trim(), keyPath, keyPwd);
+            if (signBytes.isPresent()) {
+                cmsEncrypted = new String(signBytes.get(), StandardCharsets.UTF_8);
+            } else {
+                throw new ToolException("sign package failed.", ResponseConst.RET_SIGN_PACKAGE_FAILED);
+            }
+        }
+        if (!StringUtils.isEmpty(cmsEncrypted)) {
+            try {
+                FileUtils.writeStringToFile(mfFile, "\n-----BEGIN CMS-----\n", StandardCharsets.UTF_8, true);
+                FileUtils.writeStringToFile(mfFile, cmsEncrypted, StandardCharsets.UTF_8, true);
+                FileUtils.writeStringToFile(mfFile, "\n-----END CMS-----\n", StandardCharsets.UTF_8, true);
+            }  catch (IOException e) {
+                LOGGER.error("add package signature failed {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * read match line content String.
+     *
+     */
+    private String readMatchLineContent(String fileName, List<String> rules) {
+        LineIterator lineIterator;
+        StringBuilder result = new StringBuilder();
+        String filePath = fileName.replace("\\", File.separator).replace(FILE_SEPARATOR, File.separator);
+
+        try (InputStream inputStream = FileUtils.openInputStream(FileUtils.getFile(filePath));
+             InputStreamReader inputStreamReader =  new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            lineIterator = new LineIterator(bufferedReader);
+            String line;
+
+            while (lineIterator.hasNext()) {
+                line = lineIterator.next();
+                if (StringUtils.isEmpty(line) || canLineMatch(line, rules)) {
+                    line += "\n";
+                    result.append(line);
+                }
+            }
+        } catch (IOException e) {
+            throw new ToolException("read manifest file exception.", ResponseConst.RET_RENAME_FILE_FAILED);
+        }
+        return result.toString().trim();
+    }
+
+    private boolean canLineMatch(String line, List<String> rules) {
+        String normalizeLine = Normalizer.normalize(line, Normalizer.Form.NFKC);
+        for (String rule : rules) {
+            if (normalizeLine.matches(rule) || normalizeLine.split(rule).length > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

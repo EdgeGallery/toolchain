@@ -72,6 +72,12 @@ public class VmServiceFacade {
     @Value("${transTool.appd-configs}")
     private String configDir;
 
+    @Value("${transTool.encrypted-key-path:}")
+    private String keyPath;
+
+    @Value("${transTool.key-password:}")
+    private String keyPwd;
+
     /**
      * get appd templates types.
      *
@@ -199,13 +205,16 @@ public class VmServiceFacade {
             // 9. hash check
             vmService.hashCheck(dstFileDir);
 
-            // 10. zip all package
+            // 10. sign package
+            localFileUtils.signPackage(dstFileDir, keyPath, keyPwd);
+
+            // 11. zip all package
             String dstPkgFile = localFileUtils.compressAppPackage(dstFileDir, appPkgInfo.getAppInfo().getAppName());
 
-            // 11. clear env
+            // 12. clear env
             vmService.clearEnv(dto);
 
-            // 12. return zip package
+            // 13. return zip package
             InputStream ins = new BufferedInputStream(new FileInputStream(dstPkgFile));
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/octet-stream");
