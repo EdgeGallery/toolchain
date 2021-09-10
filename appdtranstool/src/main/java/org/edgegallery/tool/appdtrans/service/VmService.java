@@ -472,7 +472,8 @@ public class VmService {
                 for (String env : updateFileInfo.getEnvs()) {
                     if (env2Values.get(env) != null) {
                         FileUtils.writeStringToFile(updFile,
-                            FileUtils.readFileToString(updFile, StandardCharsets.UTF_8).replace(env, env2Values.get(env)),
+                            FileUtils.readFileToString(updFile, StandardCharsets.UTF_8)
+                                .replace(env, env2Values.get(env)),
                             StandardCharsets.UTF_8, false);
                     }
                 }
