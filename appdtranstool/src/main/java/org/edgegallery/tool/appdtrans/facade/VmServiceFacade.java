@@ -206,7 +206,9 @@ public class VmServiceFacade {
             vmService.hashCheck(dstFileDir);
 
             // 10. sign package
-            localFileUtils.signPackage(dstFileDir, keyPath, keyPwd);
+            if ("EdgeGallery".equals(dto.getDestAppd())) {
+                localFileUtils.signPackage(dstFileDir, keyPath, keyPwd);
+            }
 
             // 11. zip all package
             String dstPkgFile = localFileUtils.compressAppPackage(dstFileDir, appPkgInfo.getAppInfo().getAppName());
