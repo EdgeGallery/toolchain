@@ -106,4 +106,9 @@ public class ResponseConst {
      * replace file failed.
      */
     public static final int RET_REPLACE_FILE_FAILED = 100016;
+
+    /**
+     * sign package failed.
+     */
+    public static final int RET_SIGN_PACKAGE_FAILED = 100017;
 }

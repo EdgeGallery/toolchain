@@ -41,4 +41,6 @@ transTool:
   tool-path: /usr/app/transTool
   upload-path: /usr/app/temp
   appd-configs: /usr/app/configs
+  encrypted-key-path: /usr/app/keys/public.p12
+  key-password: ${EDGE_CERT_PASSWORD:}
 
