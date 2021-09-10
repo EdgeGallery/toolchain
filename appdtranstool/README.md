@@ -5,7 +5,9 @@
 将各个标准的应用包模板、应用包信息定义、包模板转换规则录入系统，只支持系统中有的标准转换。
 在界面选择源、目标标准，上传需要的文件，通过标准模板、包定义、模板转换规则等进行转换，虚机部署信息，如AZ、主机组、启动脚本可以通过界面输入，也可以在线编译部署文件，前台将编辑好的部署文件传给后台替换，因此前台需要保存各个标准的部署模板文件。
 
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184421_6e8d8544_8354563.png "files.png")
+## 扩展增加应用包标准
+
+用户可以增加自己的标准，只需在https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs/vm下面增加对应的文件，包括该标准的应用包模板、应用包信息定义和包模板转换规则，具体定义方式，可参考下面的例子：
 
 #### 应用包模板
 
@@ -193,25 +195,3 @@ Hash: {hash_mep}
 各个规则的操作顺序：generateValues、replaceFiles、updateFiles、renameFiles、zipFiles、hash文件校验（只针对mf文件中配置的source文件）。
 
 根据该规则可以转换为目标标准的应用包。
-
-### 文件上传
-
-不管大文件还是小文件，都采用分片上传方式，点击上传后，都先将文件保存到本地服务器，后台返回给前台文件路径，文件上传接口参考appstore。
-文件保存路径：/usr/app/transtool, 子级目录有package、doc、Image、deploy，分别存放上传的文件。文件转换完后需要清理目录。
-
-### 接口变更
-
-
-| URL                                  | Method | Change Type | request                                                      | response                                                     |
-| ------------------------------------ | ------ | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| /mec/appdtranstool/v1/vm/templates/ | GET   | Add         |  无                                                          | ["ChinaUnicom", "EdgeGallery"]  |
-| /mec/appdtranstool/v1/vm/upload | POST   | Add         | 同/mec/appstore/v1/apps/upload接口                           | {<br />   "data":  "upload file success."<br />    "retCode": 0,<br />    "params": null,<br />    "message": "upload file success."<br />}  <br /> |
-| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | {<br />    "fileName" : string,<br />    "guid" : string, <br />    "fileType" : string<br />}<br />fileType的取值为：package、doc、image、deploy。 | {<br />    "data":  "file address."<br />    "retCode": 0,<br />    "params": null,<br />    "message": "merge file success."<br />} |
-| /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootData": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />返回转换后的应用包 |
-
-
-### 界面设计
-
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184454_e0bc5473_8354563.png "appd-1.png")
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184507_a765b1dc_8354563.png "appd-2.png")
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0531/184517_7bf47847_8354563.png "appd-3.png")

@@ -1,15 +1,17 @@
 # AppdTransTool
-The tool realizes the conversion of application packages of different standards，Promote application sharing。
+The tool realizes the conversion of application packages of different standards, Promote application sharing.
 
 ## Tool conversion plan 
-Application package templates of various standards、Application package information definition、Package template conversion rule entry system，Only support standard conversion in the system。
-Select the source in the interface、Target standard，Upload the required files，Pass standard template、Package definition、Template conversion rules, etc.，Virtual machine deployment information，Such asAZ、Host group、The startup script can be entered through the interface，You can also compile the deployment file online，The front desk transfers the edited deployment file to the backend for replacement，Therefore, the front desk needs to save various standard deployment template files。
+Application package templates of various standards, Application package information definition, Package template conversion rule entry system, Only support standard conversion in the system.
+Select the source in the interface, Target standard, Upload the required files, Pass standard template, Package definition, Template conversion rules, etc., Virtual machine deployment information, Such as AZ, Host group, The startup script can be entered through the interface, You can also compile the deployment file online, The front desk transfers the edited deployment file to the backend for replacement, Therefore, the front desk needs to save various standard deployment template files.
 
-![Enter picture description](https://images.gitee.com/uploads/images/2021/0531/184421_6e8d8544_8354563.png "files.png")
+## Expand and add application package standards
+
+Users can add their own standards, just in https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs/vm Corresponding files are added below, including the application package template, application package information definition and package template conversion rules of the standard. For specific definition methods, please refer to the following examples.
 
 #### Application package template
 
-Put each standard application package template under the configuration file path，Variable parameters use variable identification，Such as：
+Put each standard application package template under the configuration file path, Variable parameters use variable identification, Such as:
 
 ```
 metadata:
@@ -38,7 +40,7 @@ Hash: {hash_mep}
 
 #### Application package information definition
 
-When applying package conversion，Defined by application package，You can get the value of a variable parameter，Such as：
+When applying package conversion, Defined by application package, You can get the value of a variable parameter, Such as:
 
 ```
 {
@@ -109,7 +111,7 @@ When applying package conversion，Defined by application package，You can get 
 }
 ```
 
-The package definition mainly contains application informationappInfoAnd virtual machine resource informationcomputeInfo，The path of the file where the parameter is located is specified in the definition、File type and location in the file，If there are multiple files of the same type under the same path, Can have an exclusive excludeFile, if the file exists in a zip file, sub path need to be known, Such as：
+The package definition mainly contains application informationappInfoAnd virtual machine resource informationcomputeInfo, The path of the file where the parameter is located is specified in the definition, File type and location in the file, If there are multiple files of the same type under the same path, Can have an exclusive excludeFile, if the file exists in a zip file, sub path need to be known, Such as:
 
 ```
         "vm_name": {
@@ -122,11 +124,11 @@ The package definition mainly contains application informationappInfoAnd virtual
         }
 ```
 
-in this way，Defined by package，The value of the required parameter can be obtained from the source standard。
+in this way, Defined by package, The value of the required parameter can be obtained from the source standard.
 
 #### Application package template conversion rules
 
-This rule stipulates what needs to be done when transitioning to the target standard，E.g. update file listupdateFiles、Files that need to be renamedrenameFiles，Need to generate parameter listgenerateValues、Do you need to performhashcheckisNeedHashCheck，Such as：
+This rule stipulates what needs to be done when transitioning to the target standard, E.g. update file listupdateFiles, Files that need to be renamedrenameFiles, Need to generate parameter listgenerateValues, Do you need to performhashcheckisNeedHashCheck, Such as:
 
 ```
 {
@@ -176,7 +178,7 @@ This rule stipulates what needs to be done when transitioning to the target stan
 }
 ```
 
-The rule defines the specific files that need to be manipulated、Replaced variable、Generated variables, etc.，There are also files that need to be compressedzipFiles、Replaced filereplaceFiles、External input variableinputs，Such as：
+The rule defines the specific files that need to be manipulated, Replaced variable, Generated variables, etc., There are also files that need to be compressed zipFiles, Replaced file replaceFiles, External input variableinputs, Such as:
 
 ```
     "replaceFiles": [
@@ -208,28 +210,7 @@ The rule defines the specific files that need to be manipulated、Replaced varia
     ]
 ```
 
-The order of operations of each rule：replaceFiles、generateValues、inputs、updateFiles、renameFiles、zipFiles、hashDocument verification（Only formfConfigured in the filesourcefile）。
+The order of operations of each rule: replaceFiles, generateValues, inputs, updateFiles, renameFiles, zipFiles, hashDocument verification(Only for  source file Configured in the manifest file).
 
-According to this rule, it can be converted into an application package of the target standard。
+According to this rule, it can be converted into an application package of the target standard.
 
-### File Upload
-
-Regardless of large files or small files，All use multiple upload methods，After clicking upload，Save the file to the local server first，File path returned from the background to the foreground，File upload interface referenceappstore。
-File save path：/usr/app/transtool, Sub-directories havepackage、doc、image、deploy，Store uploaded files separately。The directory needs to be cleaned up after the file is converted。
-
-### Interface change
-
-
-| URL                                  | Method | Change Type | request                                                      | response                                                     |
-| ------------------------------------ | ------ | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| /mec/appdtranstool/v1/vm/templates/ | GET   | Add         |  no                                                          | ["ChinaUnicom", "EdgeGallery"]  |
-| /mec/appdtranstool/v1/vm/upload | POST   | Add         | with/mec/appstore/v1/apps/uploadinterface                           | {<br />    "upload file success."<br />}  <br />             |
-| /mec/appdtranstool/v1/vm/merge  | GET    | Add         | {<br />    "fileName" : string,<br />    "guid" : string, <br />    "fileType" : string<br />}<br />fileTypeThe value of：package、doc、image、deploy。 | {<br />    "file address"<br />}                             |
-| /mec/appdtranstool/v1/vm/trans  | POST   | Add         | {<br />    "sourceAppd" : string,<br />    "destAppd" : string, <br />    "appFile" : string,<br />    "docFile" : string,<br />    "imageFile": string,<br />    "imagePath": string,<br />    "az": string, <br />    "flavor": string,<br />    "bootdata": string,<br />    "deployFile":string<br />} | application/octet-stream  {      binary output.  }<br />Return the converted application package |
-
-
-### interface design
-
-![Enter picture description](https://images.gitee.com/uploads/images/2021/0531/184454_e0bc5473_8354563.png "appd-1.png")
-![Enter picture description](https://images.gitee.com/uploads/images/2021/0531/184507_a765b1dc_8354563.png "appd-2.png")
-![Enter picture description](https://images.gitee.com/uploads/images/2021/0531/184517_7bf47847_8354563.png "appd-3.png")
