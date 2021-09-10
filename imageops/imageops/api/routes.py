@@ -28,19 +28,28 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/api/v1/vmimage/check/<fileName>', methods=['GET'])
-def checkVMImage(fileName):
-    if os.getenv('IMAGE_PATH'):
-        imagePath = os.getenv('IMAGE_PATH')
-    else:
-        return 'No IMAGE_PATH found in env.\n', 500
+@app.route('/api/v1/vmimage/check', methods=['POST'])
+def check_vm_image():
+    input_image_name = request.json.get('inputImageName')
+    if not input_image_name:
+        return 'Lacking inputImageName in request body.\n', 500
 
     try:
-        requestId = uuid.uuid1()
-        image = os.path.join(imagePath, fileName)
-        server = Server(requestId)
-        status, msg, imageInfo = server.checkVMImage(image)
-        return jsonify({'status': status, 'msg': msg, 'imageInfo': imageInfo, 'requestId': requestId}), 200
+        request_id = uuid.uuid1()
+        server = Server(request_id)
+        image = os.path.join(server.image_path, input_image_name)
+        status, msg = server.check_vm_image(image)
+        return jsonify({'status': status, 'msg': msg, 'requestId': request_id}), 200
+    except Exception as e:
+        return str(e), 500
+
+
+@app.route('/api/v1/vmimage/check/<request_id>', methods=['GET'])
+def get_check_status(request_id):
+    try:
+        server = Server(request_id)
+        status, msg, check_info = server.get_check_status()
+        return jsonify({'status': status, 'msg': msg, 'checkInfo': check_info}), 200
     except Exception as e:
         return str(e), 500
 
@@ -61,22 +70,22 @@ def compressVMImage():
         return 'Lacking outputImageName in request body.\n', 500
 
     try:
-        requestId = uuid.uuid1()
+        request_id = uuid.uuid1()
         inputImage = os.path.join(imagePath, inputImageName)
         outputImage = os.path.join(imagePath, outputImageName)
-        server = Server(requestId)
+        server = Server(request_id)
         status, msg = server.compressVMImage(inputImage, outputImage)
-        return jsonify({'status': status, 'msg': msg, 'requestId': requestId}), 200
+        return jsonify({'status': status, 'msg': msg, 'requestId': request_id}), 200
     except Exception as e:
         return str(e), 500
 
 
-@app.route('/api/v1/vmimage/compress/<requestId>', methods=['GET'])
-def getCompressStatus(requestId):
+@app.route('/api/v1/vmimage/compress/<request_id>', methods=['GET'])
+def getCompressStatus(request_id):
     try:
-        server = Server(requestId)
-        status, msg = server.getCompressStatus()
-        return jsonify({'status': status, 'msg': msg}), 200
+        server = Server(request_id)
+        status, msg, rate = server.getCompressStatus()
+        return jsonify({'status': status, 'msg': msg, 'rate': rate}), 200
     except Exception as e:
         return str(e), 500
 

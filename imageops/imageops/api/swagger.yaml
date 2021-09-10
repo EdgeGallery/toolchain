@@ -31,29 +31,57 @@ tags:
 schemes:
 - "http"
 paths:
-  /vmimage/check/{fileName}:
-    get:
+  /vmimage/check:
+    post:
       tags:
       - "vmimage"
       summary: "Consistency check on an OpenStack VM image"
-      description: "This could only work for qcow2 image format"
+      description: "This could only work for qcow2 image fromat"
       operationId: "checkVMImage"
       consumes:
       - "application/json"
       produces:
       - "application/json"
       parameters:
-      - name: "fileName"
-        in: "path"
-        description: "File name of the VM image given"
+      - name: "body"
+        in: "body"
+        description: "Name of the image which need to be checked"
         required: true
         schema:
-          type: "string"
+          $ref: "#/definitions/CheckBody"
       responses:
         200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/CheckResponse"
+        500:
+          description: "internal error"
+        default:
+          description: Unexpected error
+  /vmimage/check/{requestId}:
+    get:
+      tags:
+      - "vmimage"
+      summary: "Get the status of checking on an OpenStack VM image"
+      description: "Use the requestId got from the check POST API to get the status of image check"
+      operationId: "checkVMImageStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "requestId"
+        in: "path"
+        description: "requestId got from the check POST API"
+        required: true
+        schema:
+          type: "integer"
+          format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CheckStatusResponse"
         500:
           description: "internal error"
         default:
@@ -115,15 +143,35 @@ paths:
           description: Unexpected error
 
 definitions:
+  CheckBody:
+    type: "object"
+    properties:
+      inputImageName:
+        type: "string"
+        example: "vm1-snapshot.img"
   CheckResponse:
     type: "object"
     properties:
       status:
         type: "integer"
+        enum: [0, 1]
+        example: 0
+      msg:
+        type: "string"
         enum:
-        - 0
-        - 1
-        - 2
+        - "Check In Progress"
+        - "Check Failed"
+        example: "Check In Progress"
+      requestId:
+        type: "integer"
+        format: "uuid"
+        example: "4619204e-0fad-11ec-b9ed-fa163eea3e94"
+  CheckStatusResponse:
+    type: "object"
+    properties:
+      status:
+        type: "integer"
+        enum: [0, 1, 2, 3, 4]
         example: 0
       msg:
         type: "string"
@@ -131,13 +179,11 @@ definitions:
         - "Check completed, the image is (now) consistent"
         - "Check completed, image is corrupted"
         - "Check completed, image has leaked clusters, but is not corrupted"
+        - "Check failed"
+        - "Check in Progress"
         example: "Check completed, the image is (now) consistent"
-      imageInfo:
-        $ref: "#/definitions/ImageInfo"
-      requestId:
-        type: "integer"
-        format: "uuid"
-        example: "4619204e-0fad-11ec-b9ed-fa163eea3e94"
+      checkInfo:
+        $ref: "#/definitions/CheckInfo"
   CompressBody:
     type: "object"
     properties:
@@ -152,9 +198,7 @@ definitions:
     properties:
       status:
         type: "integer"
-        enum:
-        - 0
-        - 1
+        enum: [0, 1]
         example: 0
       msg:
         type: "string"
@@ -171,10 +215,7 @@ definitions:
     properties:
       status:
         type: "integer"
-        enum:
-        - 0
-        - 1
-        - 2
+        enum: [0, 1, 2]
         example: 0
       msg:
         type: "string"
@@ -183,6 +224,22 @@ definitions:
         - "Compress In Progress"
         - "Compress Failed"
         example: "Compress Completed"
+      rate:
+        type: "number"
+        minimum: 0
+        maximum: 1
+        example: 1
+  CheckInfo:
+    type: "object"
+    properties:
+      checksum:
+        type: "string"
+        example: "782fa5257615748e673eefe0143188e4"
+      checkResult:
+        type: "integer"
+        enum: [0, 1, 2, 3, 63]
+      imageInfo:
+        $ref: "#/definitions/ImageInfo"
   ImageInfo:
     type: "object"
     properties:
@@ -198,3 +255,6 @@ definitions:
       filename:
         type: "string"
         example: "ubuntu-20.4.img"
+      checksum:
+        type: "string"
+        example: "e0aeaee8caffe0126c1982818c8d0ada"
