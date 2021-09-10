@@ -470,9 +470,11 @@ public class VmService {
             for (UpdateFileInfo updateFileInfo : updateFileInfos) {
                 File updFile = new File(dstFileDir + updateFileInfo.getFile());
                 for (String env : updateFileInfo.getEnvs()) {
-                    FileUtils.writeStringToFile(updFile,
-                        FileUtils.readFileToString(updFile, StandardCharsets.UTF_8).replace(env, env2Values.get(env)),
-                        StandardCharsets.UTF_8, false);
+                    if (env2Values.get(env) != null) {
+                        FileUtils.writeStringToFile(updFile,
+                            FileUtils.readFileToString(updFile, StandardCharsets.UTF_8).replace(env, env2Values.get(env)),
+                            StandardCharsets.UTF_8, false);
+                    }
                 }
             }
         } catch (IOException e) {

@@ -320,10 +320,12 @@ public class LocalFileUtils {
      * get file by parent directory and file extension.
      */
     public File getFile(String parentDir, String fileExtension) {
-        List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
-        for (File fileEntry : files) {
-            if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
-                return fileEntry;
+        if (new File(parentDir).exists()) {
+            List<File> files = (List<File>) FileUtils.listFiles(new File(parentDir), null, true);
+            for (File fileEntry : files) {
+                if (Files.getFileExtension(fileEntry.getName().toLowerCase()).equals(fileExtension)) {
+                    return fileEntry;
+                }
             }
         }
         return null;
