@@ -7,7 +7,7 @@ Select the source in the interface, Target standard, Upload the required files, 
 
 ## Expand and add application package standards
 
-Users can add their own standards, just in https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs/vm Corresponding files are added below, including the application package template, application package information definition and package template conversion rules of the standard. For specific definition methods, please refer to the following examples.
+Users can add their own standards, just in https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs (VM folder is a virtual machine application and container is a container application) Corresponding files are added below, including the application package template, application package information definition and package template conversion rules of the standard. For specific definition methods, please refer to the following examples.
 
 #### Application package template
 
