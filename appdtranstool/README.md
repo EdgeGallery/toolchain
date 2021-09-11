@@ -7,7 +7,7 @@
 
 ## 扩展增加应用包标准
 
-用户可以增加自己的标准，只需在https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs/vm下面增加对应的文件，包括该标准的应用包模板、应用包信息定义和包模板转换规则，具体定义方式，可参考下面的例子：
+用户可以增加自己的标准，只需在https://gitee.com/edgegallery/toolchain/tree/master/appdtranstool/src/main/resources/configs下面增加对应的文件（vm文件夹是虚机应用，container是容器应用），包括该标准的应用包模板、应用包信息定义和包模板转换规则，具体定义方式，可参考下面的例子：
 
 #### 应用包模板
 
