@@ -119,7 +119,6 @@
             <uploader-btn>
               {{ $t('appdRes.uploadAppDescription') }}
             </uploader-btn>
-            <em class="el-icon-question" />
             <span class="imageUploadTipDesc">{{ $t('appdRes.uploadDescriptionTip') }}</span>
           </uploader-drop>
           <uploader-list />
@@ -292,7 +291,7 @@ export default {
 .UploadApp{
   width: 100%;
   margin-top: 50px;
-  padding: 40px 0 0 0px;
+  padding: 40px 0 30px 0px;
   .radioStyle{
     margin-top: 12px;
   }

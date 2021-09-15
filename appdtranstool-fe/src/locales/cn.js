@@ -73,7 +73,9 @@ const cn = {
     targetAppdNoEmpty: '目标APPD标准不能为空',
     appPackageNoEmpty: '请上传应用包',
     appdTransTool: '应用包转换工具',
-    appdTransDes: '应用包转换工具目前支持联通和EdgeGallery的虚机转换，后面会扩展支持更多应用包标准的转换'
+    appdTransDes: '应用包转换工具目前支持联通和EdgeGallery的虚机转换，如需支持新的应用包标准，请参考',
+    appdDocuments: '扩展文档'
+
   },
   about: {},
   ...zhLocale

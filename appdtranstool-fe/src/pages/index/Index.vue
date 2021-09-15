@@ -34,12 +34,16 @@
                 :src=" finished"
                 alt=""
               >
-              <p>............</p>
+              <p>
+                ............
+              </p>
               <img
                 :src="active === 1 || active === 2 ? finished: notFinished"
                 alt=""
               >
-              <p>............</p>
+              <p>
+                ............
+              </p>
               <img
                 :src="active === 2 ? finished: notFinished"
                 alt=""
@@ -66,7 +70,10 @@
               src="../../assets/images/careful.png"
               alt=""
             >
-            <p>{{ $t('appdRes.appdTransDes') }}</p>
+            <p>
+              {{ $t('appdRes.appdTransDes') }}<a :href="this.language ==='en'?'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README_en.md':'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README.md'">{{ $t('appdRes.appdDocuments') }}
+              </a>
+            </p>
           </div>
         </div>
         <div
@@ -381,7 +388,7 @@ export default {
   width: 73.64%;
   margin: 0px auto;
   min-width: 1200px;
-  height: 632px;
+  min-height: 632px;
   background: #FFFFFF;
   padding: 8px 3.1% 0px 3.1%;
   p{
@@ -465,6 +472,13 @@ export default {
             font-weight: 200;
             color: #5E40C8;
             line-height: 20px;
+            a{
+            font-size: 12px;
+            font-family: HarmonyHeiTi;
+            font-weight: 200;
+            color: #5E40C8;
+            line-height: 20px;
+            }
           }
         }
       }
@@ -474,7 +488,7 @@ export default {
       box-sizing: border-box;
       background: #F1F2F6;
       border-radius: 16px;
-      height: 340px;
+      min-height: 380px;
     }
     .elStepsImage{
       height: 200px;
