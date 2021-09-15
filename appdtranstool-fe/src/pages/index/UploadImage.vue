@@ -141,7 +141,7 @@ export default {
 
 <style lang="less">
 .UploadImage{
-  margin-top: 50px;
+  margin-top: 40px;
   width: 100%;
   padding: 25px 0 0 100px;
   span.span_lefts{
@@ -155,7 +155,7 @@ export default {
       margin-top: 10px;
     }
     .span_lefts.lefts2en{
-       width: 147px;
+       width: 168px;
     }
   .image_title{
     margin-top: 20px;
