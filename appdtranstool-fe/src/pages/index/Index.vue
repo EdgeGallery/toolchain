@@ -29,50 +29,18 @@
       <div class="stepNavProcess">
         <div class="appChangTop">
           <div class="topLeft">
-            <div class="steps">
-              <img
-                :src=" finished"
-                alt=""
-              >
-              <p>
-                ............
-              </p>
-              <img
-                :src="active === 1 || active === 2 ? finished: notFinished"
-                alt=""
-              >
-              <p>
-                ............
-              </p>
-              <img
-                :src="active === 2 ? finished: notFinished"
-                alt=""
-              >
-            </div>
-            <div class="stepName">
-              <p>{{ $t('appdRes.uploadApp') }}</p>
-              <p
-                class="stepName2"
-                :class="{'stepName2en':(this.getLanguage==='中文')}"
-              >
-                {{ $t('appdRes.uploadAppImage') }}
-              </p>
-              <p
-                class="stepName3"
-                :class="{'stepName3en':(this.getLanguage==='中文')}"
-              >
-                {{ $t('appdRes.vmDeployConfig') }}
-              </p>
-            </div>
-          </div>
-          <div class="topRight">
             <img
-              src="../../assets/images/careful.png"
+              src="../../assets/images/icon.png"
               alt=""
             >
-            <p>
-              {{ $t('appdRes.appdTransDes') }}<a :href="this.language ==='en'?'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README_en.md':'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README.md'">{{ $t('appdRes.appdDocuments') }}
-              </a>
+            <p v-show="active===0">
+              {{ $t('appdRes.uploadApp') }}
+            </p>
+            <p v-show="active===1">
+              {{ $t('appdRes.uploadAppImage') }}
+            </p>
+            <p v-show="active===2">
+              {{ $t('appdRes.vmDeployConfig') }}
             </p>
           </div>
         </div>
@@ -84,6 +52,7 @@
             @getStepData="getStepData"
             @isChinaUnicomDest="isChinaUnicomDest"
             ref="uploadApp"
+            :language="getLanguage"
           />
         </div>
         <div
@@ -415,80 +384,35 @@ export default {
         display: flex;
         justify-content: space-between;
         .topLeft{
-          .steps{
-            display: flex;
-            justify-content: flex-start;
-            margin-left: 10px;
-            img{
-              margin: 10px 10px 0 6px;
-              width: 30px;
-              height: 30px;
-            }
-            p{
-              font-size: 24px;
-              font-family: HarmonyHeiTi;
-              font-weight: bold;
-              letter-spacing: 6px;
-              color: #380879;
-            }
-          }
-          .stepName{
-             display: flex;
-            justify-content:space-between;
-            p{
-              font-size: 14px;
-              font-family: HarmonyHeiTi;
-              font-weight: 300;
-              color: #380879;
-              line-height: 56px;
-            }
-            .stepName2{
-              margin-left: 16px;
-            }
-            .stepName2.stepName2en{
-              margin-left: 41px;
-            }
-            .stepName3{
-              margin-right: -20px;
-            }
-            .stepName3.stepName3en{
-              margin-right: -80px;
-            }
-          }
-        }
-        .topRight{
-          margin-top: 16px;
+          width: 100%;
+          margin-top: 10px;
+          height: 40px;
           display: flex;
-          justify-content: flex-start;
-          width: 350px;
+          border-radius:12px;
+          background: linear-gradient(to right,#f8f6ff,#fff);
           img{
-            width: 30px;
-            height: 30px;
-            margin-right: 4px;
+            width: 16px;
+            height: 16px;
+            margin: 12px 30px;
           }
           p{
-            font-size: 12px;
+            font-size: 16px;
             font-family: HarmonyHeiTi;
-            font-weight: 200;
+            font-weight: 400;
             color: #5E40C8;
-            line-height: 20px;
-            a{
-            font-size: 12px;
-            font-family: HarmonyHeiTi;
-            font-weight: 200;
-            color: #5E40C8;
-            line-height: 20px;
-            }
+            line-height: 40px;
           }
         }
       }
     }
     .elSteps {
-      width: 100%;
+      padding: 0 1%;
+      width: 98%;
       box-sizing: border-box;
       background: #F1F2F6;
       border-radius: 16px;
       min-height: 380px;
+      box-shadow: inset 4px 4px 25px 5px rgba(36, 20, 119, 0.1);
     }
     .elStepsImage{
       height: 200px;

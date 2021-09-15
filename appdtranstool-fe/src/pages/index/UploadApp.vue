@@ -59,6 +59,13 @@
             @click.native="getSelectSourceAppd(item)"
           />
         </el-select>
+        <p class="lookDoc">
+          {{ '('+ $t('appdRes.appdTransDes') }}
+          <a :href="this.language ==='中文'?'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README_en.md':'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README.md'">
+            {{ $t('appdRes.appdDocuments') }}
+          </a>
+          )
+        </p>
       </el-form-item>
       <el-form-item
         :label="$t('appdRes.targetAppdStandard')"
@@ -133,6 +140,12 @@ import { getTemplates } from '../../tools/api.js'
 import axios from 'axios'
 import { getCookie } from '../../tools/request.js'
 export default {
+  props: {
+    language: {
+      type: String,
+      required: true
+    }
+  },
   data () {
     return {
       appdStandardTypes: [],
@@ -144,7 +157,6 @@ export default {
         docFile: ''
       },
       radio: '1',
-      language: 'cn',
       options: {
         testChunks: false,
         headers: {},
@@ -290,10 +302,26 @@ export default {
 <style lang="less">
 .UploadApp{
   width: 100%;
-  margin-top: 50px;
+  margin-top: 40px;
   padding: 40px 0 30px 0px;
   .radioStyle{
     margin-top: 12px;
+  }
+  .lookDoc{
+            margin-top: 6px;
+            font-size: 12px;
+            font-family: HarmonyHeiTi;
+            font-weight: 200;
+            color: #5E40C8;
+            line-height: 20px;
+            a{
+            font-size: 12px;
+            font-family: HarmonyHeiTi;
+            font-weight: 200;
+            font-weight: bold;
+            color: #5E40C8;
+            line-height: 20px;
+            }
   }
 }
 

@@ -270,7 +270,7 @@ export default {
 <style lang="less">
 .VmDeployConfig{
   width: 100%;
-  margin-top: 50px;
+  margin-top: 40px;
   padding-top: 30px;
   padding-left:60px;
   .uploader-drop {
@@ -283,7 +283,7 @@ export default {
     cursor: pointer;
   }
   .look{
-    width: 1093px;
+    width: 900px;
     height: 47px;
     display: flex;
     justify-content: flex-start;
