@@ -170,60 +170,6 @@
         />
       </div>
     </div>
-
-    <!-- <el-tabs
-      v-model="activeName"
-      @tab-click="handleClick"
-    >
-      <el-tab-pane
-        :label="$t('appdRes.showConfig')"
-        name="first"
-      >
-        <div
-          v-if="activeTabIndex==='0'"
-          class="showConfigDiv"
-        >
-          <el-form
-            class="formConfing"
-            label-position="left"
-            v-model="configInfo"
-            ref="form"
-            label-width="150px"
-          >
-            <el-form-item
-              label="AZ"
-            >
-              <el-input
-                id="az"
-                v-model="configInfo.az"
-              />
-            </el-form-item>
-            <el-form-item
-              label="flavor"
-            >
-              <el-input
-                id="flavor"
-                v-model="configInfo.flavor"
-              />
-            </el-form-item>
-            <el-form-item
-              label="bootData"
-            >
-              <el-input
-                id="bootData"
-                v-model="configInfo.bootData"
-              />
-            </el-form-item>
-          </el-form>
-        </div>
-      </el-tab-pane>
-      <el-tab-pane
-        :label="$t('appdRes.editOnLine')"
-        name="second"
-      >
-
-      </el-tab-pane>
-    </el-tabs> -->
   </div>
 </template>
 

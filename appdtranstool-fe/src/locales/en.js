@@ -73,7 +73,8 @@ const en = {
     targetAppdNoEmpty: 'The target APPD standard cannot be empty',
     appPackageNoEmpty: 'Please upload the App package',
     appdTransTool: 'App package transfer tool',
-    appdTransDes: 'The app package transfer tool currently supports Unicom and EdgeGallery VM transfer, and will be expanded to support transfer of more app package standards'
+    appdTransDes: 'The application package conversion tool currently supports the virtual machine conversion of China Unicom and edgegallery. If you need to support the new application package standard, please refer to',
+    appdDocuments: 'Extended document'
   },
   about: {
   },

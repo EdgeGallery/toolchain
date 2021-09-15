@@ -48,6 +48,14 @@ export default new Router({
           meta: {
             id: '2.1'
           }
+        },
+        {
+          path: 'image',
+          name: 'image',
+          component: () => import('./pages/index/UploadImage.vue'),
+          meta: {
+            id: '2.1'
+          }
         }
       ]
     }
