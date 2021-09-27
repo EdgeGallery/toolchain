@@ -22,7 +22,7 @@
         <el-input
           id="imageAddr"
           v-model="appUploadImage.imageAddr"
-          @change="inputValueChange"
+          @input="inputValueChange"
           class="imagePath"
         />
       </span>
@@ -45,9 +45,19 @@
         <span
           class="span_lefts lefts2"
           :class="{'lefts2en':(this.language==='中文')}"
-        >{{ $t('appdRes.imageAddr') }}</span>
+        >{{ $t('appdRes.imageUpload') }}</span>
         <uploader-drop class="uploadBtn">
-          <uploader-btn>{{ $t('appdRes.imageUpload') }}</uploader-btn>
+          <uploader-btn
+            id="uploadImg"
+          >
+            {{ $t('appdRes.imageUpload') }}
+          </uploader-btn>
+          <span
+            v-if="this.imageUpload"
+            class="imageUpload"
+          >
+            {{ $t('appdRes.imageUpload') }}
+          </span>
           <em class="el-icon-question" />
           <span class="imageUploadTipDesc">{{ $t('appdRes.imageUploadTip') }}</span>
         </uploader-drop>
@@ -85,7 +95,8 @@ export default {
         chunkSize: 8 * 1024 * 1024,
         singleFile: true
       },
-      mergerUrl: ''
+      mergerUrl: '',
+      imageUpload: false
     }
   },
   created () {
@@ -96,6 +107,14 @@ export default {
   },
   methods: {
     inputValueChange (val) {
+      let uploadImg = document.getElementById('uploadImg')
+      if (val === '') {
+        uploadImg.style.opacity = 1
+        this.imageUpload = false
+      } else {
+        uploadImg.style.opacity = 0
+        this.imageUpload = true
+      }
       sessionStorage.setItem('isImageUrl', JSON.stringify(true))
     },
     fileComplete (fileType) {
@@ -186,6 +205,24 @@ export default {
    }
     .uploadBtn{
       margin-left: 65px;
+      display: flex;
+      .imageUpload{
+          display: block;
+          font-size: 16px !important;
+          text-align: center;
+          border-radius: 8px;
+          font-family: HarmonyHeiTi !important;
+          font-weight: 300 !important;
+          color: #FFFFFF !important;
+          background: #59508f !important;
+          border-radius: 8px !important;
+          padding: 6px 14px !important;
+          margin-right: -90px !important;
+          position: relative;
+          left: -114px;
+          top:-10px ;
+          z-index: 10;
+      }
     }
   .uploader-example{
     width: 100%;
@@ -205,7 +242,7 @@ export default {
     height: 46px !important;
     background-color: #fff !important;
     color: #380879 !important;
-    border: 1px solid #380879;
+    border: 1px solid #380879 !important;
     border-radius: 8px !important;
     font-size: 20px !important;
 }

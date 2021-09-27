@@ -49,6 +49,7 @@
           v-model="appUploadInfo.sourceAppd"
           clearable
           @change="changSelect(appUploadInfo.sourceAppd, 0)"
+          @clear="clearSourceAppd"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
@@ -75,6 +76,7 @@
           v-model="appUploadInfo.destAppd"
           clearable
           @change="changSelect(appUploadInfo.destAppd, 1)"
+          @clear="clearDestAppd"
         >
           <el-option
             v-for="(item,index) in appdStandardTypes"
@@ -189,6 +191,12 @@ export default {
   methods: {
     getSelectSourceAppd (item) {
       sessionStorage.setItem('hasSourceAppd', JSON.stringify(true))
+    },
+    clearSourceAppd () {
+      sessionStorage.removeItem('hasSourceAppd')
+    },
+    clearDestAppd () {
+      sessionStorage.removeItem('hasTargetAppd')
     },
     getSelectTargetAppd (item) {
       sessionStorage.setItem('hasTargetAppd', JSON.stringify(true))
