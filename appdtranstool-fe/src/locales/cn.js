@@ -68,7 +68,7 @@ const cn = {
     errorCode100014: '转换包失败。',
     errorCode100015: '删除文件失败。',
     errorCode100016: '替换文件失败。',
-    chooseOneleast: '镜像地址和镜像包请至少选择一个。',
+    chooseOneleast: '请确认，镜像地址和镜像包只能二选一。',
     sourceAppdNoEmpty: '源APPD标准不能为空',
     targetAppdNoEmpty: '目标APPD标准不能为空',
     appPackageNoEmpty: '请上传应用包',

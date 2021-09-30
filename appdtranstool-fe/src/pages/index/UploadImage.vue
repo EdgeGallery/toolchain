@@ -16,7 +16,10 @@
 
 <template>
   <div class="UploadImage">
-    <h3 class="image_title clear">
+    <h3
+      class="image_title clear"
+      :class="{'image_titleen':(this.language==='中文')}"
+    >
       <span class="span_lefts">{{ $t('appdRes.imageAddr') }}</span>
       <span class="span_right">
         <el-input
@@ -24,6 +27,7 @@
           v-model="appUploadImage.imageAddr"
           @input="inputValueChange"
           class="imagePath"
+          :class="{'imagePathen':(this.language==='中文')}"
         />
       </span>
     </h3>
@@ -36,8 +40,10 @@
     <uploader
       :options="options"
       class="uploader-example"
+      :class="{'image_titleen':(this.language==='中文')}"
       @file-complete="fileComplete"
       @file-added="onFileAdded"
+      @file-removed="deleteFile"
       accept=".zip"
     >
       <uploader-unsupport />
@@ -46,23 +52,21 @@
           class="span_lefts lefts2"
           :class="{'lefts2en':(this.language==='中文')}"
         >{{ $t('appdRes.imageUpload') }}</span>
-        <uploader-drop class="uploadBtn">
+        <uploader-drop
+          class="uploadBtn"
+          :class="{'uploads':(this.language==='中文')}"
+        >
           <uploader-btn
             id="uploadImg"
+            :class="{'uploadBtnen':(this.language==='中文')}"
           >
             {{ $t('appdRes.imageUpload') }}
           </uploader-btn>
-          <span
-            v-if="this.imageUpload"
-            class="imageUpload"
-          >
-            {{ $t('appdRes.imageUpload') }}
-          </span>
           <em class="el-icon-question" />
           <span class="imageUploadTipDesc">{{ $t('appdRes.imageUploadTip') }}</span>
         </uploader-drop>
       </div>
-      <uploader-list />
+      <uploader-list :class="{'uploader-listen':(this.language==='中文')}" />
     </uploader>
   </div>
 </template>
@@ -107,15 +111,11 @@ export default {
   },
   methods: {
     inputValueChange (val) {
-      let uploadImg = document.getElementById('uploadImg')
       if (val === '') {
-        uploadImg.style.opacity = 1
-        this.imageUpload = false
+        sessionStorage.removeItem('isImageUrl')
       } else {
-        uploadImg.style.opacity = 0
-        this.imageUpload = true
+        sessionStorage.setItem('isImageUrl', JSON.stringify(true))
       }
-      sessionStorage.setItem('isImageUrl', JSON.stringify(true))
     },
     fileComplete (fileType) {
       const file = arguments[0].file
@@ -140,6 +140,9 @@ export default {
         }
       })
     },
+    deleteFile (file, fileList) {
+      sessionStorage.removeItem('isImagePackage')
+    },
     onFileAdded (file) {
       let fileSize = file.file.size / 1024 / 1024 / 1024
       let typeName = file.file.name.substring(file.file.name.lastIndexOf('.') + 1)
@@ -163,6 +166,10 @@ export default {
   margin-top: 40px;
   width: 100%;
   padding: 25px 0 0 100px;
+  .uploader-file{
+  border: none !important;
+  margin-left: 130px !important;
+}
   span.span_lefts{
       font-size: 16px;
       font-family: HarmonyHeiTi;
@@ -175,6 +182,10 @@ export default {
     }
     .span_lefts.lefts2en{
        width: 168px;
+       margin-left: 0px;
+    }
+  .image_titleen{
+      margin-left: -40px;
     }
   .image_title{
     margin-top: 20px;
@@ -191,17 +202,23 @@ export default {
     .imagePath{
       width: 300px;
     }
+    .imagePathen{
+      margin-left: 10px;
+    }
   }
   .careful{
       font-size: 14px;
       font-family: HarmonyHeiTi;
       font-weight: 300;
       color: #380879;
-      margin-left: 130px;
+      margin-left: 130px !important;
       margin-bottom: 10px;
     }
    .careful.carefulen{
-     margin-left: 178px;
+     margin-left: 151px !important;
+   }
+   .uploads{
+     margin-left: 0;
    }
     .uploadBtn{
       margin-left: 65px;
@@ -224,11 +241,20 @@ export default {
           z-index: 10;
       }
     }
+    .uploadBtnen{
+      margin-top: 0 !important;
+      margin-left: 0px  !important;
+      width: 175px;
+      line-height: 30px;
+    }
   .uploader-example{
     width: 100%;
     .imageUploadTipDesc{
       font-size: 14px;
       color: #606266;
+    }
+    .uploader-listen{
+      margin-left: 54px;
     }
   }
 }

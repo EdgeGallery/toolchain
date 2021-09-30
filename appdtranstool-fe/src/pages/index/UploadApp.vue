@@ -97,6 +97,7 @@
           class="uploader-example"
           @file-complete="fileComplete"
           @file-added="onFileAdded"
+          @file-removed="deleteFile"
           :limit="1"
         >
           <uploader-unsupport />
@@ -121,6 +122,7 @@
           class="uploader-example"
           @file-complete="fileComplete"
           @file-added="onMdFileAdded"
+          @file-removed="deleteFile2"
           :limit="1"
         >
           <uploader-unsupport />
@@ -247,7 +249,6 @@ export default {
       }
     },
     fileComplete (fileType) {
-      console.log(fileType)
       const file = arguments[0].file
       this.getFileType(file.name)
       let url = this.mergerUrl + file.name + '&guid=' + arguments[0].uniqueIdentifier + '&fileType=' + this.uploadFileType
@@ -274,6 +275,9 @@ export default {
           })
         }
       })
+    },
+    deleteFile (file, fileList) {
+      sessionStorage.removeItem('hasAppPackage')
     },
     changSelect (value, selectType) {
       let allSelect = [this.appUploadInfo.sourceAppd, this.appUploadInfo.destAppd]
