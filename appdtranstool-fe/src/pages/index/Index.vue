@@ -15,88 +15,90 @@
   -->
 
 <template>
-  <div class="appdTrans">
-    <p
-      class="languageChange"
-      @click="changeLanguage"
-    >
-      {{ getLanguage }}
-    </p>
-    <div
-      class="appdTrans-content"
-      v-if="hackReset"
-    >
-      <div class="stepNavProcess">
-        <div class="appChangTop">
-          <div class="topLeft">
-            <img
-              src="../../assets/images/icon.png"
-              alt=""
-            >
-            <p v-show="active===0">
-              {{ $t('appdRes.uploadApp') }}
-            </p>
-            <p v-show="active===1">
-              {{ $t('appdRes.uploadAppImage') }}
-            </p>
-            <p v-show="active===2">
-              {{ $t('appdRes.vmDeployConfig') }}
-            </p>
+  <div class="appd">
+    <div class="appdTrans">
+      <p
+        class="languageChange"
+        @click="changeLanguage"
+      >
+        {{ getLanguage }}
+      </p>
+      <div
+        class="appdTrans-content"
+        v-if="hackReset"
+      >
+        <div class="stepNavProcess">
+          <div class="appChangTop">
+            <div class="topLeft">
+              <img
+                src="../../assets/images/icon.png"
+                alt=""
+              >
+              <p v-show="active===0">
+                {{ $t('appdRes.uploadApp') }}
+              </p>
+              <p v-show="active===1">
+                {{ $t('appdRes.uploadAppImage') }}
+              </p>
+              <p v-show="active===2">
+                {{ $t('appdRes.vmDeployConfig') }}
+              </p>
+            </div>
           </div>
-        </div>
-        <div
-          v-show="active===0"
-          class="elSteps"
-        >
-          <uploadApp
-            @getStepData="getStepData"
-            @isChinaUnicomDest="isChinaUnicomDest"
-            ref="uploadApp"
-            :language="getLanguage"
-          />
-        </div>
-        <div
-          v-show="active===1"
-          class="elSteps elStepsImage"
-        >
-          <uploadImage
-            @getStepData="getStepData"
-            ref="uploadImage"
-            :language="getLanguage"
-          />
-        </div>
-        <div
-          v-show="active===2"
-          class="elSteps elStepsDeloy"
-          id="deploy"
-        >
-          <vmDeployConfig
-            :language="getLanguage"
-            @getStepData="getStepData"
-            @child-event="parentEvent"
-            @child-event2="parentEvent2"
-            ref="vmDeployConfig"
-          />
-        </div>
-        <div class="elButton">
-          <el-button
-            id="prevBtn"
-            type="text"
-            @click="previous"
-            v-if="active>0"
-            :disabled="isDeploying"
+          <div
+            v-show="active===0"
+            class="elSteps"
           >
-            <strong>{{ $t('appdRes.preStep') }}</strong>
-          </el-button>
-          <el-button
-            id="nextBtn"
-            type="primary"
-            @click="next"
-            v-if="active<3"
+            <uploadApp
+              @getStepData="getStepData"
+              @isChinaUnicomDest="isChinaUnicomDest"
+              ref="uploadApp"
+              :language="getLanguage"
+            />
+          </div>
+          <div
+            v-show="active===1"
+            class="elSteps elStepsImage"
           >
-            <strong v-if="active!==2 && noChinaUnicomDest">{{ $t('appdRes.nextStep') }}</strong>
-            <strong v-else>{{ $t('appdRes.submit') }}</strong>
-          </el-button>
+            <uploadImage
+              @getStepData="getStepData"
+              ref="uploadImage"
+              :language="getLanguage"
+            />
+          </div>
+          <div
+            v-show="active===2"
+            class="elSteps elStepsDeloy"
+            id="deploy"
+          >
+            <vmDeployConfig
+              :language="getLanguage"
+              @getStepData="getStepData"
+              @child-event="parentEvent"
+              @child-event2="parentEvent2"
+              ref="vmDeployConfig"
+            />
+          </div>
+          <div class="elButton">
+            <el-button
+              id="prevBtn"
+              type="text"
+              @click="previous"
+              v-if="active>0"
+              :disabled="isDeploying"
+            >
+              <strong>{{ $t('appdRes.preStep') }}</strong>
+            </el-button>
+            <el-button
+              id="nextBtn"
+              type="primary"
+              @click="next"
+              v-if="active<3"
+            >
+              <strong v-if="active!==2 && noChinaUnicomDest">{{ $t('appdRes.nextStep') }}</strong>
+              <strong v-else>{{ $t('appdRes.submit') }}</strong>
+            </el-button>
+          </div>
         </div>
       </div>
     </div>
@@ -241,7 +243,14 @@ export default {
       if (this.active === 1) {
         let imageUrl = JSON.parse(sessionStorage.getItem('isImageUrl'))
         let isImagePackage = JSON.parse(sessionStorage.getItem('isImagePackage'))
-        if (!imageUrl && !isImagePackage) {
+        if (imageUrl && isImagePackage) {
+          this.$message({
+            duration: 2000,
+            message: this.$t('appdRes.chooseOneleast'),
+            type: 'warning'
+          })
+          return false
+        } else if (!imageUrl && !isImagePackage) {
           this.$message({
             duration: 2000,
             message: this.$t('appdRes.chooseOneleast'),
@@ -353,77 +362,82 @@ export default {
 </script>
 
 <style lang="less">
-.appdTrans{
-  width: 73.64%;
-  margin: 0px auto;
-  min-width: 1200px;
+.appd{
+  background-color: #f6f5f8 ;
   min-height: 632px;
-  background: #FFFFFF;
-  padding: 8px 3.1% 0px 3.1%;
-  p{
-    margin: 0;
-  }
-  .languageChange{
-    color: #000;
-    font-size: 16px;
-    line-height: 30px;
-    float:right ;
-  }
-  .languageChange:hover{
-    cursor: pointer;
-    color: #5E40C8;
-  }
-  .appdTrans-content{
-    width: 100%;
+  width: 100%;
+  .appdTrans{
+    width: 73.64%;
+    margin: 0px auto;
+    min-width: 1200px;
+    min-height: 632px;
     background: #FFFFFF;
-    padding-top: 1px;
-    .stepNavProcess{
-      margin-top: 30px;
-      .appChangTop{
-        height: 50px;
-        display: flex;
-        justify-content: space-between;
-        .topLeft{
-          width: 100%;
-          margin-top: 10px;
-          height: 40px;
+    padding: 8px 3.1% 0px 3.1%;
+    p{
+      margin: 0;
+    }
+    .languageChange{
+      color: #000;
+      font-size: 16px;
+      line-height: 30px;
+      float:right ;
+    }
+    .languageChange:hover{
+      cursor: pointer;
+      color: #5E40C8;
+    }
+    .appdTrans-content{
+      width: 100%;
+      background: #FFFFFF;
+      padding-top: 1px;
+      .stepNavProcess{
+        margin-top: 30px;
+        .appChangTop{
+          height: 50px;
           display: flex;
-          border-radius:12px;
-          background: linear-gradient(to right,#f8f6ff,#fff);
-          img{
-            width: 16px;
-            height: 16px;
-            margin: 12px 30px;
-          }
-          p{
-            font-size: 16px;
-            font-family: HarmonyHeiTi;
-            font-weight: 400;
-            color: #5E40C8;
-            line-height: 40px;
+          justify-content: space-between;
+          .topLeft{
+            width: 100%;
+            margin-top: 10px;
+            height: 40px;
+            display: flex;
+            border-radius:12px;
+            background: linear-gradient(to right,#f8f6ff,#fff);
+            img{
+              width: 16px;
+              height: 16px;
+              margin: 12px 30px;
+            }
+            p{
+              font-size: 16px;
+              font-family: HarmonyHeiTi;
+              font-weight: 400;
+              color: #5E40C8;
+              line-height: 40px;
+            }
           }
         }
       }
-    }
-    .elSteps {
-      padding: 0 1%;
-      width: 98%;
-      box-sizing: border-box;
-      background: #F1F2F6;
-      border-radius: 16px;
-      min-height: 380px;
-      box-shadow: inset 4px 4px 25px 5px rgba(36, 20, 119, 0.1);
-    }
-    .elStepsImage{
-      height: 200px;
-    }
-    .elStepsDeloy{
-      height: 361px;
-    }
-    .elButton {
-      width: 100%;
-      margin-top: 60px;
-      text-align: right;
+      .elSteps {
+        padding: 0 1%;
+        width: 98%;
+        box-sizing: border-box;
+        background: #F1F2F6;
+        border-radius: 16px;
+        min-height: 380px;
+        box-shadow: inset 4px 4px 25px 5px rgba(36, 20, 119, 0.1);
+      }
+      .elStepsImage{
+        height: 200px;
+      }
+      .elStepsDeloy{
+        height: 361px;
+      }
+      .elButton {
+        width: 100%;
+        margin-top: 60px;
+        text-align: right;
+      }
     }
   }
 }

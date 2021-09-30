@@ -68,7 +68,7 @@ const en = {
     errorCode100014: 'transform package failed.',
     errorCode100015: 'delete file failed.',
     errorCode100016: 'replace file failed.',
-    chooseOneleast: 'Please select at least one of the image address and the image package.',
+    chooseOneleast: 'Please confirm that only one of the image address and the image package can be selected.',
     sourceAppdNoEmpty: 'The source APPD standard cannot be empty',
     targetAppdNoEmpty: 'The target APPD standard cannot be empty',
     appPackageNoEmpty: 'Please upload the App package',
