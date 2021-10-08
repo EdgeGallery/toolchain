@@ -20,7 +20,7 @@ from hashlib import md5
 from threading import Thread
 
 
-def async(f):
+def imageasync(f):
     def wrapper(*args, **kwargs):
         thr = Thread(target=f, args=args, kwargs=kwargs)
         thr.start()
@@ -31,7 +31,7 @@ def async(f):
 class Utils(object):
 
     @classmethod
-    @async
+    @imageasync
     def get_md5_checksum(cls, image_file, check_record_file):
         m = md5()
         with open(image_file, 'rb') as f:
@@ -65,7 +65,7 @@ class Utils(object):
         return
 
     @classmethod
-    @async
+    @imageasync
     def check_cmd_exec(cls, image_file, check_record_file):
         cmd = 'qemu-img check {} --output json'.format(image_file)
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
@@ -96,7 +96,7 @@ class Utils(object):
         return image_info
 
     @classmethod
-    @async
+    @imageasync
     def compress_cmd_exec(cls, input_image, output_image, compress_record_file):
         cmd = 'virt-sparsify {} --compress --convert qcow2 {} --machine-readable'.format(input_image, output_image)
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
