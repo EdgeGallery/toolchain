@@ -24,29 +24,32 @@ class Server(object):
 
     def __init__(self, request_id=None):
         if not request_id:
-            raise Exception('Lacking request_id\n')
+            raise ValueError('Lacking request_id\n')
         self.request_id = str(request_id)
 
         if os.getenv('TMP_PATH'):
             self.tmp_path = os.getenv('TMP_PATH')
         else:
-            raise Exception('No TMP_PATH found in env\n')
+            raise ValueError('No TMP_PATH found in env\n')
 
         if os.getenv('IMAGE_PATH'):
             self.image_path = os.getenv('IMAGE_PATH')
         else:
-            raise Exception('No IMAGE_PATH found in env.\n')
+            raise ValueError('No IMAGE_PATH found in env.\n')
 
         self.check_record_file = 'check_info.json'
         self.compress_record_file = 'compress_status.log'
+        self.compress_status_complete = 'Compress Completed'
+        self.compress_status_in_progress = 'Compress In Progress'
+        self.compress_status_failed = 'Compress Failed'
 
     def check_vm_image(self, input_image=None):
         if not input_image:
-            raise Exception('No image is given\n')
+            raise ValueError('No image is given\n')
 
         image = Path(input_image)
         if not image.is_file():
-            raise Exception('Given image {} is not exist\n'.format(input_image))
+            raise ValueError('Given image {} is not exist\n'.format(input_image))
 
         try:
             check_record_path = os.path.join(self.tmp_path, self.request_id)
@@ -61,7 +64,7 @@ class Server(object):
 
             status = 0
             msg = 'Check In Progress'
-        except Exception as e:
+        except Exception:
             status = 1
             msg = 'Check Failed'
             check_info = {}
@@ -88,13 +91,13 @@ class Server(object):
 
     def compress_vm_image(self, input_image=None, output_image=None):
         if not input_image:
-            raise Exception('No image is given\n')
+            raise ValueError('No image is given\n')
         if not output_image:
-            raise Exception('No output image path is given\n')
+            raise ValueError('No output image path is given\n')
 
         image = Path(input_image)
         if not image.is_file():
-            raise Exception('Image {} is not exist\n'.format(input_image))
+            raise ValueError('Image {} is not exist\n'.format(input_image))
 
         try:
             compress_record_path = os.path.join(self.tmp_path, self.request_id)
@@ -106,10 +109,10 @@ class Server(object):
             Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
 
             status = 0
-            msg = 'Compress In Progress'
-        except Exception as e:
+            msg = '{}\n'.format(self.compress_status_in_progress)
+        except Exception:
             status = 1
-            msg = 'Compress Failed\n'
+            msg = '{}\n'.format(self.compress_status_failed)
             Utils.append_write_plain_file(compress_record_file, msg)
 
         return status, msg
@@ -121,10 +124,10 @@ class Server(object):
                                                 self.compress_record_file)
             with open(compress_record_file, 'r') as f:
                 for line in f:
-                    if 'Compress Completed' in line:
-                        return 0, 'Compress Completed', 1
-                    if 'Compress Failed' in line:
-                        return 2, 'Compress Failed', 0
-            return 1, 'Compress In Progress', 0.5
-        except Exception as e:
-            return 2, 'Compress Failed', 0
+                    if self.compress_status_complete in line:
+                        return 0, self.compress_status_complete, 1
+                    if self.compress_status_failed in line:
+                        return 2, self.compress_status_failed, 0
+            return 1, self.compress_status_in_progress, 0.5
+        except Exception:
+            return 2, self.compress_status_failed, 0

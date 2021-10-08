@@ -56,13 +56,11 @@ class Utils(object):
     def write_json_file(json_file, data):
         with open(json_file, 'w') as f:
             f.write(json.dumps(data))
-        return
 
     @staticmethod
     def append_write_plain_file(plain_file, data):
         with open(plain_file, 'a') as f:
             f.write(data)
-        return
 
     @classmethod
     @imageasync
@@ -115,5 +113,3 @@ class Utils(object):
             compress_output = 'Compress Failed\n'
 
         cls.append_write_plain_file(compress_record_file, compress_output)
-
-        return
