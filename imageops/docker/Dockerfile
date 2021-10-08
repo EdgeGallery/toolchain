@@ -3,9 +3,8 @@ FROM swr.cn-north-4.myhuaweicloud.com/eg-common/ubuntu:20.04
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
-    apt-get install -y qemu-utils libguestfs-tools
-
-RUN apt-get install -y python3-pip linux-image-generic
+    apt-get install -y libguestfs-tools python3-pip linux-image-virtual && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install flask flask_cors gunicorn
 
