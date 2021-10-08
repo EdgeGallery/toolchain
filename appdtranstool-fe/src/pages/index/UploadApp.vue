@@ -62,7 +62,10 @@
         </el-select>
         <p class="lookDoc">
           {{ '('+ $t('appdRes.appdTransDes') }}
-          <a :href="this.language ==='中文'?'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README_en.md':'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README.md'">
+          <a
+            :href="this.language ==='中文'?'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README_en.md':'https://gitee.com/edgegallery/toolchain/blob/master/appdtranstool/README.md'"
+            target="_blank"
+          >
             {{ $t('appdRes.appdDocuments') }}
           </a>
           )
@@ -122,7 +125,6 @@
           class="uploader-example"
           @file-complete="fileComplete"
           @file-added="onMdFileAdded"
-          @file-removed="deleteFile2"
           :limit="1"
         >
           <uploader-unsupport />
