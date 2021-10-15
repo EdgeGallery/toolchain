@@ -76,6 +76,12 @@ class Server(object):
     def get_check_status(self):
         check_record_file = os.path.join(self.tmp_path, self.request_id, self.check_record_file)
         check_info = Utils.read_json_file(check_record_file)
+
+        if check_info.get('imageInfo'):
+            image_info = check_info.get('imageInfo')
+            if image_info.get('filename'):
+                file_name = image_info.get('filename').split('/')[-1]
+                check_info['imageInfo']['filename'] = file_name
         if check_info.get('checksum'):
             if check_info.get('checkResult') == 0:
                 return 0, "Check Completed, the image is (now) consistent", check_info
