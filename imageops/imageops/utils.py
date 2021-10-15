@@ -20,57 +20,81 @@ from hashlib import md5
 from threading import Thread
 
 
-def imageasync(f):
+def imageasync(function):
+    """
+    image async decorate to let the check and compress commonds running in backend asynchronously
+    """
     def wrapper(*args, **kwargs):
-        thr = Thread(target=f, args=args, kwargs=kwargs)
+        """
+        wrapper
+        """
+        thr = Thread(target=function, args=args, kwargs=kwargs)
         thr.start()
 
     return wrapper
 
 
 class Utils(object):
+    """
+    Utils Class
+    """
 
     @classmethod
     @imageasync
     def get_md5_checksum(cls, image_file, check_record_file):
-        m = md5()
-        with open(image_file, 'rb') as f:
+        """
+        Get the md5 checksum of the input vm image
+        """
+        checksum = md5()
+        with open(image_file, 'rb') as open_file:
             while True:
-                data = f.read(4096)
+                data = open_file.read(4096)
                 if not data:
                     break
-                m.update(data)
+                checksum.update(data)
 
         check_record = cls.read_json_file(check_record_file)
-        check_record["checksum"] = m.hexdigest()
+        check_record["checksum"] = checksum.hexdigest()
         cls.write_json_file(check_record_file, check_record)
 
-        return m.hexdigest()
+        return checksum.hexdigest()
 
     @staticmethod
     def read_json_file(json_file):
-        with open(json_file, 'rb') as f:
-            return json.load(f)
+        """
+        Load the json date from file
+        """
+        with open(json_file, 'rb') as open_file:
+            return json.load(open_file)
 
     @staticmethod
     def write_json_file(json_file, data):
-        with open(json_file, 'w') as f:
-            f.write(json.dumps(data))
+        """
+        Write the json date to the given file
+        """
+        with open(json_file, 'w') as open_file:
+            open_file.write(json.dumps(data))
 
     @staticmethod
     def append_write_plain_file(plain_file, data):
-        with open(plain_file, 'a') as f:
-            f.write(data)
+        """
+        Write the plain text data to the end of given file
+        """
+        with open(plain_file, 'a') as open_file:
+            open_file.write(data)
 
     @classmethod
     @imageasync
     def check_cmd_exec(cls, image_file, check_record_file):
+        """
+        Exec the qemu-img check command to get the info of the given vm image
+        """
         cmd = 'qemu-img check {} --output json'.format(image_file)
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
 
         image_info = {}
-        for line in iter(p.stdout.readline, b''):
+        for line in iter(process.stdout.readline, b''):
             data = line.strip().decode('unicode-escape')
             if data in ['{', '}']:
                 continue
@@ -79,8 +103,8 @@ class Utils(object):
                 continue
             image_info[data[0].strip('"')] = data[1].strip(',').strip().strip('"')
 
-        return_code = p.wait()
-        p.stdout.close()
+        return_code = process.wait()
+        process.stdout.close()
 
         check_data = cls.read_json_file(check_record_file)
         if return_code != 0:
@@ -96,17 +120,22 @@ class Utils(object):
     @classmethod
     @imageasync
     def compress_cmd_exec(cls, input_image, output_image, compress_record_file):
-        cmd = 'virt-sparsify {} --compress --convert qcow2 {} --machine-readable'.format(input_image, output_image)
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
+        """
+        Exec virt-sparsity commad to compress and convert the given vm image to qcow2
+        """
+        cmd = 'virt-sparsify {} --compress --convert qcow2 {} --machine-readable'.format(
+            input_image,
+            output_image)
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
 
-        for line in iter(p.stdout.readline, b''):
+        for line in iter(process.stdout.readline, b''):
             data = line.decode('unicode-escape')
-            with open(compress_record_file, 'a') as f:
-                f.write(data)
+            with open(compress_record_file, 'a') as open_file:
+                open_file.write(data)
 
-        return_code = p.wait()
-        p.stdout.close()
+        return_code = process.wait()
+        process.stdout.close()
         if return_code == 0:
             compress_output = 'Compress Completed\n'
         else:

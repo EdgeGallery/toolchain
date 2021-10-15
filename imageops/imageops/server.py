@@ -14,15 +14,21 @@
 # limitations under the License.
 """
 
-import json
 import os
 from pathlib import Path
 
 from imageops.utils import Utils
 
 class Server(object):
+    """
+    Backend server for imageops API
+    The request_id is the only input param which used to identify this request
+    """
 
     def __init__(self, request_id=None):
+        """
+        Init Server class
+        """
         if not request_id:
             raise ValueError('Lacking request_id\n')
         self.request_id = str(request_id)
@@ -39,11 +45,20 @@ class Server(object):
 
         self.check_record_file = 'check_info.json'
         self.compress_record_file = 'compress_status.log'
-        self.compress_status_complete = 'Compress Completed'
-        self.compress_status_in_progress = 'Compress In Progress'
-        self.compress_status_failed = 'Compress Failed'
+
+        self.check_rc = {0: 'Check Completed, the image is (now) consistent',
+                         1: 'Check completed, image is corrupted',
+                         2: 'Check completed, image has leaked clusters, but is not corrupted',
+                         3: 'Check failed',
+                         4: 'Check in Progress'}
+        self.compress_rc = {0: 'Compress Completed',
+                            1: 'Compress In Progress',
+                            2: 'Compress Failed'}
 
     def check_vm_image(self, input_image=None):
+        """
+        Check the input vm image to get it's checksum and basic info such as type and size
+        """
         if not input_image:
             raise ValueError('No image is given\n')
 
@@ -74,6 +89,9 @@ class Server(object):
         return status, msg
 
     def get_check_status(self):
+        """
+        Get the status of one check with the request ID
+        """
         check_record_file = os.path.join(self.tmp_path, self.request_id, self.check_record_file)
         check_info = Utils.read_json_file(check_record_file)
 
@@ -84,18 +102,22 @@ class Server(object):
                 check_info['imageInfo']['filename'] = file_name
         if check_info.get('checksum'):
             if check_info.get('checkResult') == 0:
-                return 0, "Check Completed, the image is (now) consistent", check_info
+                return 0, self.check_rc[0], check_info
             if check_info.get('checkResult') == 2:
-                return 1, "Check completed, image is corrupted", check_info
+                return 1, self.check_rc[1], check_info
             if check_info.get('checkResult') == 3:
-                return 2, 'Check completed, image has leaked clusters, but is not corrupted', check_info
-            return 3, 'Check failed', check_info
+                return 2, self.check_rc[2], check_info
+            return 3, self.check_rc[3], check_info
 
         if check_info.get('checkResult') == 99:
-            return 3, 'Check failed', check_info
-        return 4, "Check in Progress", check_info
+            return 3, self.check_rc[3], check_info
+        return 4, self.check_rc[4], check_info
 
     def compress_vm_image(self, input_image=None, output_image=None):
+        """
+        Compress the input vm image to get a slim one which is sparsify
+        Also can transfer raw image to qcow2 one
+        """
         if not input_image:
             raise ValueError('No image is given\n')
         if not output_image:
@@ -115,25 +137,28 @@ class Server(object):
             Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
 
             status = 0
-            msg = '{}\n'.format(self.compress_status_in_progress)
+            msg = '{}\n'.format('Compress In Progress')
         except Exception:
             status = 1
-            msg = '{}\n'.format(self.compress_status_failed)
+            msg = '{}\n'.format('Compress Failed')
             Utils.append_write_plain_file(compress_record_file, msg)
 
         return status, msg
 
     def get_compress_status(self):
+        """
+        Get the status of one compress with the request ID
+        """
         try:
             compress_record_file = os.path.join(self.tmp_path,
                                                 self.request_id,
                                                 self.compress_record_file)
-            with open(compress_record_file, 'r') as f:
-                for line in f:
-                    if self.compress_status_complete in line:
-                        return 0, self.compress_status_complete, 1
-                    if self.compress_status_failed in line:
-                        return 2, self.compress_status_failed, 0
-            return 1, self.compress_status_in_progress, 0.5
+            with open(compress_record_file, 'r') as compress_file:
+                for line in compress_file:
+                    if self.compress_rc[0] in line:
+                        return 0, self.compress_rc[0], 1
+                    if self.compress_rc[2] in line:
+                        return 2, self.compress_rc[2], 0
+            return 1, self.compress_rc[1], 0.5
         except Exception:
-            return 2, self.compress_status_failed, 0
+            return 2, self.compress_rc[2], 0

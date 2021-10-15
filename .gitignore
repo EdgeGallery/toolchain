@@ -25,3 +25,5 @@ hs_err_pid*
 
 # python generated files
 __pycache__/
+.pylintrc
+pylint-report.txt
