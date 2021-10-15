@@ -20,7 +20,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
     apt-get install -y libguestfs-tools python3-pip linux-image-virtual && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    chmod 777 /boot/vmlinuz-5.4.0-88-generic
 
 RUN pip install flask flask_cors gunicorn
 
@@ -37,6 +38,17 @@ RUN ln -s $IMAGEOPS_HOME /usr/local/lib/python3.8/dist-packages
 ENV FLASK_APP ${API_DIR}/routes.py
 ENV TMP_PATH /tmp
 ENV IMAGE_PATH $HOME/vmImage
+
+ENV UID=166
+ENV GID=166
+ENV USER_NAME=eguser
+ENV GROUP_NAME=eggroup
+
+RUN groupadd -r -g $GID $GROUP_NAME &&\
+    useradd -r -u $UID -g $GID -d $HOME -s /sbin/nologin -c "Docker image user" $USER_NAME &&\
+    chown -hR $USER_NAME:$GROUP_NAME $HOME
+
+USER $USER_NAME
 
 # This port is for flask API in container
 EXPOSE 5000
