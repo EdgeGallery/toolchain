@@ -123,14 +123,18 @@ class Utils(object):
         """
         Exec virt-sparsity commad to compress and convert the given vm image to qcow2
         """
-        cmd = 'virt-sparsify {} --compress --convert qcow2 {} --machine-readable'.format(
-            input_image,
-            output_image)
+        cmd = 'virt-sparsify {} --compress --convert qcow2 {} \
+               --machine-readable --check-tmpdir=fail'.format(
+                   input_image,
+                   output_image)
+        check_tmpdir = True
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
         for line in iter(process.stdout.readline, b''):
             data = line.decode('unicode-escape')
+            if 'Exiting because --check-tmpdir=fail was set' in data:
+                check_tmpdir = False
             with open(compress_record_file, 'a') as open_file:
                 open_file.write(data)
 
@@ -138,6 +142,8 @@ class Utils(object):
         process.stdout.close()
         if return_code == 0:
             compress_output = 'Compress Completed\n'
+        elif not check_tmpdir:
+            compress_output = 'Compress Exiting because of No enouth space left\n'
         else:
             compress_output = 'Compress Failed\n'
 

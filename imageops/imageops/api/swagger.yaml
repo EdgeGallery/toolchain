@@ -74,9 +74,8 @@ paths:
         in: "path"
         description: "requestId got from the check POST API"
         required: true
-        schema:
-          type: "integer"
-          format: "uuid"
+        type: "integer"
+        format: "uuid"
       responses:
         200:
           description: "successful operation"
@@ -129,9 +128,8 @@ paths:
         in: "path"
         description: "requestId got from the compress POST API"
         required: true
-        schema:
-          type: "integer"
-          format: "uuid"
+        type: "integer"
+        format: "uuid"
       responses:
         200:
           description: "successful operation"
@@ -215,7 +213,7 @@ definitions:
     properties:
       status:
         type: "integer"
-        enum: [0, 1, 2]
+        enum: [0, 1, 2, 3]
         example: 0
       msg:
         type: "string"
@@ -223,6 +221,7 @@ definitions:
         - "Compress Completed"
         - "Compress In Progress"
         - "Compress Failed"
+        - "Compress Exiting because of No enouth space left"
         example: "Compress Completed"
       rate:
         type: "number"
@@ -244,10 +243,10 @@ definitions:
     type: "object"
     properties:
       image-end-offset:
-        type: "integer"
+        type: "string"
         example: 564330496
       check-errors:
-        type: "integer"
+        type: "string"
         example: 0
       format:
         type: "string"

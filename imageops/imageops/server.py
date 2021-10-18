@@ -53,7 +53,8 @@ class Server(object):
                          4: 'Check in Progress'}
         self.compress_rc = {0: 'Compress Completed',
                             1: 'Compress In Progress',
-                            2: 'Compress Failed'}
+                            2: 'Compress Failed',
+                            3: 'Compress Exiting because of No enouth space left'}
 
     def check_vm_image(self, input_image=None):
         """
@@ -157,6 +158,8 @@ class Server(object):
                 for line in compress_file:
                     if self.compress_rc[0] in line:
                         return 0, self.compress_rc[0], 1
+                    if self.compress_rc[3] in line:
+                        return 3, self.compress_rc[3], 0
                     if self.compress_rc[2] in line:
                         return 2, self.compress_rc[2], 0
             return 1, self.compress_rc[1], 0.5
