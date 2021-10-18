@@ -15,6 +15,7 @@
 """
 
 import json
+import os
 import subprocess
 from hashlib import md5
 from threading import Thread
@@ -89,6 +90,27 @@ class Utils(object):
         """
         Exec the qemu-img check command to get the info of the given vm image
         """
+        image_info_file = os.path.join(os.path.dirname(check_record_file), 'image_info.json')
+        cmd = 'qemu-img info {} --output json > {}'.format(image_file, image_info_file)
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
+        return_code = process.wait()
+        process.stdout.close()
+
+        check_data = cls.read_json_file(check_record_file)
+        if return_code != 0:
+            check_data['imageInfo'] = {}
+            check_data['checkResult'] = 99
+            cls.write_json_file(check_record_file, check_data)
+            return check_data['imageInfo']
+
+        image_info = cls.read_json_file(image_info_file)
+        if image_info.get('format') and image_info['format'] != 'qcow2':
+            check_data['imageInfo'] = {'format': image_info['format']}
+            check_data['checkResult'] = 5
+            cls.write_json_file(check_record_file, check_data)
+            return check_data['imageInfo']
+
         cmd = 'qemu-img check {} --output json'.format(image_file)
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)

@@ -50,7 +50,8 @@ class Server(object):
                          1: 'Check completed, image is corrupted',
                          2: 'Check completed, image has leaked clusters, but is not corrupted',
                          3: 'Check failed',
-                         4: 'Check in Progress'}
+                         4: 'Check in Progress',
+                         5: 'Check Exiting because of not support this type of image'}
         self.compress_rc = {0: 'Compress Completed',
                             1: 'Compress In Progress',
                             2: 'Compress Failed',
@@ -108,6 +109,8 @@ class Server(object):
                 return 1, self.check_rc[1], check_info
             if check_info.get('checkResult') == 3:
                 return 2, self.check_rc[2], check_info
+            if check_info.get('checkResult') == 5:
+                return 5, self.check_rc[5], check_info
             return 3, self.check_rc[3], check_info
 
         if check_info.get('checkResult') == 99:
