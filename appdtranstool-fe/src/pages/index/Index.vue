@@ -363,16 +363,17 @@ export default {
 
 <style lang="less">
 .appd{
-  background-color: #f6f5f8 ;
+  background-color: #f0f2f5 ;
   min-height: 632px;
   width: 100%;
   .appdTrans{
     width: 73.64%;
     margin: 0px auto;
     min-width: 1200px;
-    min-height: 632px;
+    min-height: 732px;
     background: #FFFFFF;
     padding: 8px 3.1% 0px 3.1%;
+    border-radius: 20px;
     p{
       margin: 0;
     }
