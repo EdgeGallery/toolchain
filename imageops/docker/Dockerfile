@@ -21,7 +21,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
     apt-get install -y libguestfs-tools python3-pip linux-image-virtual && \
     rm -rf /var/lib/apt/lists/* && \
-    chmod 777 /boot/vmlinuz-5.4.0-88-generic
+    chmod 777 /boot/vmlinuz-*
 
 RUN pip install flask flask_cors gunicorn
 
