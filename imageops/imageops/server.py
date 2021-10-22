@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 
 from imageops.utils import Utils
+from imageops.logger import Logger
 
 class Server(object):
     """
@@ -56,17 +57,23 @@ class Server(object):
                             1: 'Compress In Progress',
                             2: 'Compress Failed',
                             3: 'Compress Exiting because of No enouth space left'}
+        self.logger = Logger(__name__).get_logger()
 
     def check_vm_image(self, input_image=None):
         """
         Check the input vm image to get it's checksum and basic info such as type and size
         """
+        self.logger.info("Start to check VM image...")
         if not input_image:
-            raise ValueError('No image is given\n')
+            msg = 'No image is given to do the check.'
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         image = Path(input_image)
         if not image.is_file():
-            raise ValueError('Given image {} is not exist\n'.format(input_image))
+            msg = 'Given image {} is not exist.'.format(input_image)
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         try:
             check_record_path = os.path.join(self.tmp_path, self.request_id)
@@ -81,12 +88,13 @@ class Server(object):
 
             status = 0
             msg = 'Check In Progress'
-        except Exception:
+        except Exception as exception:
             status = 1
             msg = 'Check Failed'
             check_info = {}
             check_info['checkResult'] = 99
             Utils.write_json_file(check_record_file, check_info)
+            self.logger.error(exception)
 
         return status, msg
 

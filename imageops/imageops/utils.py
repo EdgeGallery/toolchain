@@ -20,6 +20,8 @@ import subprocess
 from hashlib import md5
 from threading import Thread
 
+from imageops.logger import Logger
+
 
 def imageasync(function):
     """
@@ -39,6 +41,8 @@ class Utils(object):
     """
     Utils Class
     """
+
+    logger = Logger(__name__).get_logger()
 
     @classmethod
     @imageasync
@@ -91,9 +95,11 @@ class Utils(object):
         Exec the qemu-img check command to get the info of the given vm image
         """
         image_info_file = os.path.join(os.path.dirname(check_record_file), 'image_info.json')
-        cmd = 'qemu-img info {} --output json > {}'.format(image_file, image_info_file)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        cmd = ['qemu-img', 'info', image_file, '--output', 'json', image_info_file]
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
+        for line in iter(process.stdout.readline, b''):
+            cls.logger.debug(line.strip().decode('unicode-escape'))
         return_code = process.wait()
         process.stdout.close()
 
@@ -111,8 +117,8 @@ class Utils(object):
             cls.write_json_file(check_record_file, check_data)
             return check_data['imageInfo']
 
-        cmd = 'qemu-img check {} --output json'.format(image_file)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        cmd = ['qemu-img', 'check', image_file, '--output', 'json']
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
         image_info = {}
@@ -145,12 +151,9 @@ class Utils(object):
         """
         Exec virt-sparsity commad to compress and convert the given vm image to qcow2
         """
-        cmd = 'virt-sparsify {} --compress --convert qcow2 {} \
-               --machine-readable --check-tmpdir=fail'.format(
-                   input_image,
-                   output_image)
+        cmd = ['virt-sparsify', input_image, '--compress', '--convert', 'qcow2', output_image]
         check_tmpdir = True
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
         for line in iter(process.stdout.readline, b''):
