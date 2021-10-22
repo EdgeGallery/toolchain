@@ -23,13 +23,14 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     chmod 777 /boot/vmlinuz-*
 
-RUN pip install flask flask_cors gunicorn
-
 ENV HOME=/usr/app
 ENV IMAGEOPS_HOME=$HOME/imageops
 ENV API_DIR=$IMAGEOPS_HOME/api
 
 WORKDIR $HOME
+
+COPY requirements.txt $HOME
+RUN pip install -r $HOME/requirements.txt -i https://mirrors.aliyun.com/pypi/simple
 
 COPY imageops $IMAGEOPS_HOME
 
