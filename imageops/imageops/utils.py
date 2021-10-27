@@ -15,10 +15,11 @@
 """
 
 import json
-import os
 import subprocess
 from hashlib import md5
 from threading import Thread
+
+from imageops.logger import Logger
 
 
 def imageasync(function):
@@ -39,6 +40,8 @@ class Utils(object):
     """
     Utils Class
     """
+
+    logger = Logger(__name__).get_logger()
 
     @classmethod
     @imageasync
@@ -90,34 +93,47 @@ class Utils(object):
         """
         Exec the qemu-img check command to get the info of the given vm image
         """
-        image_info_file = os.path.join(os.path.dirname(check_record_file), 'image_info.json')
-        cmd = 'qemu-img info {} --output json > {}'.format(image_file, image_info_file)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        cmd = ['qemu-img', 'info', image_file, '--output', 'json']
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
+        cls.logger.debug(cmd)
+        image_info = {}
+        for line in iter(process.stdout.readline, b''):
+            data = line.strip().decode('unicode-escape')
+            cls.logger.debug(data)
+            if data in ['{', '}']:
+                continue
+            data = str(data).split(':')
+            if len(data) != 2:
+                continue
+            image_info[data[0].strip('"')] = data[1].strip(',').strip().strip('"')
+
         return_code = process.wait()
         process.stdout.close()
 
         check_data = cls.read_json_file(check_record_file)
+        cls.logger.debug(check_data)
         if return_code != 0:
             check_data['imageInfo'] = {}
             check_data['checkResult'] = 99
             cls.write_json_file(check_record_file, check_data)
             return check_data['imageInfo']
 
-        image_info = cls.read_json_file(image_info_file)
         if image_info.get('format') and image_info['format'] != 'qcow2':
             check_data['imageInfo'] = {'format': image_info['format']}
             check_data['checkResult'] = 5
             cls.write_json_file(check_record_file, check_data)
             return check_data['imageInfo']
 
-        cmd = 'qemu-img check {} --output json'.format(image_file)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        cmd = ['qemu-img', 'check', image_file, '--output', 'json']
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
+        cls.logger.debug(cmd)
         image_info = {}
         for line in iter(process.stdout.readline, b''):
             data = line.strip().decode('unicode-escape')
+            cls.logger.debug(data)
             if data in ['{', '}']:
                 continue
             data = str(data).split(':')
@@ -145,16 +161,15 @@ class Utils(object):
         """
         Exec virt-sparsity commad to compress and convert the given vm image to qcow2
         """
-        cmd = 'virt-sparsify {} --compress --convert qcow2 {} \
-               --machine-readable --check-tmpdir=fail'.format(
-                   input_image,
-                   output_image)
+        cmd = ['virt-sparsify', input_image, '--compress', '--convert', 'qcow2', output_image]
         check_tmpdir = True
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
+        cls.logger.debug(cmd)
         for line in iter(process.stdout.readline, b''):
             data = line.decode('unicode-escape')
+            cls.logger.debug(data)
             if 'Exiting because --check-tmpdir=fail was set' in data:
                 check_tmpdir = False
             with open(compress_record_file, 'a') as open_file:
@@ -169,4 +184,5 @@ class Utils(object):
         else:
             compress_output = 'Compress Failed\n'
 
+        cls.logger.info(compress_output)
         cls.append_write_plain_file(compress_record_file, compress_output)

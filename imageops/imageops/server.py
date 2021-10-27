@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 
 from imageops.utils import Utils
+from imageops.logger import Logger
 
 class Server(object):
     """
@@ -25,23 +26,29 @@ class Server(object):
     The request_id is the only input param which used to identify this request
     """
 
+    logger = Logger(__name__).get_logger()
+
     def __init__(self, request_id=None):
         """
         Init Server class
         """
         if not request_id:
-            raise ValueError('Lacking request_id\n')
+            msg = 'Lacking request_id.'
+            self.logger.error(msg)
+            raise ValueError(msg)
         self.request_id = str(request_id)
 
-        if os.getenv('TMP_PATH'):
-            self.tmp_path = os.getenv('TMP_PATH')
-        else:
-            raise ValueError('No TMP_PATH found in env\n')
+        if not os.getenv('TMP_PATH'):
+            msg = 'No TMP_PATH found in env.'
+            self.logger.error(msg)
+            raise ValueError(msg)
+        self.tmp_path = os.getenv('TMP_PATH')
 
-        if os.getenv('IMAGE_PATH'):
-            self.image_path = os.getenv('IMAGE_PATH')
-        else:
-            raise ValueError('No IMAGE_PATH found in env.\n')
+        if not os.getenv('IMAGE_PATH'):
+            msg = 'No IMAGE_PATH found in env.'
+            self.logger.error(msg)
+            raise ValueError(msg)
+        self.image_path = os.getenv('IMAGE_PATH')
 
         self.check_record_file = 'check_info.json'
         self.compress_record_file = 'compress_status.log'
@@ -61,12 +68,17 @@ class Server(object):
         """
         Check the input vm image to get it's checksum and basic info such as type and size
         """
+        self.logger.info('Start to check VM image...')
         if not input_image:
-            raise ValueError('No image is given\n')
+            msg = 'No image is given to do the check.'
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         image = Path(input_image)
         if not image.is_file():
-            raise ValueError('Given image {} is not exist\n'.format(input_image))
+            msg = 'Given image {} is not exist.'.format(input_image)
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         try:
             check_record_path = os.path.join(self.tmp_path, self.request_id)
@@ -81,21 +93,26 @@ class Server(object):
 
             status = 0
             msg = 'Check In Progress'
-        except Exception:
+        except Exception as exception:
             status = 1
             msg = 'Check Failed'
             check_info = {}
             check_info['checkResult'] = 99
             Utils.write_json_file(check_record_file, check_info)
+            self.logger.error(exception)
 
+        self.logger.info('Check VM with status {} and msg {}'.format(status, msg))
         return status, msg
 
     def get_check_status(self):
         """
         Get the status of one check with the request ID
         """
+        self.logger.info('Start to get check status...')
         check_record_file = os.path.join(self.tmp_path, self.request_id, self.check_record_file)
         check_info = Utils.read_json_file(check_record_file)
+
+        self.logger.debug(check_info)
 
         if check_info.get('imageInfo'):
             image_info = check_info.get('imageInfo')
@@ -122,37 +139,46 @@ class Server(object):
         Compress the input vm image to get a slim one which is sparsify
         Also can transfer raw image to qcow2 one
         """
+        self.logger.info('Start to compress vm image...')
         if not input_image:
-            raise ValueError('No image is given\n')
+            msg = 'No image is given.'
+            self.logger.error(msg)
+            raise ValueError(msg)
         if not output_image:
-            raise ValueError('No output image path is given\n')
+            msg = 'No output image path is given.'
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         image = Path(input_image)
         if not image.is_file():
-            raise ValueError('Image {} is not exist\n'.format(input_image))
+            msg = 'Image {} is not exist.'.format(input_image)
+            self.logger.error(msg)
+            raise ValueError(msg)
 
         try:
             compress_record_path = os.path.join(self.tmp_path, self.request_id)
             os.makedirs(compress_record_path)
             compress_record_file = os.path.join(compress_record_path, self.compress_record_file)
 
-            data = 'Start to compress...\n'
-            Utils.append_write_plain_file(compress_record_file, data)
+            self.logger.info('Start to compress ...')
             Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
 
             status = 0
             msg = '{}\n'.format('Compress In Progress')
-        except Exception:
+        except Exception as exception:
+            self.logger.error(exception)
             status = 1
             msg = '{}\n'.format('Compress Failed')
             Utils.append_write_plain_file(compress_record_file, msg)
 
+        self.logger.info('Compress VM with status {} and msg {}'.format(status, msg))
         return status, msg
 
     def get_compress_status(self):
         """
         Get the status of one compress with the request ID
         """
+        self.logger.info('Start to get compress status...')
         try:
             compress_record_file = os.path.join(self.tmp_path,
                                                 self.request_id,
@@ -166,5 +192,6 @@ class Server(object):
                     if self.compress_rc[2] in line:
                         return 2, self.compress_rc[2], 0
             return 1, self.compress_rc[1], 0.5
-        except Exception:
+        except Exception as exception:
+            self.logger.error(exception)
             return 2, self.compress_rc[2], 0
