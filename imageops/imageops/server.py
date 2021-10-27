@@ -26,12 +26,12 @@ class Server(object):
     The request_id is the only input param which used to identify this request
     """
 
+    logger = Logger(__name__).get_logger()
+
     def __init__(self, request_id=None):
         """
         Init Server class
         """
-        self.logger = Logger(__name__).get_logger()
-
         if not request_id:
             msg = 'Lacking request_id.'
             self.logger.error(msg)

@@ -18,7 +18,14 @@ import logging
 import os
 
 class Logger(object):
+    """
+    Logger class for write info into log file
+    """
+
     def __init__(self, logger_name):
+        """
+        Init Logger class
+        """
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler(os.path.join(os.getenv('HOME'), 'imageops.log'))
@@ -28,4 +35,7 @@ class Logger(object):
         self.logger.addHandler(handler)
 
     def get_logger(self):
+        """
+        get logger
+        """
         return self.logger

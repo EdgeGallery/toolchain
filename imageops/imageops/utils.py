@@ -15,7 +15,6 @@
 """
 
 import json
-import os
 import subprocess
 from hashlib import md5
 from threading import Thread
