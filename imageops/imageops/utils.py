@@ -113,6 +113,7 @@ class Utils(object):
         process.stdout.close()
 
         check_data = cls.read_json_file(check_record_file)
+        cls.logger.debug(check_data)
         if return_code != 0:
             check_data['imageInfo'] = {}
             check_data['checkResult'] = 99
@@ -129,6 +130,7 @@ class Utils(object):
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
+        cls.logger.debug(cmd)
         image_info = {}
         for line in iter(process.stdout.readline, b''):
             data = line.strip().decode('unicode-escape')
@@ -165,8 +167,10 @@ class Utils(object):
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
 
+        cls.logger.debug(cmd)
         for line in iter(process.stdout.readline, b''):
             data = line.decode('unicode-escape')
+            cls.logger.debug(data)
             if 'Exiting because --check-tmpdir=fail was set' in data:
                 check_tmpdir = False
             with open(compress_record_file, 'a') as open_file:
@@ -181,4 +185,5 @@ class Utils(object):
         else:
             compress_output = 'Compress Failed\n'
 
+        cls.logger.info(compress_output)
         cls.append_write_plain_file(compress_record_file, compress_output)
