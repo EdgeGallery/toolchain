@@ -20,6 +20,7 @@ import os
 class Logger(object):
     def __init__(self, logger_name):
         self.logger = logging.getLogger(logger_name)
+        self.logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler(os.path.join(os.getenv('HOME'), 'imageops.log'))
         handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

@@ -94,12 +94,21 @@ class Utils(object):
         """
         Exec the qemu-img check command to get the info of the given vm image
         """
-        image_info_file = os.path.join(os.path.dirname(check_record_file), 'image_info.json')
-        cmd = ['qemu-img', 'info', image_file, '--output', 'json', image_info_file]
+        cmd = ['qemu-img', 'info', image_file, '--output', 'json']
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
+        cls.logger.debug(cmd)
+        image_info = {}
         for line in iter(process.stdout.readline, b''):
-            cls.logger.debug(line.strip().decode('unicode-escape'))
+            data = line.strip().decode('unicode-escape')
+            cls.logger.debug(data)
+            if data in ['{', '}']:
+                continue
+            data = str(data).split(':')
+            if len(data) != 2:
+                continue
+            image_info[data[0].strip('"')] = data[1].strip(',').strip().strip('"')
+
         return_code = process.wait()
         process.stdout.close()
 
@@ -110,7 +119,6 @@ class Utils(object):
             cls.write_json_file(check_record_file, check_data)
             return check_data['imageInfo']
 
-        image_info = cls.read_json_file(image_info_file)
         if image_info.get('format') and image_info['format'] != 'qcow2':
             check_data['imageInfo'] = {'format': image_info['format']}
             check_data['checkResult'] = 5
@@ -124,6 +132,7 @@ class Utils(object):
         image_info = {}
         for line in iter(process.stdout.readline, b''):
             data = line.strip().decode('unicode-escape')
+            cls.logger.debug(data)
             if data in ['{', '}']:
                 continue
             data = str(data).split(':')
