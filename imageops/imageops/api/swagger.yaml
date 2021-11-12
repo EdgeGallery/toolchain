@@ -237,7 +237,7 @@ definitions:
         example: "782fa5257615748e673eefe0143188e4"
       checkResult:
         type: "integer"
-        enum: [0, 1, 2, 3, 5, 63]
+        enum: [0, 1, 2, 3, 4, 63]
       imageInfo:
         $ref: "#/definitions/ImageInfo"
   ImageInfo:

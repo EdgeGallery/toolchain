@@ -128,8 +128,14 @@ class Server(object):
                 return 1, self.check_rc[1], check_info
             if check_info.get('checkResult') == 3:
                 return 2, self.check_rc[2], check_info
-            if check_info.get('checkResult') == 5:
+            if check_info.get('checkResult') == 4:
+                return 4, self.check_rc[4], check_info
+            if check_info.get('checkResult') == 63:
                 return 5, self.check_rc[5], check_info
+            if check_info.get('checkResult') == 99:
+                return 3, self.check_rc[3], check_info
+            if check_info.get('checkResult') == 100:
+                return 6, self.check_rc[6], check_info
             return 3, self.check_rc[3], check_info
 
         if check_info.get('checkResult') == 99:
