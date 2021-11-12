@@ -15,12 +15,16 @@
 """
 
 import json
+import os
 import subprocess
 from hashlib import md5
 from threading import Thread
+import timeout_decorator
 
 from imageops.logger import Logger
 
+
+TIMEOUT = float(os.getenv('IMAGEOPS_TIMEOUT'))
 
 def imageasync(function):
     """
@@ -44,8 +48,8 @@ class Utils(object):
     logger = Logger(__name__).get_logger()
 
     @classmethod
-    @imageasync
-    def get_md5_checksum(cls, image_file, check_record_file):
+    @timeout_decorator.timeout(TIMEOUT, timeout_exception=StopIteration, use_signals=False)
+    def _get_md5_checksum(cls, image_file):
         """
         Get the md5 checksum of the input vm image
         """
@@ -56,12 +60,32 @@ class Utils(object):
                 if not data:
                     break
                 checksum.update(data)
-
-        check_record = cls.read_json_file(check_record_file)
-        check_record["checksum"] = checksum.hexdigest()
-        cls.write_json_file(check_record_file, check_record)
-
         return checksum.hexdigest()
+
+    @classmethod
+    @imageasync
+    def get_md5_checksum(cls, image_file, check_record_file):
+        try:
+            checksum = cls._get_md5_checksum(image_file)
+            check_result = 0
+            cls.logger.info('Successfully got checksum value: {}'.format(checksum))
+        except StopIteration:
+            cls.logger.error('Exit checksum Operation because of Time Out')
+            check_result = 100
+            checksum = 'error'
+        except Exception as exception:
+            cls.logger.error('Exit CheckSum Operation because of Exception Occured')
+            cls.logger.error(exception)
+            check_result = 99
+            checksum = 'error'
+        finally:
+            check_record = cls.read_json_file(check_record_file)
+            if not check_record.get('checkResult') or check_record['checkResult'] != 5:
+                check_record['checkResult'] = check_result
+            check_record['checksum'] = checksum
+            cls.write_json_file(check_record_file, check_record)
+            cls.logger.info(check_record)
+            return checksum
 
     @staticmethod
     def read_json_file(json_file):
@@ -88,15 +112,10 @@ class Utils(object):
             open_file.write(data)
 
     @classmethod
-    @imageasync
-    def check_cmd_exec(cls, image_file, check_record_file):
-        """
-        Exec the qemu-img check command to get the info of the given vm image
-        """
-        cmd = ['qemu-img', 'info', image_file, '--output', 'json']
+#    @timeout_decorator.timeout(10, timeout_exception=StopIteration, use_signals=False)
+    def qemu_img_cmd_exec(cls, cmd):
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
-        cls.logger.debug(cmd)
         image_info = {}
         for line in iter(process.stdout.readline, b''):
             data = line.strip().decode('unicode-escape')
@@ -110,6 +129,17 @@ class Utils(object):
 
         return_code = process.wait()
         process.stdout.close()
+        return image_info, return_code
+
+    @classmethod
+    @imageasync
+    def check_cmd_exec(cls, image_file, check_record_file):
+        """
+        Exec the qemu-img check command to get the info of the given vm image
+        """
+        cmd = ['qemu-img', 'info', image_file, '--output', 'json']
+        cls.logger.debug(cmd)
+        image_info, return_code = cls.qemu_img_cmd_exec(cmd)
 
         check_data = cls.read_json_file(check_record_file)
         cls.logger.debug(check_data)
@@ -117,40 +147,34 @@ class Utils(object):
             check_data['imageInfo'] = {}
             check_data['checkResult'] = 99
             cls.write_json_file(check_record_file, check_data)
+            cls.logger.error('Failed to get image info')
+            cls.logger.error(check_data)
             return check_data['imageInfo']
 
         if image_info.get('format') and image_info['format'] != 'qcow2':
             check_data['imageInfo'] = {'format': image_info['format']}
             check_data['checkResult'] = 5
             cls.write_json_file(check_record_file, check_data)
+            cls.logger.error('Does not accept image with type {}'.format(image_info['format']))
+            cls.logger.error(check_data)
             return check_data['imageInfo']
 
         cmd = ['qemu-img', 'check', image_file, '--output', 'json']
-        process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT)
-
         cls.logger.debug(cmd)
-        image_info = {}
-        for line in iter(process.stdout.readline, b''):
-            data = line.strip().decode('unicode-escape')
-            cls.logger.debug(data)
-            if data in ['{', '}']:
-                continue
-            data = str(data).split(':')
-            if len(data) != 2:
-                continue
-            image_info[data[0].strip('"')] = data[1].strip(',').strip().strip('"')
-
-        return_code = process.wait()
-        process.stdout.close()
+        image_info, return_code = cls.qemu_img_cmd_exec(cmd)
 
         check_data = cls.read_json_file(check_record_file)
         if return_code != 0:
             check_data["imageInfo"] = {}
             check_data["checkResult"] = return_code
+            cls.logger.error('Failed to check image')
+            cls.logger.error(check_data)
         else:
             check_data["imageInfo"] = image_info
-            check_data["checkResult"] = return_code
+            if not check_data.get('checkResult'):
+                check_data["checkResult"] = return_code
+            cls.logger.info('Successfully got image check info')
+            cls.logger.info(check_data)
         cls.write_json_file(check_record_file, check_data)
 
         return image_info

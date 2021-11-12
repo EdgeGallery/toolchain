@@ -58,7 +58,8 @@ class Server(object):
                          2: 'Check completed, image has leaked clusters, but is not corrupted',
                          3: 'Check failed',
                          4: 'Check in Progress',
-                         5: 'Check Exiting because of not support this type of image'}
+                         5: 'Check Exiting because of not support this type of image',
+                         6: 'Check Time Out'}
         self.compress_rc = {0: 'Compress Completed',
                             1: 'Compress In Progress',
                             2: 'Compress Failed',
@@ -68,7 +69,7 @@ class Server(object):
         """
         Check the input vm image to get it's checksum and basic info such as type and size
         """
-        self.logger.info('Start to check VM image...')
+        self.logger.info('Start to check VM image {} ...'.format(input_image))
         if not input_image:
             msg = 'No image is given to do the check.'
             self.logger.error(msg)
@@ -93,6 +94,7 @@ class Server(object):
 
             status = 0
             msg = 'Check In Progress'
+
         except Exception as exception:
             status = 1
             msg = 'Check Failed'
@@ -101,7 +103,7 @@ class Server(object):
             Utils.write_json_file(check_record_file, check_info)
             self.logger.error(exception)
 
-        self.logger.info('Check VM with status {} and msg {}'.format(status, msg))
+        self.logger.info('Check image {} with status: {}, msg: {}'.format(input_image,status, msg))
         return status, msg
 
     def get_check_status(self):
@@ -119,7 +121,7 @@ class Server(object):
             if image_info.get('filename'):
                 file_name = image_info.get('filename').split('/')[-1]
                 check_info['imageInfo']['filename'] = file_name
-        if check_info.get('checksum'):
+        if check_info.get('checksum') and check_info['checksum'] != 'error':
             if check_info.get('checkResult') == 0:
                 return 0, self.check_rc[0], check_info
             if check_info.get('checkResult') == 2:
@@ -132,6 +134,8 @@ class Server(object):
 
         if check_info.get('checkResult') == 99:
             return 3, self.check_rc[3], check_info
+        if check_info.get('checkResult') == 100:
+            return 6, self.check_rc[6], check_info
         return 4, self.check_rc[4], check_info
 
     def compress_vm_image(self, input_image=None, output_image=None):
