@@ -150,7 +150,6 @@ class Utils(object):
 
             if return_code != 0:
                 cls.logger.error('Failed to exec cmd: {}'.format(cmd))
-                image_info = {}
                 check_result = 99
                 return image_info
 
@@ -189,7 +188,6 @@ class Utils(object):
             check_result = return_code
             if return_code != 0:
                 cls.logger.error('Failed to exec cmd: {}'.format(cmd))
-                image_info = {}
             else:
                 cls.logger.info('Successfully exec cmd: {}'.format(cmd))
         except StopIteration:
