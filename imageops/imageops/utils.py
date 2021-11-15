@@ -17,7 +17,6 @@
 import json
 import os
 import subprocess
-import time
 from hashlib import md5
 from threading import Thread
 import timeout_decorator
@@ -68,7 +67,7 @@ class Utils(object):
     def get_md5_checksum(cls, image_file, check_record_file):
         try:
             checksum = cls._get_md5_checksum(image_file)
-            check_result = 4
+            check_result = 0
             cls.logger.info('Successfully got checksum value: {}'.format(checksum))
         except StopIteration:
             cls.logger.error('Exit checksum Operation because of Time Out')
@@ -81,13 +80,10 @@ class Utils(object):
             checksum = 'error'
         finally:
             check_record = cls.read_json_file(check_record_file)
-            if check_record.get('checkResult'):
-                if check_result == 100:
-                    check_record['checkResult'] = 100
-                if check_result == 99 and check_record['checkResult'] != 63:
-                    check_record['checkResult'] = 99
-            else:
-                check_record['checkResult'] = check_result
+            if check_result == 100:
+                check_record['checkResult'] = 100
+            if check_result == 99 and check_record['checkResult'] != 63:
+                check_record['checkResult'] = 99
 
             check_record['checksum'] = checksum
             cls.write_json_file(check_record_file, check_record)
@@ -176,8 +172,13 @@ class Utils(object):
         finally:
             check_data = cls.read_json_file(check_record_file)
             check_data['imageInfo'] = image_info
-            if not check_data.get('checkResult') or not check_data['checkResult'] in [99, 100]:
-                check_data['checkResult'] = check_result
+            if check_data.get('checkResult') != 100:
+                if check_result == 4:
+                    if check_data.get('checkResult') != 99:
+                        check_data['checkResult'] = check_result
+                else:
+                    check_data['checkResult'] = check_result
+
             cls.write_json_file(check_record_file, check_data)
             cls.logger.debug(check_data)
 
@@ -194,17 +195,16 @@ class Utils(object):
         except StopIteration:
             cls.logger.error('Exit cmd: {}, because of Time Out'.format(cmd))
             image_info = {}
-            return_code = 100
+            check_result = 100
         except Exception as exception:
             cls.logger.error('Exit cmd: {}, because of Exception Occured'.format(cmd))
             image_info = {}
-            return_code = 99
+            check_result = 99
         finally:
             check_data = cls.read_json_file(check_record_file)
-            if not check_data.get('checkResult') or not check_data['checkResult'] in [99, 100]:
+            if check_data.get('checkResult') not in [99, 100]:
                 check_data["checkResult"] = check_result
             check_data["imageInfo"] = image_info
-            check_data["checkResult"] = check_result
             cls.write_json_file(check_record_file, check_data)
             cls.logger.debug(check_data)
 

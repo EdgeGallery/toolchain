@@ -86,7 +86,7 @@ class Server(object):
             os.makedirs(check_record_path)
             check_record_file = os.path.join(check_record_path, self.check_record_file)
 
-            check_info = {}
+            check_info = {'checkResult': 4}
             check_info['imageInfo'] = Utils.check_cmd_exec(input_image, check_record_file)
             check_info['checksum'] = Utils.get_md5_checksum(input_image, check_record_file)
 
@@ -94,12 +94,10 @@ class Server(object):
 
             status = 0
             msg = 'Check In Progress'
-
         except Exception as exception:
             status = 1
             msg = 'Check Failed'
-            check_info = {}
-            check_info['checkResult'] = 99
+            check_info = {'checkResult': 99}
             Utils.write_json_file(check_record_file, check_info)
             self.logger.error(exception)
 
@@ -121,28 +119,29 @@ class Server(object):
             if image_info.get('filename'):
                 file_name = image_info.get('filename').split('/')[-1]
                 check_info['imageInfo']['filename'] = file_name
-        if check_info.get('checksum') and check_info['checksum'] != 'error':
-            if check_info.get('checkResult') == 0:
-                return 0, self.check_rc[0], check_info
-            if check_info.get('checkResult') == 2:
-                return 1, self.check_rc[1], check_info
-            if check_info.get('checkResult') == 3:
-                return 2, self.check_rc[2], check_info
-            if check_info.get('checkResult') == 4:
-                return 4, self.check_rc[4], check_info
-            if check_info.get('checkResult') == 63:
-                return 5, self.check_rc[5], check_info
-            if check_info.get('checkResult') == 99:
-                return 3, self.check_rc[3], check_info
-            if check_info.get('checkResult') == 100:
-                return 6, self.check_rc[6], check_info
-            return 3, self.check_rc[3], check_info
 
         if check_info.get('checkResult') == 99:
             return 3, self.check_rc[3], check_info
         if check_info.get('checkResult') == 100:
             return 6, self.check_rc[6], check_info
-        return 4, self.check_rc[4], check_info
+
+        if not check_info.get('imageInfo'):
+            return 4, self.check_rc[4], check_info
+        if not check_info.get('checksum'):
+            if check_info.get('checkResult') == 63:
+                return 5, self.check_rc[5], check_info
+            return 4, self.check_rc[4], check_info
+        if check_info.get('checkResult') == 0:
+            return 0, self.check_rc[0], check_info
+        if check_info.get('checkResult') == 2:
+            return 1, self.check_rc[1], check_info
+        if check_info.get('checkResult') == 3:
+            return 2, self.check_rc[2], check_info
+        if check_info.get('checkResult') == 4:
+            return 4, self.check_rc[4], check_info
+        if check_info.get('checkResult') == 63:
+            return 5, self.check_rc[5], check_info
+        return 3, self.check_rc[3], check_info
 
     def compress_vm_image(self, input_image=None, output_image=None):
         """
