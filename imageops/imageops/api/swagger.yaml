@@ -169,7 +169,7 @@ definitions:
     properties:
       status:
         type: "integer"
-        enum: [0, 1, 2, 3, 4, 5]
+        enum: [0, 1, 2, 3, 4, 5, 6]
         example: 0
       msg:
         type: "string"
@@ -180,6 +180,7 @@ definitions:
         - "Check failed"
         - "Check in Progress"
         - "Check Exiting because of not support this type of image"
+        - "Check Time Out"
         example: "Check completed, the image is (now) consistent"
       checkInfo:
         $ref: "#/definitions/CheckInfo"
@@ -214,7 +215,7 @@ definitions:
     properties:
       status:
         type: "integer"
-        enum: [0, 1, 2, 3]
+        enum: [0, 1, 2, 3, 4]
         example: 0
       msg:
         type: "string"
@@ -223,6 +224,7 @@ definitions:
         - "Compress In Progress"
         - "Compress Failed"
         - "Compress Exiting because of No enouth space left"
+        - "Compress Time Out"
         example: "Compress Completed"
       rate:
         type: "number"

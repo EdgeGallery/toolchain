@@ -102,7 +102,7 @@ class Server(object):
             Utils.write_json_file(check_record_file, check_info)
             self.logger.error(exception)
 
-        self.logger.info('Check image {} with status: {}, msg: {}'.format(input_image,status, msg))
+        self.logger.info('Check image {}, status: {}, msg: {}'.format(input_image, status, msg))
         return status, msg
 
     def get_check_status(self):

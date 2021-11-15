@@ -212,7 +212,7 @@ class Utils(object):
 
     @classmethod
     @timeout_decorator.timeout(TIMEOUT, timeout_exception=StopIteration, use_signals=False)
-    def virt_sparsify_cmd_exec(cls, cmd, compress_record_file):
+    def _virt_sparsify_cmd_exec(cls, cmd, compress_record_file):
         check_tmpdir = True
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
@@ -238,7 +238,7 @@ class Utils(object):
                '--machine-readable', '--check-tmpdir=fail']
 
         try:
-            return_code, check_tmpdir = cls.virt_sparsify_cmd_exec(cmd, compress_record_file)
+            return_code, check_tmpdir = cls._virt_sparsify_cmd_exec(cmd, compress_record_file)
 
             if return_code == 0:
                 compress_output = 'Compress Completed\n'
