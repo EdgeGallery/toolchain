@@ -63,7 +63,8 @@ class Server(object):
         self.compress_rc = {0: 'Compress Completed',
                             1: 'Compress In Progress',
                             2: 'Compress Failed',
-                            3: 'Compress Exiting because of No enouth space left'}
+                            3: 'Compress Exiting because of No enouth space left',
+                            4: 'Compress Time Out'}
 
     def check_vm_image(self, input_image=None):
         """
@@ -148,7 +149,7 @@ class Server(object):
         Compress the input vm image to get a slim one which is sparsify
         Also can transfer raw image to qcow2 one
         """
-        self.logger.info('Start to compress vm image...')
+        self.logger.info('Start to compress vm image {} ...'.format(input_image))
         if not input_image:
             msg = 'No image is given.'
             self.logger.error(msg)
@@ -169,25 +170,26 @@ class Server(object):
             os.makedirs(compress_record_path)
             compress_record_file = os.path.join(compress_record_path, self.compress_record_file)
 
-            self.logger.info('Start to compress ...')
+            self.logger.info('Start to compress image {} ...'.format(input_image))
             Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
 
             status = 0
-            msg = '{}\n'.format('Compress In Progress')
+            msg = '{}'.format('Compress In Progress')
         except Exception as exception:
             self.logger.error(exception)
             status = 1
-            msg = '{}\n'.format('Compress Failed')
+            msg = '{}'.format('Compress Failed')
             Utils.append_write_plain_file(compress_record_file, msg)
 
-        self.logger.info('Compress VM with status {} and msg {}'.format(status, msg))
+        self.logger.info('Compress image {} with status: {} and msg: {}'
+                         .format(input_image, status, msg))
         return status, msg
 
     def get_compress_status(self):
         """
         Get the status of one compress with the request ID
         """
-        self.logger.info('Start to get compress status...')
+        self.logger.info('Start to get status of compress image ...')
         try:
             compress_record_file = os.path.join(self.tmp_path,
                                                 self.request_id,
@@ -196,10 +198,12 @@ class Server(object):
                 for line in compress_file:
                     if self.compress_rc[0] in line:
                         return 0, self.compress_rc[0], 1
-                    if self.compress_rc[3] in line:
-                        return 3, self.compress_rc[3], 0
                     if self.compress_rc[2] in line:
                         return 2, self.compress_rc[2], 0
+                    if self.compress_rc[3] in line:
+                        return 3, self.compress_rc[3], 0
+                    if self.compress_rc[4] in line:
+                        return 4, self.compress_rc[4], 0
             return 1, self.compress_rc[1], 0.5
         except Exception as exception:
             self.logger.error(exception)

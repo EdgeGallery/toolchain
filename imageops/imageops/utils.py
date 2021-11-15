@@ -211,16 +211,11 @@ class Utils(object):
         return image_info
 
     @classmethod
-    @imageasync
-    def compress_cmd_exec(cls, input_image, output_image, compress_record_file):
-        """
-        Exec virt-sparsity commad to compress and convert the given vm image to qcow2
-        """
-        cmd = ['virt-sparsify', input_image, '--compress', '--convert', 'qcow2', output_image]
+    @timeout_decorator.timeout(TIMEOUT, timeout_exception=StopIteration, use_signals=False)
+    def virt_sparsify_cmd_exec(cls, cmd, compress_record_file):
         check_tmpdir = True
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
-
         cls.logger.debug(cmd)
         for line in iter(process.stdout.readline, b''):
             data = line.decode('unicode-escape')
@@ -229,15 +224,32 @@ class Utils(object):
                 check_tmpdir = False
             with open(compress_record_file, 'a') as open_file:
                 open_file.write(data)
-
         return_code = process.wait()
         process.stdout.close()
-        if return_code == 0:
-            compress_output = 'Compress Completed\n'
-        elif not check_tmpdir:
-            compress_output = 'Compress Exiting because of No enouth space left\n'
-        else:
-            compress_output = 'Compress Failed\n'
+        return return_code, check_tmpdir
+
+    @classmethod
+    @imageasync
+    def compress_cmd_exec(cls, input_image, output_image, compress_record_file):
+        """
+        Exec virt-sparsity commad to compress and convert the given vm image to qcow2
+        """
+        cmd = ['virt-sparsify', input_image, '--compress', '--convert', 'qcow2', output_image,
+               '--machine-readable', '--check-tmpdir=fail']
+
+        try:
+            return_code, check_tmpdir = cls.virt_sparsify_cmd_exec(cmd, compress_record_file)
+
+            if return_code == 0:
+                compress_output = 'Compress Completed\n'
+            elif not check_tmpdir:
+                compress_output = 'Compress Exiting because of No enouth space left\n'
+            else:
+                compress_output = 'Compress Failed\n'
+        except StopIteration:
+            compress_output = 'Compress Time Out\n'
+        except Exception as exception:
+            compress_output = 'Compress Failed with exception: {}'.format(exception)
 
         cls.logger.info(compress_output)
         cls.append_write_plain_file(compress_record_file, compress_output)
