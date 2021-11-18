@@ -16,7 +16,9 @@
 
 import json
 import os
+import re
 import subprocess
+import time
 from hashlib import md5
 from threading import Thread
 import timeout_decorator
@@ -75,7 +77,7 @@ class Utils(object):
             checksum = 'error'
         except Exception as exception:
             cls.logger.error('Exit CheckSum Operation because of Exception Occured')
-            cls.logger.error(exception)
+            cls.logger.exception(exception)
             check_result = 99
             checksum = 'error'
         finally:
@@ -165,6 +167,7 @@ class Utils(object):
             return image_info
         except Exception as exception:
             cls.logger.error('Exit cmd: {}, because of Exception Occured'.format(cmd))
+            cls.logger.exception(exception)
             image_info = {}
             check_result = 99
             return image_info
@@ -196,6 +199,7 @@ class Utils(object):
             check_result = 100
         except Exception as exception:
             cls.logger.error('Exit cmd: {}, because of Exception Occured'.format(cmd))
+            cls.logger.exception(exception)
             image_info = {}
             check_result = 99
         finally:
@@ -220,8 +224,10 @@ class Utils(object):
             cls.logger.debug(data)
             if 'Exiting because --check-tmpdir=fail was set' in data:
                 check_tmpdir = False
-            with open(compress_record_file, 'a') as open_file:
-                open_file.write(data)
+            if 'Copy to destination and make sparse' in data:
+                cls.append_write_plain_file(compress_record_file,
+                                            'Medium timestamp: {}\n'.format(time.time()))
+            cls.append_write_plain_file(compress_record_file, data)
         return_code = process.wait()
         process.stdout.close()
         return return_code, check_tmpdir
@@ -236,6 +242,8 @@ class Utils(object):
                '--machine-readable', '--check-tmpdir=fail']
 
         try:
+            cls.append_write_plain_file(compress_record_file,
+                                        'Start timestamp: {}\n'.format(time.time()))
             return_code, check_tmpdir = cls._virt_sparsify_cmd_exec(cmd, compress_record_file)
 
             if return_code == 0:
@@ -251,3 +259,46 @@ class Utils(object):
 
         cls.logger.info(compress_output)
         cls.append_write_plain_file(compress_record_file, compress_output)
+        cls.append_write_plain_file(compress_record_file,
+                                    'End timestamp: {}\n'.format(time.time()))
+
+    @classmethod
+    def get_compress_rate(cls, compress_record_file):
+        """
+        Estimate the rate of compress by parsing the record file
+        """
+        begin = {'signal': 'Fill free space', 'base': 0, 'end': 0.3}
+        medium = {'signal': 'Copy to destination and make sparse', 'base': 0.3, 'end': 0.9}
+        end = {'signal': 'Sparsify operation', 'base': 0.9, 'end': 1.0}
+
+        rate = begin.get('base')
+        process_one_start = False
+        process_two_start = False
+        process_three_start = False
+        with open(compress_record_file, 'r') as compress_file:
+            for line in compress_file:
+                if 'Start timestamp' in line:
+                    begin['start_time'] = int(re.search('\d+', line).group())
+                if 'Medium timestamp' in line:
+                    medium['start_time'] = int(re.search('\d+', line).group())
+                if begin.get('signal') in line:
+                    process_one_start = True
+                if medium.get('signal') in line:
+                    process_two_start = True
+                if end.get('signal') in line:
+                    process_three_start = True
+                if process_one_start and not process_two_start:
+                    rate_one_num = re.findall("\d+", line)
+                    if len(rate_one_num) != 2:
+                        continue
+                    rate_one = float(rate_one_num[0])/float(rate_one_num[1])
+                    base = begin.get('base')
+                    rate = round(base + (begin.get('end') - base) * rate_one, 3)
+                if process_two_start and not process_three_start:
+                    cost_one = medium.get('start_time') - begin.get('start_time')
+                    cost_two = int(time.time()) - medium.get('start_time')
+                    rate = round(medium.get('base') + cost_two / (2 * cost_one), 3)
+                    rate = min(rate, medium.get('end'))
+                if process_three_start:
+                    rate = end.get('end')
+        return rate

@@ -198,13 +198,16 @@ class Server(object):
                 for line in compress_file:
                     if self.compress_rc[0] in line:
                         return 0, self.compress_rc[0], 1
-                    if self.compress_rc[2] in line:
-                        return 2, self.compress_rc[2], 0
-                    if self.compress_rc[3] in line:
-                        return 3, self.compress_rc[3], 0
-                    if self.compress_rc[4] in line:
-                        return 4, self.compress_rc[4], 0
-            return 1, self.compress_rc[1], 0.5
+                    for item in [2, 3, 4]:
+                        if self.compress_rc[item] in line:
+                            return item, self.compress_rc[item], 1
         except Exception as exception:
-            self.logger.error(exception)
+            self.logger.exception(exception)
             return 2, self.compress_rc[2], 0
+
+        try:
+            compress_rate = Utils.get_compress_rate(compress_record_file)
+            return 1, self.compress_rc[1], compress_rate
+        except Exception as exception:
+            self.logger.exception(exception)
+            return 1, self.compress_rc[1], 0.5
