@@ -257,3 +257,6 @@ definitions:
       filename:
         type: "string"
         example: "ubuntu-20.4.img"
+      filename:
+        type: "number"
+        example: 40.0

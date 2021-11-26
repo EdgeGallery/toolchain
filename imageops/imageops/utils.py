@@ -144,6 +144,7 @@ class Utils(object):
         """
         cmd = ['qemu-img', 'info', image_file, '--output', 'json']
         cls.logger.debug(cmd)
+        virtual_size = 0
         try:
             image_info, return_code = cls.qemu_img_cmd_exec(cmd)
             if return_code == 0:
@@ -160,6 +161,9 @@ class Utils(object):
                 image_info = {'format': image_info['format']}
                 check_result = 63
                 return image_info
+
+            if image_info.get('virtual-size'):
+                virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
         except StopIteration:
             cls.logger.error('Exit cmd: {}, because of Time Out'.format(cmd))
             image_info = {}
@@ -188,6 +192,7 @@ class Utils(object):
         cls.logger.debug(cmd)
         try:
             image_info, return_code = cls.qemu_img_cmd_exec(cmd)
+            image_info['virtual_size'] = virtual_size
             check_result = return_code
             if return_code != 0:
                 cls.logger.error('Failed to exec cmd: {}'.format(cmd))

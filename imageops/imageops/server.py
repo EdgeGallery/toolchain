@@ -110,39 +110,47 @@ class Server(object):
         Get the status of one check with the request ID
         """
         self.logger.info('Start to get check status...')
-        check_record_file = os.path.join(self.tmp_path, self.request_id, self.check_record_file)
-        check_info = Utils.read_json_file(check_record_file)
+        check_info = {}
+        try:
+            check_record_file = os.path.join(self.tmp_path,
+                                             self.request_id,
+                                             self.check_record_file)
+            check_info = Utils.read_json_file(check_record_file)
+            self.logger.debug(check_info)
 
-        self.logger.debug(check_info)
+            if check_info.get('imageInfo'):
+                image_info = check_info.get('imageInfo')
+                if image_info.get('filename'):
+                    file_name = image_info.get('filename').split('/')[-1]
+                    check_info['imageInfo']['filename'] = file_name
 
-        if check_info.get('imageInfo'):
-            image_info = check_info.get('imageInfo')
-            if image_info.get('filename'):
-                file_name = image_info.get('filename').split('/')[-1]
-                check_info['imageInfo']['filename'] = file_name
+            if check_info.get('checkResult') == 99:
+                return 3, self.check_rc[3], check_info
+            if check_info.get('checkResult') == 100:
+                return 6, self.check_rc[6], check_info
 
-        if check_info.get('checkResult') == 99:
-            return 3, self.check_rc[3], check_info
-        if check_info.get('checkResult') == 100:
-            return 6, self.check_rc[6], check_info
-
-        if not check_info.get('imageInfo'):
-            return 4, self.check_rc[4], check_info
-        if not check_info.get('checksum'):
+            if not check_info.get('imageInfo'):
+                return 4, self.check_rc[4], check_info
+            if not check_info.get('checksum'):
+                if check_info.get('checkResult') == 63:
+                    return 5, self.check_rc[5], check_info
+                return 4, self.check_rc[4], check_info
+            if check_info.get('checkResult') == 0:
+                return 0, self.check_rc[0], check_info
+            if check_info.get('checkResult') == 2:
+                return 1, self.check_rc[1], check_info
+            if check_info.get('checkResult') == 3:
+                return 2, self.check_rc[2], check_info
+            if check_info.get('checkResult') == 4:
+                return 4, self.check_rc[4], check_info
             if check_info.get('checkResult') == 63:
                 return 5, self.check_rc[5], check_info
-            return 4, self.check_rc[4], check_info
-        if check_info.get('checkResult') == 0:
-            return 0, self.check_rc[0], check_info
-        if check_info.get('checkResult') == 2:
-            return 1, self.check_rc[1], check_info
-        if check_info.get('checkResult') == 3:
-            return 2, self.check_rc[2], check_info
-        if check_info.get('checkResult') == 4:
-            return 4, self.check_rc[4], check_info
-        if check_info.get('checkResult') == 63:
-            return 5, self.check_rc[5], check_info
-        return 3, self.check_rc[3], check_info
+            return 3, self.check_rc[3], check_info
+        except IOError as io_exception:
+            self.logger.exception(io_exception)
+            return 3, '{}, {}'.format(self.check_rc[3], 'nonexistent request ID'), check_info
+        except Exception:
+            return 3, self.check_rc[3], check_info
 
     def compress_vm_image(self, input_image=None, output_image=None):
         """
@@ -201,6 +209,9 @@ class Server(object):
                     for item in [2, 3, 4]:
                         if self.compress_rc[item] in line:
                             return item, self.compress_rc[item], 1
+        except IOError as io_exception:
+            self.logger.exception(io_exception)
+            return 2, '{}, {}'.format(self.compress_rc[2], 'nonexistent request ID'), 0
         except Exception as exception:
             self.logger.exception(exception)
             return 2, self.compress_rc[2], 0
