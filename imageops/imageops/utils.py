@@ -307,3 +307,33 @@ class Utils(object):
                 if process_three_start:
                     rate = end.get('end')
         return rate
+
+    @classmethod
+    def check_compress_requires(cls, input_image, check_path, free_rate=0.2):
+        """
+        Check whether the space left is enough for compressing operation.
+        """
+        disk = os.statvfs(check_path)
+        disk_size = disk.f_bsize * disk.f_blocks / (1024 ** 3)
+        disk_free = disk.f_bsize * disk.f_bfree / (1024 ** 3)
+
+        cmd = ['qemu-img', 'info', input_image, '--output', 'json']
+        cls.logger.debug('Get virtual size of image {}'.format(input_image))
+        virtual_size = 0
+        image_info, return_code = cls.qemu_img_cmd_exec(cmd)
+
+        if return_code != 0 or not image_info.get('virtual-size'):
+            cls.logger.error('Failed to get virtual size of image {}'.format(input_image))
+            return False
+
+        virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
+        if virtual_size >= disk_free:
+            cls.logger.error('Disk space left is smaller than virtual size of image {}'
+                             .format(input_image))
+            return False
+        new_free_rate = round((disk_free - virtual_size) / disk_size, 3)
+        if (new_free_rate < free_rate):
+            cls.logger.error('Free disk after compress will be {}, smaller than required {}'
+                             .format(new_free_rate, free_rate))
+            return False
+        return True
