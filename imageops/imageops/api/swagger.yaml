@@ -15,9 +15,9 @@
 
 swagger: "2.0"
 info:
-  description: "This is the dovetail API."
+  description: "This is the imageops API."
   version: "1.0.0"
-  title: "Dovetail API"
+  title: "Imageops API"
   contact:
     email: "xudan16@huawei.com"
   license:

@@ -67,10 +67,13 @@ class Utils(object):
     @classmethod
     @imageasync
     def get_md5_checksum(cls, image_file, check_record_file):
+        """
+        Get the md5 checksum of the input vm image and write results into file
+        """
         try:
             checksum = cls._get_md5_checksum(image_file)
             check_result = 0
-            cls.logger.info('Successfully got checksum value: {}'.format(checksum))
+            cls.logger.info('Successfully got checksum value: %s', checksum)
         except StopIteration:
             cls.logger.error('Exit checksum Operation because of Time Out')
             check_result = 100
@@ -90,7 +93,7 @@ class Utils(object):
             check_record['checksum'] = checksum
             cls.write_json_file(check_record_file, check_record)
             cls.logger.info(check_record)
-            return checksum
+        return checksum
 
     @staticmethod
     def read_json_file(json_file):
@@ -119,6 +122,9 @@ class Utils(object):
     @classmethod
     @timeout_decorator.timeout(TIMEOUT, timeout_exception=StopIteration, use_signals=False)
     def qemu_img_cmd_exec(cls, cmd):
+        """
+        Exec qemu-img commands and parse the text results into dict
+        """
         process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         image_info = {}
@@ -147,30 +153,27 @@ class Utils(object):
         virtual_size = 0
         try:
             image_info, return_code = cls.qemu_img_cmd_exec(cmd)
-            if return_code == 0:
-                check_result = 4
-                cls.logger.info('Successfully exec cmd: {}'.format(cmd))
-
             if return_code != 0:
-                cls.logger.error('Failed to exec cmd: {}'.format(cmd))
+                cls.logger.error('Failed to exec cmd: %s', cmd)
                 check_result = 99
                 return image_info
 
-            if image_info.get('format') and image_info['format'] != 'qcow2':
-                cls.logger.error('Does not accept image with type {}'.format(image_info['format']))
+            if image_info.get('format') != 'qcow2':
+                cls.logger.error('Does not accept image with type %s', image_info['format'])
                 image_info = {'format': image_info['format']}
                 check_result = 63
                 return image_info
 
-            if image_info.get('virtual-size'):
-                virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
+            check_result = 4
+            cls.logger.info('Successfully exec cmd: %s', cmd)
+            virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
         except StopIteration:
-            cls.logger.error('Exit cmd: {}, because of Time Out'.format(cmd))
+            cls.logger.error('Exit cmd: %s, because of Time Out', cmd)
             image_info = {}
             check_result = 100
             return image_info
         except Exception as exception:
-            cls.logger.error('Exit cmd: {}, because of Exception Occured'.format(cmd))
+            cls.logger.error('Exit cmd: %s, because of Exception Occured', cmd)
             cls.logger.exception(exception)
             image_info = {}
             check_result = 99
@@ -195,15 +198,15 @@ class Utils(object):
             image_info['virtual_size'] = virtual_size
             check_result = return_code
             if return_code != 0:
-                cls.logger.error('Failed to exec cmd: {}'.format(cmd))
-            else:
-                cls.logger.info('Successfully exec cmd: {}'.format(cmd))
+                cls.logger.error('Failed to exec cmd: %s', cmd)
+                return image_info
+            cls.logger.info('Successfully exec cmd: %s', cmd)
         except StopIteration:
-            cls.logger.error('Exit cmd: {}, because of Time Out'.format(cmd))
+            cls.logger.error('Exit cmd: %s, because of Time Out', cmd)
             image_info = {}
             check_result = 100
         except Exception as exception:
-            cls.logger.error('Exit cmd: {}, because of Exception Occured'.format(cmd))
+            cls.logger.error('Exit cmd: %s, because of Exception Occured', cmd)
             cls.logger.exception(exception)
             image_info = {}
             check_result = 99
@@ -272,41 +275,48 @@ class Utils(object):
         """
         Estimate the rate of compress by parsing the record file
         """
-        begin = {'signal': 'Fill free space', 'base': 0, 'end': 0.3}
-        medium = {'signal': 'Copy to destination and make sparse', 'base': 0.3, 'end': 0.9}
-        end = {'signal': 'Sparsify operation', 'base': 0.9, 'end': 1.0}
-
-        rate = begin.get('base')
-        process_one_start = False
-        process_two_start = False
-        process_three_start = False
+        rate_info = {'begin': {'sig': 'Fill free space', 'base': 0, 'end': 0.3},
+                     'medium':
+                         {'sig': 'Copy to destination and make sparse', 'base': 0.3, 'end': 0.9},
+                     'end': {'sig': 'Sparsify operation', 'base': 0.9, 'end': 1.0}
+                    }
+        rate = rate_info.get('begin').get('base')
+        process_status = {1: False, 2: False, 3: False}
         with open(compress_record_file, 'r') as compress_file:
+            begin = rate_info.get('begin')
+            medium = rate_info.get('medium')
+            end = rate_info.get('end')
             for line in compress_file:
                 if 'Start timestamp' in line:
-                    begin['start_time'] = int(re.search('\d+', line).group())
+                    begin['start_time'] = int(re.search(r'\d+', line).group())
                 if 'Medium timestamp' in line:
-                    medium['start_time'] = int(re.search('\d+', line).group())
-                if begin.get('signal') in line:
-                    process_one_start = True
-                if medium.get('signal') in line:
-                    process_two_start = True
-                if end.get('signal') in line:
-                    process_three_start = True
-                if process_one_start and not process_two_start:
-                    rate_one_num = re.findall("\d+", line)
+                    medium['start_time'] = int(re.search(r'\d+', line).group())
+                cls.update_process_status(line, process_status, rate_info)
+                if process_status.get(3):
+                    rate = end.get('end')
+                    return rate
+                if process_status.get(2):
+                    cost_one = medium.get('start_time') - begin.get('start_time')
+                    cost_two = int(time.time()) - medium.get('start_time')
+                    rate = round(medium.get('base') + cost_two / (2 * cost_one), 3)
+                    rate = min(rate, medium.get('end'))
+                else:
+                    rate_one_num = re.findall(r'\d+', line)
                     if len(rate_one_num) != 2:
                         continue
                     rate_one = float(rate_one_num[0])/float(rate_one_num[1])
                     base = begin.get('base')
                     rate = round(base + (begin.get('end') - base) * rate_one, 3)
-                if process_two_start and not process_three_start:
-                    cost_one = medium.get('start_time') - begin.get('start_time')
-                    cost_two = int(time.time()) - medium.get('start_time')
-                    rate = round(medium.get('base') + cost_two / (2 * cost_one), 3)
-                    rate = min(rate, medium.get('end'))
-                if process_three_start:
-                    rate = end.get('end')
         return rate
+
+    @classmethod
+    def update_process_status(cls, line, process_status, rate_info):
+        if rate_info.get('begin').get('sig') in line:
+            process_status[1] = True
+        if rate_info.get('medium').get('sig') in line:
+            process_status[2] = True
+        if rate_info.get('end').get('sig') in line:
+            process_status[3] = True
 
     @classmethod
     def check_compress_requires(cls, input_image, check_path, free_rate=0.2):
@@ -318,22 +328,22 @@ class Utils(object):
         disk_free = disk.f_bsize * disk.f_bfree / (1024 ** 3)
 
         cmd = ['qemu-img', 'info', input_image, '--output', 'json']
-        cls.logger.debug('Get virtual size of image {}'.format(input_image))
+        cls.logger.debug('Get virtual size of image %s', input_image)
         virtual_size = 0
         image_info, return_code = cls.qemu_img_cmd_exec(cmd)
 
         if return_code != 0 or not image_info.get('virtual-size'):
-            cls.logger.error('Failed to get virtual size of image {}'.format(input_image))
+            cls.logger.error('Failed to get virtual size of image %s', input_image)
             return False
 
         virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
         if virtual_size >= disk_free:
-            cls.logger.error('Disk space left is smaller than virtual size of image {}'
-                             .format(input_image))
+            cls.logger.error('Disk space left is smaller than virtual size of image %s',
+                             input_image)
             return False
         new_free_rate = round((disk_free - virtual_size) / disk_size, 3)
-        if (new_free_rate < free_rate):
-            cls.logger.error('Free disk after compress will be {}, smaller than required {}'
-                             .format(new_free_rate, free_rate))
+        if new_free_rate < free_rate:
+            cls.logger.error('Free disk after compress will be %s, smaller than required %s',
+                             new_free_rate, free_rate)
             return False
         return True
