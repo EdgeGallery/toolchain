@@ -178,7 +178,7 @@ class Server(object):
                 self.logger.error('Free disk space under %s is not enough to compress image %s',
                                   self.tmp_path, input_image)
                 status = 1
-                msg = '{}'.format('Compress Failed')
+                msg = '{}'.format(self.compress_rc.get(2))
                 Utils.append_write_plain_file(compress_record_file, msg)
             else:
                 self.logger.info('Free disk space under %s is enough to compress image %s',
@@ -189,7 +189,7 @@ class Server(object):
         except Exception as exception:
             self.logger.error(exception)
             status = 1
-            msg = '{}'.format('Compress Failed')
+            msg = '{}'.format(self.compress_rc.get(2))
             Utils.append_write_plain_file(compress_record_file, msg)
 
         self.logger.info('Compress image %s with status: %s and msg: %s', input_image, status, msg)
@@ -207,11 +207,11 @@ class Server(object):
             with open(compress_record_file, 'r') as compress_file:
                 for line in compress_file:
                     if self.compress_rc[0] in line:
-                        self.logger.info('Compress res: %s', self.compress_rc[0])
+                        self.logger.info(self.compress_rc[0])
                         return 0, self.compress_rc[0], 1
                     for item in [2, 3, 4]:
                         if self.compress_rc[item] in line:
-                            self.logger.error('Compress res: %s', self.compress_rc[item])
+                            self.logger.error(self.compress_rc[item])
                             return item, self.compress_rc[item], 1
         except IOError as io_exception:
             self.logger.exception(io_exception)
@@ -222,7 +222,7 @@ class Server(object):
 
         try:
             compress_rate = Utils.get_compress_rate(compress_record_file)
-            self.logger.info('Compress res: %s', self.compress_rc[1])
+            self.logger.info(self.compress_rc[1])
             return 1, self.compress_rc[1], compress_rate
         except Exception as exception:
             self.logger.exception(exception)
