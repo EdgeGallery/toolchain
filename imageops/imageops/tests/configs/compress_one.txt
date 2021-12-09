@@ -1,0 +1,12 @@
+Start timestamp: 1638171728.8340385
+[   0.0] Create overlay file in /tmp to protect source disk
+[   0.0] Examine source disk
+3/12
+9/12
+12/12
+[  22.6] Fill free space in /dev/sda1 with zero
+34816/186400
+40694/186400
+46695/186400
+52788/186400
+58880/186400

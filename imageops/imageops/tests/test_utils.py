@@ -38,7 +38,7 @@ class UtilsTest(unittest.TestCase):
 
     def setUp(self):
         self.compress_record_path = os.path.join(self.tmp_path, self.request_id)
-        self.compress_record_file = os.path.join(self.compress_record_path, 'compress_status.log')
+        self.compress_record_file = os.path.join(self.compress_record_path, 'compress_status.txt')
 
     def tearDown(self):
         if os.path.isfile(self.compress_record_file):
@@ -52,23 +52,23 @@ class UtilsTest(unittest.TestCase):
         self.assertRaises(FileNotFoundError, Utils.get_compress_rate, self.compress_record_file)
 
     def test_get_compress_rate_process_zero(self):
-        compress_record_file = os.path.join(self.configs, 'compress_zero.log')
+        compress_record_file = os.path.join(self.configs, 'compress_zero.txt')
         rate = Utils.get_compress_rate(compress_record_file)
         self.assertEqual(0, rate)
 
     def test_get_compress_rate_process_one(self):
-        compress_record_file = os.path.join(self.configs, 'compress_one.log')
+        compress_record_file = os.path.join(self.configs, 'compress_one.txt')
         rate = Utils.get_compress_rate(compress_record_file)
         self.assertEqual(0.095, rate)
 
     @mock.patch("imageops.utils.time.time")
     def test_get_compress_rate_process_two(self, time):
-        compress_record_file = os.path.join(self.configs, 'compress_two.log')
+        compress_record_file = os.path.join(self.configs, 'compress_two.txt')
         time.return_value = 1638171770.3269310
         rate = Utils.get_compress_rate(compress_record_file)
         self.assertEqual(0.338, rate)
 
     def test_get_compress_rate_process_three(self):
-        compress_record_file = os.path.join(self.configs, 'compress_three.log')
+        compress_record_file = os.path.join(self.configs, 'compress_three.txt')
         rate = Utils.get_compress_rate(compress_record_file)
         self.assertEqual(1.0, rate)

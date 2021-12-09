@@ -1,0 +1,4 @@
+Start timestamp: 1638171728.8340385
+[   0.0] Create overlay file in /tmp to protect source disk
+[   0.0] Examine source disk
+3/12

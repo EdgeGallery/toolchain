@@ -158,15 +158,18 @@ class Utils(object):
                 check_result = 99
                 return image_info
 
+            virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
+            disk_size = image_info.get('actual-size')
             if image_info.get('format') != 'qcow2':
                 cls.logger.error('Does not accept image with type %s', image_info['format'])
-                image_info = {'format': image_info['format']}
+                image_info = {'format': image_info['format'],
+                              'virtual_size': virtual_size,
+                              'disk_size': disk_size}
                 check_result = 63
                 return image_info
 
             check_result = 4
             cls.logger.info('Successfully exec cmd: %s', cmd)
-            virtual_size = round(int(image_info.get('virtual-size')) / (1024 ** 3), 3)
         except StopIteration:
             cls.logger.error('Exit cmd: %s, because of Time Out', cmd)
             image_info = {}
@@ -196,6 +199,7 @@ class Utils(object):
         try:
             image_info, return_code = cls.qemu_img_cmd_exec(cmd)
             image_info['virtual_size'] = virtual_size
+            image_info['disk_size'] = disk_size
             check_result = return_code
             if return_code != 0:
                 cls.logger.error('Failed to exec cmd: %s', cmd)
@@ -313,6 +317,9 @@ class Utils(object):
 
     @classmethod
     def update_process_status(cls, line, process_status, rate_info):
+        """
+        Update compress process by parsing the input line.
+        """
         if rate_info.get('begin').get('sig') in line:
             process_status[1] = True
         if rate_info.get('medium').get('sig') in line:
