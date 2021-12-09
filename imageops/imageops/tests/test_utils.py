@@ -14,11 +14,9 @@
 # limitations under the License.
 """
 
-import json
 import os
 import unittest
 from unittest import mock
-from pathlib import Path
 
 from imageops.utils import Utils, time
 
