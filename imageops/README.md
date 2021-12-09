@@ -11,7 +11,7 @@
 1. 运行imageops容器
 
 ```
-docker run -d -v <host-vm-image-path>:/usr/app/vmImage -p <host-port>:5000 swr.cn-north-4.myhuaweicloud.com/edgegallery/imageops:<image-tag>
+docker run -d -e IMAGEOPS_TIMEOUT=3600 -v <host-vm-image-path>:/usr/app/vmImage -p <host-port>:5000 swr.cn-north-4.myhuaweicloud.com/edgegallery/imageops:<image-tag>
 ```
 
 - `<host-vm-image-path>`：本机目录，用于存放虚机镜像，并映射到容器中的特定路径

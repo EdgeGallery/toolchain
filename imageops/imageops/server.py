@@ -178,7 +178,7 @@ class Server(object):
                 self.logger.error('Free disk space under %s is not enough to compress image %s',
                                   self.tmp_path, input_image)
                 status = 1
-                msg = '{}'.format(self.compress_rc.get(2))
+                msg = '{}'.format(self.compress_rc.get(3))
                 Utils.append_write_plain_file(compress_record_file, msg)
             else:
                 self.logger.info('Free disk space under %s is enough to compress image %s',
@@ -212,7 +212,7 @@ class Server(object):
                     for item in [2, 3, 4]:
                         if self.compress_rc[item] in line:
                             self.logger.error(self.compress_rc[item])
-                            return item, self.compress_rc[item], 1
+                            return item, self.compress_rc[item], 0
         except IOError as io_exception:
             self.logger.exception(io_exception)
             return 2, '{}, {}'.format(self.compress_rc[2], 'nonexistent request ID'), 0
@@ -226,4 +226,4 @@ class Server(object):
             return 1, self.compress_rc[1], compress_rate
         except Exception as exception:
             self.logger.exception(exception)
-            return 1, self.compress_rc[1], 0.5
+            return 2, self.compress_rc[2], 0
