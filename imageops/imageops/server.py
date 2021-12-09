@@ -70,7 +70,7 @@ class Server(object):
         """
         Check the input vm image to get it's checksum and basic info such as type and size
         """
-        self.logger.info('Start to check VM image {} ...'.format(input_image))
+        self.logger.info('Start to check VM image %s ...', input_image)
         if not input_image:
             msg = 'No image is given to do the check.'
             self.logger.error(msg)
@@ -102,7 +102,7 @@ class Server(object):
             Utils.write_json_file(check_record_file, check_info)
             self.logger.error(exception)
 
-        self.logger.info('Check image {}, status: {}, msg: {}'.format(input_image, status, msg))
+        self.logger.info('Check image %s, status: %s, msg: %s', input_image, status, msg)
         return status, msg
 
     def get_check_status(self):
@@ -118,33 +118,28 @@ class Server(object):
             check_info = Utils.read_json_file(check_record_file)
             self.logger.debug(check_info)
 
-            if check_info.get('imageInfo'):
-                image_info = check_info.get('imageInfo')
-                if image_info.get('filename'):
-                    file_name = image_info.get('filename').split('/')[-1]
-                    check_info['imageInfo']['filename'] = file_name
+            if not check_info.get('imageInfo'):
+                return 4, self.check_rc[4], check_info
+            image_info = check_info.get('imageInfo')
+            if image_info.get('filename'):
+                file_name = image_info.get('filename').split('/')[-1]
+                check_info['imageInfo']['filename'] = file_name
 
             if check_info.get('checkResult') == 99:
                 return 3, self.check_rc[3], check_info
             if check_info.get('checkResult') == 100:
                 return 6, self.check_rc[6], check_info
+            if check_info.get('checkResult') == 63:
+                return 5, self.check_rc[5], check_info
 
-            if not check_info.get('imageInfo'):
-                return 4, self.check_rc[4], check_info
-            if not check_info.get('checksum'):
-                if check_info.get('checkResult') == 63:
-                    return 5, self.check_rc[5], check_info
-                return 4, self.check_rc[4], check_info
             if check_info.get('checkResult') == 0:
                 return 0, self.check_rc[0], check_info
             if check_info.get('checkResult') == 2:
                 return 1, self.check_rc[1], check_info
             if check_info.get('checkResult') == 3:
                 return 2, self.check_rc[2], check_info
-            if check_info.get('checkResult') == 4:
+            if check_info.get('checkResult') == 4 or not check_info.get('checksum'):
                 return 4, self.check_rc[4], check_info
-            if check_info.get('checkResult') == 63:
-                return 5, self.check_rc[5], check_info
             return 3, self.check_rc[3], check_info
         except IOError as io_exception:
             self.logger.exception(io_exception)
@@ -157,7 +152,7 @@ class Server(object):
         Compress the input vm image to get a slim one which is sparsify
         Also can transfer raw image to qcow2 one
         """
-        self.logger.info('Start to compress vm image {} ...'.format(input_image))
+        self.logger.info('Start to compress vm image %s ...', input_image)
         if not input_image:
             msg = 'No image is given.'
             self.logger.error(msg)
@@ -178,27 +173,26 @@ class Server(object):
             os.makedirs(compress_record_path)
             compress_record_file = os.path.join(compress_record_path, self.compress_record_file)
 
-            self.logger.info('Start to compress image {} ...'.format(input_image))
+            self.logger.info('Start to compress image %s ...', input_image)
             if not Utils.check_compress_requires(input_image, self.tmp_path):
-                self.logger.error('Free disk space under {} is not enough for compressing image {}'
-                                  .format(self.tmp_path, input_image))
+                self.logger.error('Free disk space under %s is not enough to compress image %s',
+                                  self.tmp_path, input_image)
                 status = 1
-                msg = '{}'.format('Compress Failed')
+                msg = '{}'.format(self.compress_rc.get(2))
                 Utils.append_write_plain_file(compress_record_file, msg)
             else:
-                self.logger.info('Free disk space under {} is enough for compressing image {}'
-                                 .format(self.tmp_path, input_image))
+                self.logger.info('Free disk space under %s is enough to compress image %s',
+                                 self.tmp_path, input_image)
                 Utils.compress_cmd_exec(input_image, output_image, compress_record_file)
                 status = 0
                 msg = '{}'.format('Compress In Progress')
         except Exception as exception:
             self.logger.error(exception)
             status = 1
-            msg = '{}'.format('Compress Failed')
+            msg = '{}'.format(self.compress_rc.get(2))
             Utils.append_write_plain_file(compress_record_file, msg)
 
-        self.logger.info('Compress image {} with status: {} and msg: {}'
-                         .format(input_image, status, msg))
+        self.logger.info('Compress image %s with status: %s and msg: %s', input_image, status, msg)
         return status, msg
 
     def get_compress_status(self):
@@ -213,11 +207,11 @@ class Server(object):
             with open(compress_record_file, 'r') as compress_file:
                 for line in compress_file:
                     if self.compress_rc[0] in line:
-                        self.logger.info('Compress res: {}'.format(self.compress_rc[0]))
+                        self.logger.info(self.compress_rc[0])
                         return 0, self.compress_rc[0], 1
                     for item in [2, 3, 4]:
                         if self.compress_rc[item] in line:
-                            self.logger.error('Compress res: {}'.format(self.compress_rc[item]))
+                            self.logger.error(self.compress_rc[item])
                             return item, self.compress_rc[item], 1
         except IOError as io_exception:
             self.logger.exception(io_exception)
@@ -228,7 +222,7 @@ class Server(object):
 
         try:
             compress_rate = Utils.get_compress_rate(compress_record_file)
-            self.logger.info('Compress res: {}'.format(self.compress_rc[1]))
+            self.logger.info(self.compress_rc[1])
             return 1, self.compress_rc[1], compress_rate
         except Exception as exception:
             self.logger.exception(exception)
