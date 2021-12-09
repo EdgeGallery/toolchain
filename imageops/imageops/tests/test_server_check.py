@@ -21,6 +21,7 @@ from unittest import mock
 from pathlib import Path
 
 from imageops.server import Server
+from imageops.utils import Utils
 
 
 class ServerTest(unittest.TestCase):
@@ -45,15 +46,33 @@ class ServerTest(unittest.TestCase):
     def tearDown(self):
         if os.path.isfile(self.check_record_file):
             os.remove(self.check_record_file)
-        os.rmdir(self.check_record_path)
-        os.rmdir(self.test_server.tmp_path)
+        if os.path.exists(self.check_record_path):
+            os.rmdir(self.check_record_path)
+        if os.path.exists(self.test_server.tmp_path):
+            os.rmdir(self.test_server.tmp_path)
 
-    def test_check_vm_image_without_exception(self):
-        mock_check_info = {'checkResult': 4}
-        with open(self.check_record_file, 'w') as open_file:
-             open_file.write(json.dumps(mock_check_info))
-        rc, msg, check_info = self.test_server.get_check_status()
-        self.assertEqual(4, rc)
-        self.assertEqual(self.test_server.check_rc[4], msg)
-        self.assertEqual(mock_check_info, check_info)
+    @mock.patch("imageops.utils.Utils.check_cmd_exec")
+    @mock.patch("imageops.utils.Utils.get_md5_checksum")
+    def test_check_vm_image_without_exception(self, get_md5_checksum, check_cmd_exec):
+        check_cmd_exec.return_value = {"format": "qcow2", "virtual_size": 40.0}
+        get_md5_checksum.return_value = '123'
+        input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
+        status, msg = self.test_server.check_vm_image(input_image)
+        self.assertEqual(0, status)
+        self.assertEqual('Check In Progress', msg)
 
+    def test_check_vm_image_with_no_input_image(self):
+        self.assertRaises(ValueError, self.test_server.check_vm_image)
+
+    def test_check_vm_image_with_nonexist_input_image(self):
+        self.assertRaises(ValueError, self.test_server.check_vm_image, 'nonexosts.img')
+
+    @mock.patch("imageops.utils.Utils.check_cmd_exec")
+    @mock.patch("imageops.utils.Utils.get_md5_checksum")
+    def test_check_vm_image_failed(self, get_md5_checksum, check_cmd_exec):
+        check_cmd_exec.side_effect = Exception
+        get_md5_checksum.return_value = '123'
+        input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
+        status, msg = self.test_server.check_vm_image(input_image)
+        self.assertEqual(1, status)
+        self.assertEqual('Check Failed', msg)

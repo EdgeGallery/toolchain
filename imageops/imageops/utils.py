@@ -289,8 +289,10 @@ class Utils(object):
             for line in compress_file:
                 if 'Start timestamp' in line:
                     begin['start_time'] = int(re.search(r'\d+', line).group())
+                    continue
                 if 'Medium timestamp' in line:
                     medium['start_time'] = int(re.search(r'\d+', line).group())
+                    continue
                 cls.update_process_status(line, process_status, rate_info)
                 if process_status.get(3):
                     rate = end.get('end')
@@ -300,7 +302,7 @@ class Utils(object):
                     cost_two = int(time.time()) - medium.get('start_time')
                     rate = round(medium.get('base') + cost_two / (2 * cost_one), 3)
                     rate = min(rate, medium.get('end'))
-                else:
+                elif process_status.get(1):
                     rate_one_num = re.findall(r'\d+', line)
                     if len(rate_one_num) != 2:
                         continue

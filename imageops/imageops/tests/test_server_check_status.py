@@ -47,8 +47,10 @@ class ServerTest(unittest.TestCase):
     def tearDown(self):
         if os.path.isfile(self.check_record_file):
             os.remove(self.check_record_file)
-        os.rmdir(self.check_record_path)
-        os.rmdir(self.test_server.tmp_path)
+        if os.path.exists(self.check_record_path):
+            os.rmdir(self.check_record_path)
+        if os.path.exists(self.test_server.tmp_path):
+            os.rmdir(self.test_server.tmp_path)
 
     def test_get_check_status_in_progress_with_no_image_info(self):
         mock_check_info = {'checkResult': 4}
