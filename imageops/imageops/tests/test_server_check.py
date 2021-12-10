@@ -22,7 +22,7 @@ from imageops.server import Server
 from imageops.utils import Utils
 
 
-class ServerTest(unittest.TestCase):
+class ServerCheckTest(unittest.TestCase):
     """
     Unit Test Cases about Server Module
     """
@@ -36,6 +36,7 @@ class ServerTest(unittest.TestCase):
 
     def setUp(self):
         self.test_server = Server('123-456-789')
+        self.input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
         self.check_record_path = os.path.join(self.test_server.tmp_path,
                                               self.test_server.request_id)
         self.check_record_file = os.path.join(self.check_record_path,
@@ -54,8 +55,7 @@ class ServerTest(unittest.TestCase):
     def test_check_vm_image_without_exception(self, get_md5_checksum, check_cmd_exec):
         check_cmd_exec.return_value = {"format": "qcow2", "virtual_size": 40.0}
         get_md5_checksum.return_value = '123'
-        input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
-        status, msg = self.test_server.check_vm_image(input_image)
+        status, msg = self.test_server.check_vm_image(self.input_image)
         self.assertEqual(0, status)
         self.assertEqual('Check In Progress', msg)
 
@@ -70,7 +70,6 @@ class ServerTest(unittest.TestCase):
     def test_check_vm_image_failed(self, get_md5_checksum, check_cmd_exec):
         check_cmd_exec.side_effect = Exception
         get_md5_checksum.return_value = '123'
-        input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
-        status, msg = self.test_server.check_vm_image(input_image)
+        status, msg = self.test_server.check_vm_image(self.input_image)
         self.assertEqual(1, status)
         self.assertEqual('Check Failed', msg)

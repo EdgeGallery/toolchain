@@ -257,6 +257,9 @@ definitions:
       filename:
         type: "string"
         example: "ubuntu-20.4.img"
-      filename:
+      virtual_size:
         type: "number"
         example: 40.0
+      disk_size:
+        type: "string"
+        example: "578359296"

@@ -22,7 +22,7 @@ from unittest import mock
 from imageops.server import Server
 
 
-class ServerTest(unittest.TestCase):
+class ServerCheckStatusTest(unittest.TestCase):
     """
     Unit Test Cases about Server Module
     """
