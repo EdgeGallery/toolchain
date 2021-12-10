@@ -205,15 +205,18 @@ class Utils(object):
                 cls.logger.error('Failed to exec cmd: %s', cmd)
                 return image_info
             cls.logger.info('Successfully exec cmd: %s', cmd)
+            return image_info
         except StopIteration:
             cls.logger.error('Exit cmd: %s, because of Time Out', cmd)
             image_info = {}
             check_result = 100
+            return image_info
         except Exception as exception:
             cls.logger.error('Exit cmd: %s, because of Exception Occured', cmd)
             cls.logger.exception(exception)
             image_info = {}
             check_result = 99
+            return image_info
         finally:
             check_data = cls.read_json_file(check_record_file)
             if check_data.get('checkResult') not in [99, 100]:
@@ -222,7 +225,6 @@ class Utils(object):
             cls.write_json_file(check_record_file, check_data)
             cls.logger.debug(check_data)
 
-        return image_info
 
     @classmethod
     @timeout_decorator.timeout(TIMEOUT, timeout_exception=StopIteration, use_signals=False)
@@ -260,16 +262,20 @@ class Utils(object):
 
             if return_code == 0:
                 compress_output = 'Compress Completed\n'
+                cls.logger.info(compress_output)
             elif not check_tmpdir:
                 compress_output = 'Compress Exiting because of No enouth space left\n'
+                cls.logger.error(compress_output)
             else:
                 compress_output = 'Compress Failed\n'
+                cls.logger.error(compress_output)
         except StopIteration:
             compress_output = 'Compress Time Out\n'
+            cls.logger.exception(compress_output)
         except Exception as exception:
             compress_output = 'Compress Failed with exception: {}'.format(exception)
+            cls.logger.exception(compress_output)
 
-        cls.logger.info(compress_output)
         cls.append_write_plain_file(compress_record_file, compress_output)
         cls.append_write_plain_file(compress_record_file,
                                     'End timestamp: {}\n'.format(time.time()))

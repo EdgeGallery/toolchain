@@ -1,0 +1,46 @@
+Start timestamp: 1638171728.8340385
+[   0.0] Create overlay file in /tmp to protect source disk
+[   0.0] Examine source disk
+3/12
+9/12
+12/12
+[  22.6] Fill free space in /dev/sda1 with zero
+34816/186400
+40694/186400
+46695/186400
+52788/186400
+58880/186400
+64529/186400
+69632/186400
+75776/186400
+81611/186400
+87040/186400
+92306/186400
+97792/186400
+104095/186400
+110592/186400
+115886/186400
+121585/186400
+126659/186400
+131826/186400
+136777/186400
+142849/186400
+146480/186400
+151797/186400
+157211/186400
+162817/186400
+168449/186400
+174158/186400
+179269/186400
+186400/186400
+[  35.0] Fill free space in /dev/sda15 with zero
+155936/203074
+176856/203074
+203074/203074
+Medium timestamp: 1638171767.3269308
+[  38.4] Copy to destination and make sparse
+[  92.4] Sparsify operation completed with no errors.
+virt-sparsify: Before deleting the old disk, carefully check that the 
+target disk boots and works correctly.
+Compress Completed
+End timestamp: 1638171821.4571595
