@@ -27,14 +27,11 @@ class ServerCheckTest(unittest.TestCase):
     Unit Test Cases about Server Module
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         file_path = os.path.abspath(os.path.dirname(__file__))
         os.environ['HOME'] = os.path.join(file_path, 'home')
         os.environ['TMP_PATH'] = os.path.join(file_path, 'tmp')
         os.environ['IMAGE_PATH'] = os.path.join(file_path, 'vmImages')
-
-    def setUp(self):
         self.test_server = Server('123-456-789')
         self.input_image = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
         self.check_record_path = os.path.join(self.test_server.tmp_path,
@@ -49,6 +46,26 @@ class ServerCheckTest(unittest.TestCase):
             os.rmdir(self.check_record_path)
         if os.path.exists(self.test_server.tmp_path):
             os.rmdir(self.test_server.tmp_path)
+
+    def test_server_init_without_request_id(self):
+        logger_mock = mock.Mock()
+        Server.logger = logger_mock
+        self.assertRaises(ValueError, Server)
+        Server.logger.error.assert_called_with('Lacking request_id.')
+
+    def test_server_init_without_tmp_env(self):
+        logger_mock = mock.Mock()
+        Server.logger = logger_mock
+        os.environ.pop('TMP_PATH')
+        self.assertRaises(ValueError, Server, 'abc-xyz')
+        Server.logger.error.assert_called_with('No TMP_PATH found in env.')
+
+    def test_server_init_without_image_env(self):
+        logger_mock = mock.Mock()
+        Server.logger = logger_mock
+        os.environ.pop('IMAGE_PATH')
+        self.assertRaises(ValueError, Server, 'abc-xyz')
+        Server.logger.error.assert_called_with('No IMAGE_PATH found in env.')
 
     @mock.patch("imageops.utils.Utils.check_cmd_exec")
     @mock.patch("imageops.utils.Utils.get_md5_checksum")

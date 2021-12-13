@@ -20,6 +20,7 @@ import unittest
 from unittest import mock
 
 from imageops.server import Server
+from imageops.utils import Utils
 
 
 class ServerCheckStatusTest(unittest.TestCase):
@@ -142,3 +143,19 @@ class ServerCheckStatusTest(unittest.TestCase):
         self.assertEqual(2, rc)
         self.assertEqual(self.test_server.check_rc[2], msg)
         self.assertEqual(mock_check_info, check_info)
+
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    def test_get_check_status_io_exception(self, read_json_file):
+        read_json_file.side_effect = IOError
+        rc, msg, check_info = self.test_server.get_check_status()
+        self.assertEqual(3, rc)
+        self.assertEqual('{}, {}'.format(self.test_server.check_rc[3], 'nonexistent request ID'), msg)
+        self.assertEqual({}, check_info)
+
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    def test_get_check_status_exception(self, read_json_file):
+        read_json_file.side_effect = Exception
+        rc, msg, check_info = self.test_server.get_check_status()
+        self.assertEqual(3, rc)
+        self.assertEqual(self.test_server.check_rc[3], msg)
+        self.assertEqual({}, check_info)

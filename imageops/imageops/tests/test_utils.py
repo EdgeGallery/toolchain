@@ -54,6 +54,11 @@ class UtilsTest(unittest.TestCase):
         if os.path.exists(self.tmp_path):
             os.rmdir(self.tmp_path)
 
+    def test_internal_get_md5_checksum(self):
+        image_file = os.path.join(os.getenv('IMAGE_PATH'), 'input_image_test_file.img')
+        checksum = Utils._get_md5_checksum(image_file)
+        self.assertEqual('05d42b3d5f9b17ae6f35411110a16aff', checksum)
+
     def test_get_compress_rate_with_no_compress_status_log(self):
         self.assertRaises(FileNotFoundError, Utils.get_compress_rate, self.compress_record_file)
 
@@ -296,3 +301,64 @@ class UtilsTest(unittest.TestCase):
         image_info = Utils.check_cmd_exec('123.img', '456.json')
         Utils.logger.error.assert_called_with('Exit cmd: %s, because of Exception Occured', cmd)
         Utils.logger.debug.assert_called_with({'imageInfo': {}, 'checkResult': 99})
+
+    @mock.patch("imageops.utils.Utils.write_json_file")
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    @mock.patch("imageops.utils.Utils.qemu_img_cmd_exec")
+    def test_check_cmd_exec_check_fail(self, qemu_img_cmd_exec, read_json_file, write_file):
+        cmd = ['qemu-img', 'check', '123.img', '--output', 'json']
+        logger_mock = mock.Mock()
+        Utils.logger = logger_mock
+        exec_1 = [{'format': 'qcow2', 'virtual-size': '2361393152', 'actual-size': '1419333632'}, 0]
+        exec_2 = [{'format': 'qcow2'}, 1]
+        mock_info = {'format': 'qcow2', "virtual_size": 2.199, "disk_size": '1419333632'}
+        qemu_img_cmd_exec.side_effect = [exec_1, exec_2]
+        read_json_file.side_effect = [{'checkResult': 4}, {'checkResult': 4}]
+        image_info = Utils.check_cmd_exec('123.img', '456.json')
+        Utils.logger.error.assert_called_with('Failed to exec cmd: %s', cmd)
+        Utils.logger.debug.assert_called_with({"checkResult": 1, "imageInfo": mock_info})
+
+    @mock.patch("imageops.utils.Utils.write_json_file")
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    @mock.patch("imageops.utils.Utils.qemu_img_cmd_exec")
+    def test_check_cmd_exec_check_timeout(self, qemu_img_cmd_exec, read_json_file, write_file):
+        cmd = ['qemu-img', 'check', '123.img', '--output', 'json']
+        logger_mock = mock.Mock()
+        Utils.logger = logger_mock
+        exec_1 = [{'format': 'qcow2', 'virtual-size': '2361393152', 'actual-size': '1419333632'}, 0]
+        exec_2 = StopIteration
+        qemu_img_cmd_exec.side_effect = [exec_1, exec_2]
+        read_json_file.side_effect = [{'checkResult': 4}, {'checkResult': 4}]
+        image_info = Utils.check_cmd_exec('123.img', '456.json')
+        Utils.logger.error.assert_called_with('Exit cmd: %s, because of Time Out', cmd)
+        Utils.logger.debug.assert_called_with({"checkResult": 100, "imageInfo": {}})
+
+    @mock.patch("imageops.utils.Utils.write_json_file")
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    @mock.patch("imageops.utils.Utils.qemu_img_cmd_exec")
+    def test_check_cmd_exec_check_exception(self, qemu_img_cmd_exec, read_json_file, write_file):
+        cmd = ['qemu-img', 'check', '123.img', '--output', 'json']
+        logger_mock = mock.Mock()
+        Utils.logger = logger_mock
+        exec_1 = [{'format': 'qcow2', 'virtual-size': '2361393152', 'actual-size': '1419333632'}, 0]
+        exec_2 = Exception
+        qemu_img_cmd_exec.side_effect = [exec_1, exec_2]
+        read_json_file.side_effect = [{'checkResult': 4}, {'checkResult': 4}]
+        image_info = Utils.check_cmd_exec('123.img', '456.json')
+        Utils.logger.error.assert_called_with('Exit cmd: %s, because of Exception Occured', cmd)
+        Utils.logger.debug.assert_called_with({"checkResult": 99, "imageInfo": {}})
+
+    @mock.patch("imageops.utils.Utils.write_json_file")
+    @mock.patch("imageops.utils.Utils.read_json_file")
+    @mock.patch("imageops.utils.Utils.qemu_img_cmd_exec")
+    def test_check_cmd_exec_success(self, qemu_img_cmd_exec, read_json_file, write_file):
+        cmd = ['qemu-img', 'check', '123.img', '--output', 'json']
+        logger_mock = mock.Mock()
+        Utils.logger = logger_mock
+        exec_1 = [{'format': 'qcow2', 'virtual-size': '2361393152', 'actual-size': '1419333632'}, 0]
+        exec_2 = [{'format': 'qcow2'}, 0]
+        mock_info = {'format': 'qcow2', "virtual_size": 2.199, "disk_size": '1419333632'}
+        qemu_img_cmd_exec.side_effect = [exec_1, exec_2]
+        read_json_file.side_effect = [{'checkResult': 4}, {'checkResult': 4}]
+        image_info = Utils.check_cmd_exec('123.img', '456.json')
+        Utils.logger.debug.assert_called_with({"checkResult": 0, "imageInfo": mock_info})

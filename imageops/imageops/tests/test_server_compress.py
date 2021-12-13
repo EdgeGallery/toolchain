@@ -80,7 +80,7 @@ class ServerCompressTest(unittest.TestCase):
     @mock.patch("imageops.utils.Utils.check_compress_requires")
     @mock.patch("imageops.utils.Utils.compress_cmd_exec")
     def test_compress_vm_image_with_exception(self, compress_cmd_exec, check_compress_requires):
-        check_compress_requires.return_value = True
+        check_compress_requires.side_effect = Exception
         status, msg = self.test_server.compress_vm_image(self.input_image, self.output_image)
-        self.assertEqual(0, status)
-        self.assertEqual(self.test_server.compress_rc.get(1), msg)
+        self.assertEqual(1, status)
+        self.assertEqual(self.test_server.compress_rc.get(2), msg)
