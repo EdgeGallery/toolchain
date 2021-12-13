@@ -79,3 +79,20 @@ class ServerCheckStatusTest(unittest.TestCase):
         self.assertEqual(1, rc)
         self.assertEqual(self.test_server.compress_rc[1], msg)
         self.assertEqual(0.123, rate)
+
+    @mock.patch("os.path.join")
+    def test_get_compress_status_exception(self, join):
+        join.side_effect = Exception
+        rc, msg, rate = self.test_server.get_compress_status()
+        self.assertEqual(2, rc)
+        self.assertEqual(self.test_server.compress_rc[2], msg)
+        self.assertEqual(0, rate)
+
+    @mock.patch("imageops.utils.Utils.get_compress_rate")
+    def test_get_compress_status_get_rate_with_exception(self, get_compress_rate):
+        self.test_server.compress_record_file = 'compress_one.txt'
+        get_compress_rate.side_effect = Exception
+        rc, msg, rate = self.test_server.get_compress_status()
+        self.assertEqual(2, rc)
+        self.assertEqual(self.test_server.compress_rc[2], msg)
+        self.assertEqual(0, rate)
