@@ -125,6 +125,9 @@ class Server(object):
                 file_name = image_info.get('filename').split('/')[-1]
                 check_info['imageInfo']['filename'] = file_name
 
+            if check_info.get('checkResult') == 4 or not check_info.get('checksum'):
+                return 4, self.check_rc[4], check_info
+
             if check_info.get('checkResult') == 99:
                 return 3, self.check_rc[3], check_info
             if check_info.get('checkResult') == 100:
@@ -138,8 +141,6 @@ class Server(object):
                 return 1, self.check_rc[1], check_info
             if check_info.get('checkResult') == 3:
                 return 2, self.check_rc[2], check_info
-            if check_info.get('checkResult') == 4 or not check_info.get('checksum'):
-                return 4, self.check_rc[4], check_info
             return 3, self.check_rc[3], check_info
         except IOError as io_exception:
             self.logger.exception(io_exception)
