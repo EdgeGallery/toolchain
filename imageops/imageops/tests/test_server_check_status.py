@@ -89,13 +89,13 @@ class ServerCheckStatusTest(unittest.TestCase):
         self.assertEqual(self.test_server.check_rc[4], msg)
         self.assertEqual('d.qcow2', check_info.get('imageInfo').get('filename'))
 
-    def test_get_check_status_failed(self):
+    def test_get_check_status_failed_with_no_checksum(self):
         mock_check_info = {'checkResult': 99, 'imageInfo': {'format': 'qcow2'}}
         with open(self.check_record_file, 'w') as open_file:
              open_file.write(json.dumps(mock_check_info))
         rc, msg, check_info = self.test_server.get_check_status()
-        self.assertEqual(3, rc)
-        self.assertEqual(self.test_server.check_rc[3], msg)
+        self.assertEqual(4, rc)
+        self.assertEqual(self.test_server.check_rc[4], msg)
         self.assertEqual(mock_check_info, check_info)
 
     def test_get_check_status_failed_with_checksum(self):
@@ -117,8 +117,17 @@ class ServerCheckStatusTest(unittest.TestCase):
         self.assertEqual(self.test_server.check_rc[6], msg)
         self.assertEqual(mock_check_info, check_info)
 
-    def test_get_check_status_wrong_image_format(self):
+    def test_get_check_status_wrong_image_format_with_no_checksum(self):
         mock_check_info = {'checkResult': 63, 'imageInfo': {'format': 'raw'}}
+        with open(self.check_record_file, 'w') as open_file:
+             open_file.write(json.dumps(mock_check_info))
+        rc, msg, check_info = self.test_server.get_check_status()
+        self.assertEqual(4, rc)
+        self.assertEqual(self.test_server.check_rc[4], msg)
+        self.assertEqual(mock_check_info, check_info)
+
+    def test_get_check_status_wrong_image_format_with_checksum(self):
+        mock_check_info = {'checkResult': 63, 'imageInfo': {'format': 'raw'}, 'checksum': '123'}
         with open(self.check_record_file, 'w') as open_file:
              open_file.write(json.dumps(mock_check_info))
         rc, msg, check_info = self.test_server.get_check_status()
