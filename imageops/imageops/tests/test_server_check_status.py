@@ -62,6 +62,15 @@ class ServerCheckStatusTest(unittest.TestCase):
         self.assertEqual(mock_check_info, check_info)
 
     def test_get_check_status_in_progress_with_no_checksum(self):
+        mock_check_info = {'checkResult': 0, 'imageInfo': {'format': 'qcow2'}}
+        with open(self.check_record_file, 'w') as open_file:
+             open_file.write(json.dumps(mock_check_info))
+        rc, msg, check_info = self.test_server.get_check_status()
+        self.assertEqual(4, rc)
+        self.assertEqual(self.test_server.check_rc[4], msg)
+        self.assertEqual(mock_check_info, check_info)
+
+    def test_get_check_status_with_no_checksum(self):
         mock_check_info = {'checkResult': 4, 'imageInfo': {'format': 'qcow2'}}
         with open(self.check_record_file, 'w') as open_file:
              open_file.write(json.dumps(mock_check_info))
