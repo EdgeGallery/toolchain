@@ -277,15 +277,16 @@ public class VmService {
     }
 
     private String getYamlContentFromZip(ZipFile zipFile, ZipEntry entry) throws IOException {
-        File newYamlFile = new File("deploy.yaml");
         try (BufferedReader br = new BufferedReader(
-            new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
-             FileOutputStream out = new FileOutputStream(newYamlFile);
-             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out,  StandardCharsets.UTF_8))) {
+            new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
+            File newYamlFile = new File("deploy.yaml");
+            FileOutputStream out = new FileOutputStream(newYamlFile);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out,  StandardCharsets.UTF_8));
             String line;
             while ((line = br.readLine()) != null) {
                 bw.write(line + "\r\n");
             }
+            bw.close();
 
             String yamlContent = FileUtils.readFileToString(newYamlFile, StandardCharsets.UTF_8);
             yamlContent = yamlContent.replace("\t", "");

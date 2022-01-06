@@ -20,12 +20,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.ibatis.io.Resources;
+import org.edgegallery.tool.appdtrans.constants.ResponseConst;
 import org.edgegallery.tool.appdtrans.controller.dto.request.Chunk;
 import org.edgegallery.tool.appdtrans.controller.dto.request.TransVmPkgReqDto;
 import org.edgegallery.tool.appdtrans.controller.dto.response.ResponseObject;
+import org.edgegallery.tool.appdtrans.exception.IllegalRequestException;
+import org.edgegallery.tool.appdtrans.exception.RestReturn;
+import org.edgegallery.tool.appdtrans.exception.ToolException;
 import org.edgegallery.tool.appdtrans.facade.VmServiceFacade;
 import org.junit.After;
 import org.junit.Assert;
@@ -268,5 +273,15 @@ public class VmPkgTransTest {
             .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andReturn();
 
         Assert.assertEquals(HttpStatus.OK.value(), transResult.getResponse().getStatus());
+    }
+
+    @Test(expected = IllegalRequestException.class)
+    public void test_exception() {
+        ToolException e = new ToolException("test ToolException.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
+        RestReturn restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+            .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e.getMessage())
+            .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
+        Assert.assertEquals("test ToolException.", restReturn.getMessage());
+        throw new IllegalRequestException("test IllegalRequestException.", ResponseConst.RET_FILE_NOT_FOUND);
     }
 }
