@@ -1,0 +1,17 @@
+[{
+	"id": "image_id",
+	"name": "image_name",
+	"version": "app_package_version",
+	"checksum": "1",
+	"containerFormat": "bare",
+	"diskFormat": "raw",
+	"minDisk": 3,
+	"minRam": 6,
+	"architecture": "X86",
+	"size": 688390,
+	"swImage": "image_path",
+	"hw_scsi_model": "virtio-scsi",
+	"hw_disk_bus": "scsi",
+	"operatingSystem": "Euler",
+	"supportedVirtualisationEnvironment": "linux"
+}]
