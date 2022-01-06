@@ -1,0 +1,73 @@
+{
+    "generateValues": [
+        {
+            "item": "image_id",
+            "type": "uuid"
+        },
+        {
+            "item": "vnfd_id",
+            "type": "string"
+        }
+    ],
+    "replaceFiles": {
+        "docFilePath": "/Artifacts/Docs/template.md",
+        "deployFilePath": "/APPD/Definition/app-name.yaml"
+    },
+    "updateFiles": [
+        {
+            "file": "/app-name.mf",
+            "envs": [
+                "{app_name}",
+                "{app_provider}",
+                "{app_package_version}",
+                "{app_release_data_time}",
+                "{app_type}",
+                "{app_package_description}"
+            ]
+        },
+        {
+            "file": "/APPD/Definition/MainServiceTemplate.yaml",
+            "envs": [
+                "{app_name}",
+                "{vnfd_id}",
+                "{app_provider}",
+                "{app_package_version}",
+                "{memorysize}",
+                "{vcpu}",
+                "{storagesize}",
+                "{vm_name}",
+                "{az}",
+                "{flavor}",
+                "{image_name}",
+                "{bootdata}"
+            ]
+        },
+        {
+            "file": "/Image/SwImageDesc.json",
+            "envs": [
+                "image_id",
+                "app_package_version",
+                "image_path",
+                "image_name",
+                "app_architecture"
+            ]
+        }
+    ],
+    "renameFiles": [
+        {
+            "file": "/app-name.mf",
+            "newName": "{app_name}"
+        },
+        {
+            "file": "/APPD/Definition/app-name.yaml",
+            "newName": "{app_name}"
+        }
+    ],
+    "zipFiles": [
+        {
+            "path": "/APPD/",
+            "zipName": "{app_name}"
+        }
+    ],
+    "isNeedHashCheck": "true"
+}

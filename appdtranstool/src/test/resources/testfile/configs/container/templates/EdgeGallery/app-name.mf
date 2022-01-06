@@ -1,0 +1,20 @@
+metadata:
+app_product_name: {app_name}
+app_provider_id: {app_provider}
+app_package_version: {app_package_version}
+app_release_data_time: {app_release_data_time}
+app_type: {app_type}
+app_class: container
+app_package_description: {app_package_description}
+
+Source: Artifacts/Deployment/Charts/{app_name}.tgz
+Algorithm: SHA-256
+Hash: {hash_first}
+
+Source: APPD/MainServiceTemplate.zip
+Algorithm: SHA-256
+Hash: {hash_second}
+
+-----BEGIN CMS-----
+{sign_code}
+-----END CMS-----

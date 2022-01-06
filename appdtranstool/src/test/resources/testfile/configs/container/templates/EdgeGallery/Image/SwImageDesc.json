@@ -1,0 +1,1 @@
+[{"id":"image_id","name":"image_name","version":"app_package_version","checksum":"2","containerFormat":"bare","diskFormat":"raw","minDisk":3,"minRam":6,"architecture":"app_architecture","size":688390,"swImage":"image_path","hw_scsi_model":"virtio-scsi","hw_disk_bus":"scsi","operatingSystem":"linux","supportedVirtualisationEnvironment":"linux"}]

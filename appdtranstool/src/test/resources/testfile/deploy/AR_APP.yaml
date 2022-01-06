@@ -1,0 +1,292 @@
+tosca_definitions_version: tosca_simple_profile_yaml_1_2
+description: EG MEC VM
+imports:
+  - nfv_vnfd_types_v1_0.yaml
+
+metadata:
+  template_name: AR_APP
+  template_author: EDGEGALLERY
+  template_version: 1.0.0
+  vnfm_type: MEPM
+  vnfd_id: AR_APP_cirros
+  vnfd_version: v1.2
+  vnfd_name: AR_APP_cirros
+  vnfd_description: EG sample for gvnfm
+
+topology_template:
+  inputs:
+    DC_ID:
+      type: string
+      description: DC_ID
+    ak:
+      type: string
+      default: abdc
+      description: AK
+    sk:
+      type: string
+      default: 1234
+      description: SK
+    mep_certificate:
+      type: text
+      default: YHXGFTWU!@$%@&%#(DH(122479+_)
+      description: MEP Certificate
+    app_mp1_ip:
+      type: string
+      default:
+      description: app_mp1_ip
+    app_mp1_mask:
+      type: string
+      default:
+      description: app_mp1_mask
+    app_mp1_gw:
+      type: string
+      default:
+      description: app_mp1_gw
+    app_n6_ip:
+      type: string
+      default:
+      description: app_n6_ip
+    app_n6_mask:
+      type: string
+      default:
+      description: app_n6_mask
+    app_n6_gw:
+      type: string
+      default:
+      description: app_n6_gw
+    app_internet_ip:
+      type: string
+      default:
+      description: app_internet_ip
+    app_internet_mask:
+      type: string
+      default:
+      description: app_internet_mask
+    app_internet_gw:
+      type: string
+      default:
+      description: app_internet_gw
+    mep_ip:
+      type: string
+      default:
+      description: mep_ip
+    mep_port:
+      type: string
+      default:
+      description: mep_port
+
+    network_name_mep:
+      type: string
+      default: mec_network_mep
+      description: network_name_mep
+    network_mep_physnet:
+      type: string
+      default: network_mep_physnet
+      description: network_mep_physnet
+    network_mep_vlanid:
+      type: string
+      default: network_mep_vlanid
+      description: network_mep_vlanid
+    network_name_n6:
+      type: string
+      default: mec_newwork_n6
+      description: network_name_n6
+    network_n6_physnet:
+      type: string
+      default: network_n6_physnet
+      description: network_n6_physnet
+    network_n6_vlanid:
+      type: string
+      default: network_n6_vlanid
+      description: network_n6_vlanid
+    network_name_internet:
+      type: string
+      default: mec_newwork_internet
+      description: network_name_internet
+    network_internet_physnet:
+      type: string
+      default: network_internet_physnet
+      description: network_internet_physnet
+    network_internet_vlanid:
+      type: string
+      default: network_internet_vlanid
+      description: network_internet_vlanid
+    ue_ip_segment:
+      type: string
+      default: 0.0.0.0/0
+      description: ue_ip_segment
+    mec_internet_ip:
+      type: string
+      default:
+      description: mec_internet_ip
+
+  node_templates:
+    Simple_VNF:
+      type: tosca.nodes.nfv.VNF
+      properties:
+        vnfd_id: AR_APP_cirros
+        vnfd_version: v1.2
+        provider: ChinaUnicom
+        product_name: AR_APP
+        software_version: 1.0.0
+        product_info_name: vSPCLNLWYEMS
+        product_info_description: EASTCOM vSPCLNLWY EMS
+        flavour_id: default
+        flavour_description: default flavor
+        ve_vnfm_vnf_enable: false
+        ve_vnfm_em_enable: false
+
+    EMS_VDU1:
+      type: tosca.nodes.nfv.Vdu.Compute
+      capabilities:
+        virtual_compute:
+          properties:
+            virtual_memory:
+              virtual_mem_size: 1024 MB
+            virtual_cpu:
+              num_virtual_cpu: 1
+              cpu_architecture: X86
+            virtual_local_storage:
+              size_of_storage: 1 GB
+      properties:
+        name: vm1
+        description: EMS_VDU1 node
+        nfvi_constraints: nova
+        vdu_profile:
+          min_number_of_instances: 1
+          max_number_of_instances: 1
+          initial_number_of_instances: 1
+          flavor_extra_specs:
+            mgmt_egx86: true
+        sw_image_data:
+          name: cirros
+        bootdata:
+          config_drive: true
+          user_data:
+            contents:
+              #!/bin/bash
+              echo "$certificate_info$"  >> /home/mep.ca
+              echo "app_instance_id_key=($$APP_INSTANCE_ID), mep_ip=$MEP_IP$, mep_port=$MEP_PORT$"  >> /home/init.txt
+              rm -fr /etc/sysconfig/network-scripts/*ifcfg-eth0*
+              echo "BOOTPROTO=static" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "DEVICE=eth0" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "TYPE=Ethernet" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "DEFROUTE=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "IPV4_FAILURE_FATAL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "MTU=1500" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "IPADDR=$APP_MP1_IP$" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "NETMASK=$APP_MP1_MASK$" >> /etc/sysconfig/network-scripts/ifcfg-eth0
+              echo "$MEP_IP$/32 via $APP_MP1_GW$" >> /etc/sysconfig/network-scripts/route-eth0
+              rm -fr /etc/sysconfig/network-scripts/*ifcfg-eth1*
+              echo "BOOTPROTO=static" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "DEVICE=eth1" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "TYPE=Ethernet" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "DEFROUTE=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "IPV4_FAILURE_FATAL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "MTU=1500" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "IPADDR=$APP_N6_IP$" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "NETMASK=$APP_N6_MASK$" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+              echo "$UE_IP_SEGMENT$ via $APP_N6_GW$" >> /etc/sysconfig/network-scripts/route-eth1
+              rm -fr /etc/sysconfig/network-scripts/*ifcfg-eth2*
+              echo "BOOTPROTO=static" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "DEVICE=eth2" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "TYPE=Ethernet" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "DEFROUTE=yes" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "IPV4_FAILURE_FATAL=no" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "MTU=1500" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "IPADDR=$APP_INTERNET_IP$" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "NETMASK=$APP_INTERNET_MASK$" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              echo "GATEWAY=$APP_INTERNET_GW$" >> /etc/sysconfig/network-scripts/ifcfg-eth2
+              systemctl restart network
+            params:
+    EMS_VDU1_CP0:
+      type: tosca.nodes.nfv.VduCp
+      properties:
+        description: to mep
+        vnic_name: eth0
+        order: 0
+        vnic_type: normal
+        port_security_enabled: true
+      requirements:
+        - virtual_binding: EMS_VDU1
+        - virtual_link: MEC_APP_MP1
+
+    EMS_VDU1_CP1:
+      type: tosca.nodes.nfv.VduCp
+      properties:
+        description: internal
+        vnic_name: eth1
+        order: 1
+        vnic_type: normal
+        port_security_enabled: true
+      attributes:
+        ipv4_addres: {get_input: mec_internet_ip}
+      requirements:
+        - virtual_binding: EMS_VDU1
+        - virtual_link: MEC_APP_INTERNET
+
+    EMS_VDU1_CP2:
+      type: tosca.nodes.nfv.VduCp
+      properties:
+        description: to UFP&OM
+        vnic_name: eth2
+        order: 2
+        vnic_type: normal
+        port_security_enabled: true
+      requirements:
+        - virtual_binding: EMS_VDU1
+        - virtual_link: MEC_APP_N6
+
+    MEC_APP_MP1:
+      type: tosca.nodes.nfv.VnfVirtualLink
+      properties:
+        vl_profile:
+          network_name: {get_input: network_name_mep}
+          network_type: vlan
+          physical_network: {get_input: network_mep_physnet}
+          provider_segmentation_id: {get_input: network_mep_vlanid}
+
+    MEC_APP_INTERNET:
+      type: tosca.nodes.nfv.VnfVirtualLink
+      properties:
+        vl_profile:
+          network_name: {get_input: network_name_internet}
+          network_type: vlan
+          physical_network: {get_input: network_internet_physnet}
+          provider_segmentation_id: {get_input: network_internet_vlanid}
+
+    MEC_APP_N6:
+      type: tosca.nodes.nfv.VnfVirtualLink
+      properties:
+        vl_profile:
+          network_name: {get_input: network_name_n6}
+          network_type: vlan
+          physical_network: {get_input: network_n6_physnet}
+          provider_segmentation_id: {get_input: network_n6_vlanid}
+    app_configuration:
+      type: tosca.nodes.nfv.app.configuration
+      properties:
+        certification_info:
+          access_key_id: {get_input: ak}
+          secret_key: {get_input: sk}
+
+
+  groups:
+    AntiAffinityGroup:
+      type: tosca.groups.nfv.PlacementGroup
+      properties:
+        description: antiaffinity group
+      members: [EMS_VDU1]
+  policies:
+    - antiaffinity_policy:
+        type: tosca.policies.nfv.AntiAffinityRule
+        targets: [AntiAffinityGroup]
+        properties:
+          scope: nfvi_node
+          enforced: true
