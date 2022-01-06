@@ -111,4 +111,8 @@ public class ResponseConst {
      * sign package failed.
      */
     public static final int RET_SIGN_PACKAGE_FAILED = 100017;
+
+    private ResponseConst() {
+        throw new IllegalStateException("Utility class");
+    }
 }

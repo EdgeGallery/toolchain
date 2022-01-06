@@ -207,22 +207,26 @@ public class LocalFileUtils {
 
             String parentDir = dir.length() == 0 ? "" : dir + FILE_SEPARATOR;
             if (files != null && files.length > 0) {
-                for (int i = 0; i < files.length; i++) {
-                    createCompressedFile(out, files[i], parentDir + files[i].getName());
+                for (File value : files) {
+                    createCompressedFile(out, value, parentDir + value.getName());
                 }
             }
         } else {
-            try (FileInputStream fis = new FileInputStream(file)) {
-                out.putNextEntry(new ZipEntry(dir));
-                int j;
-                byte[] buffer = new byte[1024];
-                while ((j = fis.read(buffer)) > 0) {
-                    out.write(buffer, 0, j);
-                }
-            } catch (FileNotFoundException e) {
-                LOGGER.error("createCompressedFile: can not find param file, {}", e.getMessage());
-                throw new ToolException("can not find file", ResponseConst.RET_COMPRESS_FAILED);
+            writeZipFile(out, file, dir);
+        }
+    }
+
+    private void writeZipFile(ZipOutputStream out, File file, String dir) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            out.putNextEntry(new ZipEntry(dir));
+            int j;
+            byte[] buffer = new byte[1024];
+            while ((j = fis.read(buffer)) > 0) {
+                out.write(buffer, 0, j);
             }
+        } catch (FileNotFoundException e) {
+            LOGGER.error("writeZipFile: can not find param file, {}", e.getMessage());
+            throw new ToolException("can not find file", ResponseConst.RET_COMPRESS_FAILED);
         }
     }
 
@@ -269,7 +273,7 @@ public class LocalFileUtils {
     private static void addFileToZip(ZipOutputStream out, File file, List<String> entryPaths) throws IOException {
         byte[] buf = new byte[1024];
         try (FileInputStream in = new FileInputStream(file)) {
-            if (entryPaths.size() > 0) {
+            if (entryPaths.isEmpty()) {
                 out.putNextEntry(new ZipEntry(StringUtils.join(entryPaths, FILE_SEPARATOR)
                     + FILE_SEPARATOR + file.getName()));
             } else {
@@ -376,7 +380,6 @@ public class LocalFileUtils {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
             lineIterator = new LineIterator(bufferedReader);
             String line;
-
             while (lineIterator.hasNext()) {
                 line = lineIterator.next();
                 if (StringUtils.isEmpty(line) || canLineMatch(line, rules)) {

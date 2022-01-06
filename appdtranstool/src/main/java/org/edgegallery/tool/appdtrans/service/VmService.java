@@ -71,9 +71,9 @@ public class VmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmService.class);
 
-    private static final String DEFINE_PATH = "/vm/definitions";
+    private static final String VM_DEFINITIONS = "/vm/definitions";
 
-    private static final String RULE_PATH = "/vm/rules";
+    private static final String VM_RULES = "/vm/rules";
 
     private static final String JSON_FILE_EXTENSION = ".json";
 
@@ -104,7 +104,7 @@ public class VmService {
      * @return AppPkgInfo
      */
     public AppPkgInfo getAppPkgInfo(String filePath, String sourceAppd) {
-        String defFilePath = configDir + DEFINE_PATH + FILE_SEPARATOR + sourceAppd + JSON_FILE_EXTENSION;
+        String defFilePath = configDir + VM_DEFINITIONS + FILE_SEPARATOR + sourceAppd + JSON_FILE_EXTENSION;
         File defFile = new File(defFilePath);
         try {
             String fileContent = FileUtils.readFileToString(defFile, StandardCharsets.UTF_8);
@@ -171,12 +171,12 @@ public class VmService {
                 ZipEntry entry = entries.nextElement();
                 String fileName = entry.getName();
                 // check the path of entry if equal to ruled path
-                if (!StringUtils.isEmpty(itemDef.getFilePath())) {
-                    if (!fileName.contains(itemDef.getFilePath())
-                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath())) {
-                        continue;
-                    }
+                if (!StringUtils.isEmpty(itemDef.getFilePath())
+                    && (!fileName.contains(itemDef.getFilePath())
+                    || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath()))) {
+                    continue;
                 }
+
                 // check the posix of file
                 if (fileName.endsWith(itemDef.getFileType())) {
                     // check the file if in exclude file
@@ -215,28 +215,25 @@ public class VmService {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String fileName = entry.getName();
-                // check the path of entry if equal to ruled path
-                if (!StringUtils.isEmpty(itemDef.getFilePath())) {
-                    if (!fileName.contains(itemDef.getFilePath())
-                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath())) {
-                        continue;
-                    } else if (itemDef.isZip()
-                        && Files.getFileExtension(fileName.toLowerCase()).equals(ZIP_EXTENSION)) {
-                        File tempFile = File.createTempFile("tempFile", "zip");
-                        FileOutputStream  tempOut = new FileOutputStream(tempFile);
-                        IOUtils.copy(zipFile.getInputStream(new ZipEntry(fileName)), tempOut);
-                        ZipFile innerZipFile = new ZipFile(tempFile);
-                        return getValueFromInnerZip(innerZipFile, itemDef, location);
-                    }
+                if (itemDef.isZip() && Files.getFileExtension(fileName.toLowerCase()).equals(ZIP_EXTENSION)) {
+                    File tempFile = File.createTempFile("tempFile", "zip");
+                    FileOutputStream  tempOut = new FileOutputStream(tempFile);
+                    IOUtils.copy(zipFile.getInputStream(new ZipEntry(fileName)), tempOut);
+                    ZipFile innerZipFile = new ZipFile(tempFile);
+                    return getValueFromInnerZip(innerZipFile, itemDef, location);
                 }
-                // check the posix of file
-                if (fileName.endsWith(itemDef.getFileType())) {
-                    // check the file if in exclude file
-                    if (!StringUtils.isEmpty(itemDef.getExcludeFile())
-                        && fileName.substring(fileName.lastIndexOf("/") + 1).equals(itemDef.getExcludeFile())) {
-                        continue;
-                    }
 
+                // check the path of entry if equal to ruled path
+                if (!StringUtils.isEmpty(itemDef.getFilePath())
+                    && (!fileName.contains(itemDef.getFilePath())
+                    || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(itemDef.getFilePath()))) {
+                    continue;
+                }
+
+                // check the posix of file or if exclude file
+                if (fileName.endsWith(itemDef.getFileType())
+                    && (StringUtils.isEmpty(itemDef.getExcludeFile())
+                    || !fileName.substring(fileName.lastIndexOf("/") + 1).equals(itemDef.getExcludeFile()))) {
                     String yamlContent = getYamlContentFromZip(zipFile, entry);
                     Yaml yaml = new Yaml(new SafeConstructor());
                     Map<String, Object> loaded;
@@ -257,20 +254,15 @@ public class VmService {
                 ZipEntry entry = entries.nextElement();
                 String fileName = entry.getName();
                 // check the path of entry if equal to ruled path
-                if (!StringUtils.isEmpty(defInfo.getSubPath())) {
-                    if (!fileName.contains(defInfo.getSubPath())
-                        || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(defInfo.getSubPath())) {
-                        continue;
-                    }
+                if (!StringUtils.isEmpty(defInfo.getSubPath())
+                    && (!fileName.contains(defInfo.getSubPath())
+                    || !fileName.substring(0, fileName.lastIndexOf(FILE_SEPARATOR)).equals(defInfo.getSubPath()))) {
+                    continue;
                 }
                 // check the posix of file
-                if (fileName.endsWith(defInfo.getFileType())) {
-                    // check the file if in exclude file
-                    if (!StringUtils.isEmpty(defInfo.getExcludeFile())
-                        && fileName.substring(fileName.lastIndexOf("/") + 1).equals(defInfo.getExcludeFile())) {
-                        continue;
-                    }
-
+                if (fileName.endsWith(defInfo.getFileType())
+                    && (StringUtils.isEmpty(defInfo.getExcludeFile())
+                    || !fileName.substring(fileName.lastIndexOf("/") + 1).equals(defInfo.getExcludeFile()))) {
                     String yamlContent = getYamlContentFromZip(innerZipFile, entry);
                     Yaml yaml = new Yaml(new SafeConstructor());
                     Map<String, Object> loaded;
@@ -285,20 +277,18 @@ public class VmService {
     }
 
     private String getYamlContentFromZip(ZipFile zipFile, ZipEntry entry) throws IOException {
+        File newYamlFile = new File("deploy.yaml");
         try (BufferedReader br = new BufferedReader(
-            new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8))) {
-            File newYamlFile = new File("deploy.yaml");
-            FileOutputStream out = new FileOutputStream(newYamlFile);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out,  StandardCharsets.UTF_8));
+            new InputStreamReader(zipFile.getInputStream(entry), StandardCharsets.UTF_8));
+             FileOutputStream out = new FileOutputStream(newYamlFile);
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out,  StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 bw.write(line + "\r\n");
             }
-            br.close();
-            bw.close();
 
             String yamlContent = FileUtils.readFileToString(newYamlFile, StandardCharsets.UTF_8);
-            yamlContent = yamlContent.replaceAll("\t", "");
+            yamlContent = yamlContent.replace("\t", "");
             return yamlContent;
         }
     }
@@ -328,12 +318,11 @@ public class VmService {
      * @return RuleInfo
      */
     public RuleInfo getRuleInfo(String destAppd) {
-        String defFilePath = configDir + RULE_PATH + FILE_SEPARATOR + destAppd + JSON_FILE_EXTENSION;
+        String defFilePath = configDir + VM_RULES + FILE_SEPARATOR + destAppd + JSON_FILE_EXTENSION;
         try {
             String fileContent = FileUtils.readFileToString(new File(defFilePath), StandardCharsets.UTF_8);
             Gson g = new Gson();
-            RuleInfo ruleInfo = g.fromJson(fileContent, new TypeToken<RuleInfo>() { }.getType());
-            return ruleInfo;
+            return g.fromJson(fileContent, new TypeToken<RuleInfo>() { }.getType());
         } catch (IOException e) {
             throw new ToolException("failed to get package info from file.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
         }
@@ -428,7 +417,7 @@ public class VmService {
      *
      */
     public Map<String, String> buildUpdateVals(AppPkgInfo appPkgInfo, String imagePath, TransVmPkgReqDto dto) {
-        Map<String, String> updVar2Values = new HashMap<String, String>();
+        Map<String, String> updVar2Values = new HashMap<>();
         updVar2Values.put("{app_name}", appPkgInfo.getAppInfo().getAppName());
         updVar2Values.put("{app_provider}", appPkgInfo.getAppInfo().getAppProvider());
         updVar2Values.put("{app_package_version}", appPkgInfo.getAppInfo().getAppVersion());
@@ -509,18 +498,22 @@ public class VmService {
             if (!org.springframework.util.StringUtils.isEmpty(zipDir)) {
                 File dir = new File(zipDir);
                 if (dir.isDirectory()) {
-                    File[] files = dir.listFiles();
-                    if (files != null && files.length > 0) {
-                        List<File> subFiles = Arrays.asList(files);
-                        if (!CollectionUtils.isEmpty(subFiles)) {
-                            String zipFile = zipDir + FILE_SEPARATOR + env2Values.get(zipFileInfo.getZipName())
-                                + ".zip";
-                            localFileUtils.zipFiles(subFiles, new File(zipFile));
-                            for (File subFile : subFiles) {
-                                FileUtils.deleteQuietly(subFile);
-                            }
-                        }
-                    }
+                    zipFolder(env2Values, zipFileInfo, zipDir, dir);
+                }
+            }
+        }
+    }
+
+    private void zipFolder(Map<String, String> env2Values, ZipFileInfo zipFileInfo, String zipDir, File dir) {
+        File[] files = dir.listFiles();
+        if (files != null && files.length > 0) {
+            List<File> subFiles = Arrays.asList(files);
+            if (!CollectionUtils.isEmpty(subFiles)) {
+                String zipFile = zipDir + FILE_SEPARATOR + env2Values.get(zipFileInfo.getZipName())
+                    + ".zip";
+                localFileUtils.zipFiles(subFiles, new File(zipFile));
+                for (File subFile : subFiles) {
+                    FileUtils.deleteQuietly(subFile);
                 }
             }
         }
@@ -557,16 +550,7 @@ public class VmService {
             try {
                 String imagePath = imageFile.getCanonicalPath();
                 String hashFile = imagePath.substring(dstFileDir.length() + 1).replace(File.separator, FILE_SEPARATOR);
-                String sourceData =  "Source: " + hashFile + "\n";
-                FileUtils.writeStringToFile(mfFile, sourceData, StandardCharsets.UTF_8, true);
-                FileUtils.writeStringToFile(mfFile, "Algorithm: SHA-256\n", StandardCharsets.UTF_8, true);
-                try (FileInputStream fis = new FileInputStream(imagePath)) {
-                    String hashValue = DigestUtils.sha256Hex(fis);
-                    String hashData = "Hash: " + hashValue + "\n";
-                    FileUtils.writeStringToFile(mfFile, hashData, StandardCharsets.UTF_8, true);
-                } catch (IOException e) {
-                    LOGGER.error("add image file hash check failed {}", e.getMessage());
-                }
+                updateHashValue(mfFile, imagePath, hashFile);
 
                 // add image zip
                 String toscaMeta = dstFileDir + "/TOSCA-Metadata/TOSCA.meta";
@@ -579,6 +563,19 @@ public class VmService {
             } catch (IOException e) {
                 LOGGER.error("add image file hash check failed {}", e.getMessage());
             }
+        }
+    }
+
+    private void updateHashValue(File mfFile, String imagePath, String hashFile) throws IOException {
+        String sourceData =  "Source: " + hashFile + "\n";
+        FileUtils.writeStringToFile(mfFile, sourceData, StandardCharsets.UTF_8, true);
+        FileUtils.writeStringToFile(mfFile, "Algorithm: SHA-256\n", StandardCharsets.UTF_8, true);
+        try (FileInputStream fis = new FileInputStream(imagePath)) {
+            String hashValue = DigestUtils.sha256Hex(fis);
+            String hashData = "Hash: " + hashValue + "\n";
+            FileUtils.writeStringToFile(mfFile, hashData, StandardCharsets.UTF_8, true);
+        } catch (IOException e) {
+            LOGGER.error("add image file hash check failed {}", e.getMessage());
         }
     }
 

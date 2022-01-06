@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
@@ -53,7 +54,7 @@ public class VmServiceFacade {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VmServiceFacade.class);
 
-    private static final String TEMPLATES_PATH = "/vm/templates/";
+    private static final String VM_TEMPLATES = "/vm/templates/";
 
     private static final String FILE_SEPARATOR = "/";
 
@@ -84,10 +85,10 @@ public class VmServiceFacade {
      */
     public List<String> getVmTemplates() {
         List<String> templates = new ArrayList<>();
-        File file = new File(configDir + TEMPLATES_PATH);
+        File file = new File(configDir + VM_TEMPLATES);
         File[] lstFiles = file.listFiles();
         if (lstFiles == null) {
-            return null;
+            return Collections.emptyList();
         }
         for (File filePath : lstFiles) {
             if (filePath.isDirectory()) {
@@ -178,7 +179,7 @@ public class VmServiceFacade {
             String dstFileDir = toolHome + FILE_SEPARATOR + dto.getDestAppd();
             FileUtils.deleteDirectory(new File(dstFileDir));
             localFileUtils.checkDir(new File(toolHome));
-            FileUtils.copyToDirectory(new File(configDir + TEMPLATES_PATH + dto.getDestAppd()), new File(toolHome));
+            FileUtils.copyToDirectory(new File(configDir + VM_TEMPLATES + dto.getDestAppd()), new File(toolHome));
 
             // 3. generate values
             RuleInfo ruleInfo = vmService.getRuleInfo(dto.getDestAppd());
