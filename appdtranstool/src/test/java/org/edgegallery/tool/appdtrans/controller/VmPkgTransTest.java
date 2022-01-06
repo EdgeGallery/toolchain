@@ -275,13 +275,30 @@ public class VmPkgTransTest {
         Assert.assertEquals(HttpStatus.OK.value(), transResult.getResponse().getStatus());
     }
 
-    @Test(expected = IllegalRequestException.class)
+    @Test
     public void test_exception() {
         ToolException e = new ToolException("test ToolException.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
         RestReturn restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
             .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e.getMessage())
             .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
         Assert.assertEquals("test ToolException.", restReturn.getMessage());
-        throw new IllegalRequestException("test IllegalRequestException.", ResponseConst.RET_FILE_NOT_FOUND);
+
+        ToolException e1 = new ToolException("test ToolException1.", ResponseConst.RET_PARSE_FILE_EXCEPTION, "test1");
+        restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+            .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e1.getMessage())
+            .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
+        Assert.assertEquals("test ToolException1.", restReturn.getMessage());
+
+        IllegalRequestException e2 = new IllegalRequestException("test IllegalRequestException.", ResponseConst.RET_FILE_NOT_FOUND);
+        restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+            .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e2.getMessage())
+            .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
+        Assert.assertEquals("test IllegalRequestException.", restReturn.getMessage());
+
+        IllegalRequestException e3 = new IllegalRequestException("test IllegalRequestException1.", ResponseConst.RET_FILE_NOT_FOUND, "test2");
+        restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+            .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e3.getMessage())
+            .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
+        Assert.assertEquals("test IllegalRequestException1.", restReturn.getMessage());
     }
 }
