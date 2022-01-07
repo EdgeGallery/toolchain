@@ -264,6 +264,32 @@ public class VmPkgTransTest {
     }
 
     @Test
+    public void should_upload_success() throws Exception {
+        File pkgFile1 = Resources.getResourceAsFile(PACKAGE1);
+        FileInputStream fileInputStream = new FileInputStream(pkgFile1);
+        MultipartFile multipartFile = new MockMultipartFile("file", pkgFile1.getName(), "text/plain", IOUtils.toByteArray(fileInputStream));
+        Chunk chunk = new Chunk();
+        chunk.setFile(multipartFile);
+        chunk.setChunkSize(8 * 1024 * 1024L);
+        chunk.setTotalSize(multipartFile.getSize());
+        chunk.setIdentifier("12692-OpenStackAPPV100zip");
+
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post("/mec/appdtranstool/v1/vm/upload")
+            .contentType(MediaType.APPLICATION_JSON_VALUE).content(gson.toJson(chunk))
+            .accept(MediaType.APPLICATION_JSON_VALUE)).andReturn();
+        Assert.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void should_merge_success() throws Exception {
+        MvcResult mvcResult = mvc.perform(
+            MockMvcRequestBuilders.get("/mec/appdtranstool/v1/vm/apps/merge").param("fileName", "OpenStackAPPV100")
+                .param("guid", "12692-OpenStackAPPV100zip").param("fileType", "deploy"))
+            .andDo(MockMvcResultHandlers.print()).andReturn();
+        Assert.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+    }
+
+    @Test
     public void should_trans_eg_success() throws Exception {
         TransVmPkgReqDto dto = new TransVmPkgReqDto();
         dto.setSourceAppd("ChinaUnicom");
