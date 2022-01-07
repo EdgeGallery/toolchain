@@ -117,6 +117,10 @@ public class VmPkgTransTest {
         chunk.setChunkSize(8 * 1024 * 1024L);
         chunk.setTotalSize(multipartFile.getSize());
         chunk.setIdentifier("12692-OpenStackAPPV100zip");
+        chunk.setId(12692L);
+        chunk.setFilename(pkgFile1.getName());
+        chunk.setType("zip");
+        chunk.setRelativePath(pkgFile1.getCanonicalPath());
         upload(chunk);
 
         // merge1
@@ -135,6 +139,10 @@ public class VmPkgTransTest {
         chunk2.setChunkSize(8 * 1024 * 1024L);
         chunk2.setTotalSize(multipartFile2.getSize());
         chunk2.setIdentifier("10189-vmTestcsar");
+        chunk2.setId(10189L);
+        chunk2.setFilename(pkgFile2.getName());
+        chunk2.setType("csar");
+        chunk2.setRelativePath(pkgFile2.getCanonicalPath());
         upload(chunk2);
 
         // merge2
@@ -153,6 +161,10 @@ public class VmPkgTransTest {
         chunk3.setChunkSize(8 * 1024 * 1024L);
         chunk3.setTotalSize(multipartFile3.getSize());
         chunk3.setIdentifier("6766-templatemd");
+        chunk3.setId(6766L);
+        chunk3.setFilename(docFile.getName());
+        chunk3.setType("md");
+        chunk3.setRelativePath(docFile.getCanonicalPath());
         upload(chunk3);
 
         // merge3
@@ -171,6 +183,10 @@ public class VmPkgTransTest {
         chunk4.setChunkSize(8 * 1024 * 1024L);
         chunk4.setTotalSize(multipartFile4.getSize());
         chunk4.setIdentifier("10027-AR_APPyaml");
+        chunk4.setId(10027L);
+        chunk4.setFilename(deployFile.getName());
+        chunk4.setType("yaml");
+        chunk4.setRelativePath(deployFile.getCanonicalPath());
         upload(chunk4);
 
         // merge4
@@ -189,6 +205,10 @@ public class VmPkgTransTest {
         chunk5.setChunkSize(8 * 1024 * 1024L);
         chunk5.setTotalSize(multipartFile5.getSize());
         chunk5.setIdentifier("15748944-cirroszip");
+        chunk5.setId(15748944L);
+        chunk5.setFilename(imgFile.getName());
+        chunk5.setType("zip");
+        chunk5.setRelativePath(imgFile.getCanonicalPath());
         upload(chunk5);
 
         // merge5
@@ -228,6 +248,11 @@ public class VmPkgTransTest {
             i++;
             blocks--;
         }
+
+        StringBuilder chunkInfo = new StringBuilder();
+        chunkInfo.append(chunk.getId()).append(chunk.getTotalChunks()).append(chunk.getType())
+            .append(chunk.getRelativePath()).append(chunk.getFilename()).append(chunk.getCurrentChunkSize());
+        Assert.assertFalse(chunkInfo.toString().isEmpty());
     }
 
     @Test
@@ -275,8 +300,8 @@ public class VmPkgTransTest {
         Assert.assertEquals(HttpStatus.OK.value(), transResult.getResponse().getStatus());
     }
 
-    @Test(expected = Exception.class)
-    public void test_exception() throws Exception {
+    @Test
+    public void test_exception() {
         ToolException e = new ToolException("test ToolException.", ResponseConst.RET_PARSE_FILE_EXCEPTION);
         RestReturn restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
             .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e.getMessage())
@@ -288,13 +313,9 @@ public class VmPkgTransTest {
             .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e1.getMessage())
             .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
         Assert.assertEquals("test ToolException1.", restReturn.getMessage());
-        throw new Exception("test exception.");
-    }
 
-    @Test(expected = IllegalRequestException.class)
-    public void test_IllegalRequestException() {
         IllegalRequestException e2 = new IllegalRequestException("test IllegalRequestException.", ResponseConst.RET_FILE_NOT_FOUND);
-        RestReturn restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+        restReturn = RestReturn.builder().code(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
             .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e2.getMessage())
             .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
         Assert.assertEquals("test IllegalRequestException.", restReturn.getMessage());
@@ -304,6 +325,5 @@ public class VmPkgTransTest {
             .error(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).message(e3.getMessage())
             .path("/vm/test/excption").retCode(ResponseConst.RET_FAIL).params(null).build();
         Assert.assertEquals("test IllegalRequestException1.", restReturn.getMessage());
-        throw e3;
     }
 }
