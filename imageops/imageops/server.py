@@ -223,7 +223,7 @@ class Server(object):
 
         try:
             compress_rate = Utils.get_compress_rate(compress_record_file)
-            self.logger.info(self.compress_rc[1])
+            self.logger.info('Status: %s, rate: %s', self.compress_rc[1], compress_rate)
             return 1, self.compress_rc[1], compress_rate
         except Exception as exception:
             self.logger.exception(exception)
