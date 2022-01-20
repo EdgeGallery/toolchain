@@ -245,6 +245,10 @@
                     <artifactId>jackson-core</artifactId>
                     <groupId>com.fasterxml.jackson.core</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>vertx-bridge-common</artifactId>
+                    <groupId>io.vertx</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -448,7 +452,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
+            <artifactId>log4j-api</artifactId>
             <version>2.17.1</version>
         </dependency>
         <dependency>
@@ -460,6 +464,11 @@
             <artifactId>vertx-core</artifactId>
             <groupId>io.vertx</groupId>
             <version>3.9.12</version>
+        </dependency>
+        <dependency>
+            <artifactId>netty-codec</artifactId>
+            <groupId>io.netty</groupId>
+            <version>4.1.72.Final</version>
         </dependency>
     </dependencies>
 
