@@ -26,7 +26,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
-import org.aspectj.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +139,11 @@ public class PackageChecker {
             return false;
         } finally {
             // delete send box contents
-            FileUtil.deleteContents(new File(getSandbox()));
+            try {
+                FileUtil.deleteDir(new File(getSandbox()));
+            } catch (IOException e) {
+                LOGGER.error("failed to delete sandbox.");
+            }
         }
     }
 

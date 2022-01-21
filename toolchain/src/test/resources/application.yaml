@@ -23,7 +23,7 @@ service_description:
 servicecomb:
   service:
     registry:
-      address: http://service-center:30100  #连接SC(Service Center,注册中心)的地址
+      address: http://127.0.0.1:30100  #连接SC(Service Center,注册中心)的地址
   rest:
     address: 0.0.0.0:8058  #Rest通信地址
   cors:
