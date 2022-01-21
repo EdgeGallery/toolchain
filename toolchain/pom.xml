@@ -391,7 +391,7 @@
                     <groupId>org.springframework</groupId>
                 </exclusion>
             </exclusions>
-<!--            <version>2.3.3.RELEASE</version>-->
+            <version>2.3.3.RELEASE</version>
         </dependency>
         <!-- unit test -->
         <dependency>
