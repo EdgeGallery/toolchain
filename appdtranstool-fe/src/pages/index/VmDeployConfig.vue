@@ -287,8 +287,8 @@ export default {
     height: 47px;
     display: flex;
     justify-content: flex-start;
-    border-radius: 12px;
-    background-image: linear-gradient(to right, #fff , #F1F2F6);
+    border-radius: 19.5px;
+    background: #4E3494;
     box-shadow: 0px 7px 21px 0px rgba(40, 12, 128, 0.08);
     .clicks{
       margin: 14px 0 0 32px;
@@ -301,7 +301,7 @@ export default {
       font-size: 18px;
       font-family: HarmonyHeiTi;
       font-weight: 400;
-      color: #380879;
+      color: #fff;
     }
   }
 
@@ -330,12 +330,17 @@ export default {
     font-size: 16px !important;
     font-family: HarmonyHeiTi !important;
     font-weight: 300 !important;
-    color: #FFFFFF !important;
-    background: #59508f !important;
+    color: #fff !important;
+    background: #4E3494 !important;
     border-radius: 8px !important;
     padding: 6px 20px !important;
     margin-right: 20px !important;
     margin-top: -10px !important;
+  }
+  .down-demo:hover{
+    color: #4E3494 !important;
+    background: #fff !important;
+    cursor: pointer;
   }
   .test {
     font-size: 14px;
@@ -385,8 +390,7 @@ export default {
     width: 600px;
 }
 .el-form-item {
-    margin-left: 70px !important;
-    margin-top: 16px;
+  margin-top: 16px;
 }
 
 </style>

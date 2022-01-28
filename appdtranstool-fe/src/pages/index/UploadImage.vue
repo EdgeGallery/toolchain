@@ -174,7 +174,7 @@ export default {
       font-size: 16px;
       font-family: HarmonyHeiTi;
       font-weight: 400;
-      color: #380879;
+      color: #fff;
       line-height: 24px;
     }
     .lefts2{
@@ -210,7 +210,7 @@ export default {
       font-size: 14px;
       font-family: HarmonyHeiTi;
       font-weight: 300;
-      color: #380879;
+      color: #fff;
       margin-left: 130px !important;
       margin-bottom: 10px;
     }
@@ -264,13 +264,13 @@ export default {
   color: #688ef3;
 }
  .el-button {
-    width: 174px !important;
-    height: 46px !important;
-    background-color: #fff !important;
-    color: #380879 !important;
-    border: 1px solid #380879 !important;
-    border-radius: 8px !important;
-    font-size: 20px !important;
+  width: 174px !important;
+  height: 46px !important;
+  background-color: #fff !important;
+  color: #380879 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 20px !important;
 }
 .el-button:hover{
    background: #5E40C8 !important;
