@@ -316,26 +316,24 @@ export default {
 <style lang="less">
 .UploadApp{
   width: 100%;
-  margin-top: 40px;
-  padding: 40px 0 30px 0px;
   .radioStyle{
     margin-top: 12px;
   }
   .lookDoc{
-            margin-top: 6px;
-            font-size: 12px;
-            font-family: HarmonyHeiTi;
-            font-weight: 200;
-            color: #5E40C8;
-            line-height: 20px;
-            a{
-            font-size: 12px;
-            font-family: HarmonyHeiTi;
-            font-weight: 200;
-            font-weight: bold;
-            color: #5E40C8;
-            line-height: 20px;
-            }
+    margin-top: 6px;
+    font-size: 12px;
+    font-family: HarmonyHeiTi;
+    font-weight: 200;
+    color: #fff;
+    line-height: 20px;
+    a{
+      font-size: 12px;
+      font-family: HarmonyHeiTi;
+      font-weight: 200;
+      font-weight: bold;
+      color: #fff;
+      line-height: 20px;
+    }
   }
 }
 

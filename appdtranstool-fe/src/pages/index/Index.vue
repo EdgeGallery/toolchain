@@ -30,10 +30,7 @@
         <div class="stepNavProcess">
           <div class="appChangTop">
             <div class="topLeft">
-              <img
-                src="../../assets/images/icon.png"
-                alt=""
-              >
+              <span class="title_line" />
               <p v-show="active===0">
                 {{ $t('appdRes.uploadApp') }}
               </p>
@@ -363,7 +360,7 @@ export default {
 
 <style lang="less">
 .appd{
-  background-color: #f0f2f5 ;
+  background-color: #3e279b ;
   min-height: 632px;
   width: 100%;
   .appdTrans{
@@ -371,62 +368,60 @@ export default {
     margin: 0px auto;
     min-width: 1200px;
     min-height: 732px;
-    background: #FFFFFF;
-    padding: 8px 3.1% 0px 3.1%;
-    border-radius: 20px;
+    background: #2E147C;
+    padding: 40px;
+    border-radius: 16px;
     p{
       margin: 0;
     }
     .languageChange{
-      color: #000;
+      color: #fff;
       font-size: 16px;
       line-height: 30px;
       float:right ;
     }
     .languageChange:hover{
+      font-weight: bold;
       cursor: pointer;
-      color: #5E40C8;
     }
     .appdTrans-content{
       width: 100%;
-      background: #FFFFFF;
-      padding-top: 1px;
       .stepNavProcess{
-        margin-top: 30px;
         .appChangTop{
           height: 50px;
           display: flex;
           justify-content: space-between;
           .topLeft{
             width: 100%;
-            margin-top: 10px;
             height: 40px;
             display: flex;
             border-radius:12px;
-            background: linear-gradient(to right,#f8f6ff,#fff);
-            img{
-              width: 16px;
-              height: 16px;
-              margin: 12px 30px;
+            .title_line{
+              display: block;
+              width: 9px;
+              height: 9px;
+              border-radius: 50%;
+              background: #43F6AD;
+              position: relative;
+              top: 14px;
+              margin-right: 10px;
             }
             p{
-              font-size: 16px;
+              font-size: 20px;
+              letter-spacing: 2px;
               font-family: HarmonyHeiTi;
               font-weight: 400;
-              color: #5E40C8;
+              color: #fff;
               line-height: 40px;
             }
           }
         }
       }
       .elSteps {
-        padding: 0 1%;
-        width: 98%;
+        width: 100%;
         box-sizing: border-box;
-        background: #F1F2F6;
         border-radius: 16px;
         min-height: 380px;
-        box-shadow: inset 4px 4px 25px 5px rgba(36, 20, 119, 0.1);
       }
       .elStepsImage{
         height: 200px;
@@ -443,20 +438,24 @@ export default {
   }
 }
 .uploader-btn {
-    font-size: 16px !important;
-    font-family: HarmonyHeiTi  !important;
-    font-weight: 300 !important;
-    color: #FFFFFF !important;
-    background: #59508f !important;
-    border-radius: 8px !important;
-    padding: 6px 14px !important;
-    margin-right: 20px !important;
-    margin-top: -10px !important;
+  font-size: 16px !important;
+  font-family: HarmonyHeiTi  !important;
+  font-weight: 300 !important;
+  color: #fff !important;
+  background: #4E3494 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  margin-right: 20px !important;
+  margin-top: -10px !important;
+  border: none !important;
 }
-
+.uploader-btn:hover{
+  color: #4E3494 !important;
+  background: #fff !important;
+}
 .uploader-drop {
  padding-left:0px !important;
- background: #F1F2F6 !important;
+ background: none !important;
 }
 .el-icon-question{
     display: none;
@@ -465,10 +464,7 @@ export default {
   font-size: 14px ;
   font-family: HarmonyHeiTi  !important;
   font-weight: 300  !important;
-  color: #380879  !important;
-}
-.el-form{
-    background: #F1F2F6;
+  color: #fff  !important;
 }
 .el-form-item {
     margin-bottom: 6px !important;
@@ -477,25 +473,27 @@ export default {
   border: none !important;
 }
 .el-form-item__label {
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-family: HarmonyHeiTi !important;
   font-weight: 400 !important;
-  color: #380879 !important;
+  color: #fff !important;
 }
 .el-select {
-    width: 600px;
+  width: 600px;
 }
 .el-radio__label {
-    color: #380879 !important;
+  color: #fff !important;
 }
 .el-select > .el-input {
-    border-radius: 8px;
+  border-radius: 8px;
 }
 .el-select .el-input .el-select__caret {
-    color: #380879;
+  color: #fff;
 }
 .el-input__inner{
-  border: 1px solid #fff !important;
+  color: #fff;
+  border:none !important;
+  background: #4E3494;
 }
 .el-radio__input.is-checked .el-radio__inner{
   background: url(../../assets/images/oneClick.png) 50% no-repeat !important;

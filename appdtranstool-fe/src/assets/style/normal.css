@@ -180,14 +180,13 @@ a{
   border: none !important;
 }
 .uploader-file-info {
- background-color: #fff;
+ background-color: #2F1B68;
  width: 600px;
  border-radius: 10px !important;
  height: 30px !important;
- box-shadow: inset 0px 10px 10px #e7e5f0;
+ box-shadow: inset 0px 4px  12px 0  rgba(0,0,0,0.25);
 }
 .uploader-file .uploader-file-progress {
-  background-color: #fff !important;
   width: 600px;
   border-radius: 10px !important;
   height: 30px !important;
@@ -195,21 +194,21 @@ a{
 .uploader-file-icon:before {
   width: 18px;
   height: 18px;
-  margin-top: -6px !important;
+  margin-top: -4px !important;
   background: url('../images/object.png')  no-repeat 0 0 !important;
   background-size: 100% !important;
   content: "" !important;
 }
 .uploader-file-name {
-  color: #59508f !important;
+  color: #fff !important;
   line-height: 30px;
 }
 .uploader-file-size {
-  color: #59508f !important;
+  color: #fff !important;
   line-height: 30px;
 }
 .uploader-file-status {
-  color: #59508f !important;
+  color: #fff !important;
   line-height: 30px;
   width: 22% !important;
 }
@@ -222,11 +221,13 @@ a{
 }
 .uploader-file-actions .uploader-file-retry {
   background: url('../images/refresh.png')  no-repeat 0 0 !important;
-  background-size: 100% !important;
+  background-size: 85% !important;
 }
 .uploader-file-actions .uploader-file-remove {
   background: url('../images/delete.png')  no-repeat 0 0 !important;
-  background-size: 85% !important;
+  position: relative;
+  top: 2px;
+  background-size: 70% !important;
   display: block !important;
 }
 @media screen and (max-width:1380px){
