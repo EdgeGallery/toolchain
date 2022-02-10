@@ -1,9 +1,0 @@
-org\mec\toolchain\controller\GetTaskTest.class
-org\mec\toolchain\controller\GetSourceCodeTest.class
-org\mec\toolchain\controller\PortingControllerTest.class
-org\mec\toolchain\controller\UploadSouceCodeTest.class
-org\mec\toolchain\controller\GetTaskListTest.class
-org\mec\toolchain\controller\CreateTaskTest.class
-org\mec\toolchain\controller\DeleteTaskTest.class
-org\mec\toolchain\controller\CreateTaskTest$1.class
-org\mec\toolchain\controller\DeleteSourceCodeTest.class
