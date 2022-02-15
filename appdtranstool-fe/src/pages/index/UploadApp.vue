@@ -15,7 +15,10 @@
   -->
 
 <template>
-  <div class="UploadApp">
+  <div
+    class="UploadApp"
+    :class="this.language==='中文'?'formPaddingEn':'formPaddingCn'"
+  >
     <el-form
       v-model="appUploadInfo"
       ref="form"
@@ -314,6 +317,12 @@ export default {
 </script>
 
 <style lang="less">
+.formPaddingCn{
+  padding-left: 130px;
+}
+  .formPaddingEn{
+  padding-left: 30px;
+}
 .UploadApp{
   width: 100%;
   .radioStyle{
@@ -322,13 +331,13 @@ export default {
   .lookDoc{
     margin-top: 6px;
     font-size: 12px;
-    font-family: HarmonyHeiTi;
+    font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
     font-weight: 200;
     color: #fff;
     line-height: 20px;
     a{
       font-size: 12px;
-      font-family: HarmonyHeiTi;
+      font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
       font-weight: 200;
       font-weight: bold;
       color: #fff;

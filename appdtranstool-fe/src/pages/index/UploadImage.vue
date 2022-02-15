@@ -172,7 +172,7 @@ export default {
 }
   span.span_lefts{
       font-size: 16px;
-      font-family: HarmonyHeiTi;
+      font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
       font-weight: 400;
       color: #fff;
       line-height: 24px;
@@ -208,7 +208,7 @@ export default {
   }
   .careful{
       font-size: 14px;
-      font-family: HarmonyHeiTi;
+      font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
       font-weight: 300;
       color: #fff;
       margin-left: 130px !important;
@@ -228,7 +228,7 @@ export default {
           font-size: 16px !important;
           text-align: center;
           border-radius: 8px;
-          font-family: HarmonyHeiTi !important;
+          font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
           font-weight: 300 !important;
           color: #FFFFFF !important;
           background: #59508f !important;
@@ -244,11 +244,12 @@ export default {
     .uploadBtnen{
       margin-top: 0 !important;
       margin-left: 0px  !important;
-      width: 175px;
+      width: 186px;
       line-height: 30px;
     }
   .uploader-example{
     width: 100%;
+    margin-top: 10px;
     .imageUploadTipDesc{
       font-size: 14px;
       color: #606266;

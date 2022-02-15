@@ -409,7 +409,7 @@ export default {
             p{
               font-size: 20px;
               letter-spacing: 2px;
-              font-family: HarmonyHeiTi;
+              font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
               font-weight: 400;
               color: #fff;
               line-height: 40px;
@@ -439,7 +439,7 @@ export default {
 }
 .uploader-btn {
   font-size: 16px !important;
-  font-family: HarmonyHeiTi  !important;
+  font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
   font-weight: 300 !important;
   color: #fff !important;
   background: #4E3494 !important;
@@ -462,7 +462,7 @@ export default {
 }
 .imageUploadTipDesc{
   font-size: 14px ;
-  font-family: HarmonyHeiTi  !important;
+  font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
   font-weight: 300  !important;
   color: #fff  !important;
 }
@@ -474,7 +474,7 @@ export default {
 }
 .el-form-item__label {
   font-size: 14px !important;
-  font-family: HarmonyHeiTi !important;
+  font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
   font-weight: 400 !important;
   color: #fff !important;
 }

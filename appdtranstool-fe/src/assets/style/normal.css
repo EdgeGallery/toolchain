@@ -190,6 +190,7 @@ a{
   width: 600px;
   border-radius: 10px !important;
   height: 30px !important;
+  background: none !important;
 }
 .uploader-file-icon:before {
   width: 18px;
@@ -229,6 +230,24 @@ a{
   top: 2px;
   background-size: 70% !important;
   display: block !important;
+}
+/*下拉框样式*/ 
+.el-select-dropdown{
+  background: rgba(46,20,124,0.7);
+  backdrop-filter: blur(4px);
+  border: none;
+}
+.el-select-dropdown__item{
+  color: #fff;
+}
+.el-popper[x-placement^=bottom] .popper__arrow{
+ display: none;
+}
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+  background: rgba(96,86,154,0.5);
+}
+.el-select-dropdown__item.is-disabled:hover{
+  background: rgba(96,86,154,0.5);
 }
 @media screen and (max-width:1380px){
   .padding56{
