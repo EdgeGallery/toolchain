@@ -272,7 +272,7 @@ export default {
   width: 100%;
   margin-top: 40px;
   padding-top: 30px;
-  padding-left:60px;
+  padding-left:112px;
   .uploader-drop {
   margin-left: 60px;
 }
@@ -299,7 +299,7 @@ export default {
       margin-left:16px;
       line-height: 47px;
       font-size: 18px;
-      font-family: HarmonyHeiTi;
+      font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
       font-weight: 400;
       color: #fff;
     }
@@ -328,7 +328,7 @@ export default {
     text-decoration: none;
     display: inline-block;
     font-size: 16px !important;
-    font-family: HarmonyHeiTi !important;
+    font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
     font-weight: 300 !important;
     color: #fff !important;
     background: #4E3494 !important;
@@ -381,7 +381,7 @@ export default {
 .UploadTipDesc{
   display: block;
   font-size: 16px !important;
-  font-family: HarmonyHeiTi;
+  font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
   font-weight: 300;
   color: #380879;
   margin: 20px 0 10px 66px;
