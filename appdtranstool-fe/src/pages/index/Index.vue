@@ -367,9 +367,9 @@ export default {
     width: 73.64%;
     margin: 0px auto;
     min-width: 1200px;
-    min-height: 732px;
-    background: #2E147C;
-    padding: 40px;
+    min-height: 665px;
+    background: rgba(46,20,124,0.7);
+    padding: 40px 80px;
     border-radius: 16px;
     p{
       margin: 0;
@@ -379,9 +379,14 @@ export default {
       font-size: 16px;
       line-height: 30px;
       float:right ;
+      background: #2B186B;
+      border-radius: 6px;
+      border: 1px solid rgba(114,104,170,0.6);
+      padding:2px 22px ;
     }
     .languageChange:hover{
-      font-weight: bold;
+      background: #fff;
+      color: #2B186B;
       cursor: pointer;
     }
     .appdTrans-content{
@@ -425,13 +430,15 @@ export default {
       }
       .elStepsImage{
         height: 200px;
+        background: #2B1771;
+        border-radius:8px ;
       }
       .elStepsDeloy{
         height: 361px;
       }
       .elButton {
         width: 100%;
-        margin-top: 60px;
+        margin-top: 30px;
         text-align: right;
       }
     }
@@ -461,7 +468,7 @@ export default {
     display: none;
 }
 .imageUploadTipDesc{
-  font-size: 14px ;
+  font-size: 12px ;
   font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
   font-weight: 300  !important;
   color: #fff  !important;
@@ -479,7 +486,7 @@ export default {
   color: #fff !important;
 }
 .el-select {
-  width: 600px;
+  width: 800px;
 }
 .el-radio__label {
   color: #fff !important;
