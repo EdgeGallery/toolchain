@@ -369,7 +369,7 @@ export default {
     min-width: 1200px;
     min-height: 665px;
     background: rgba(46,20,124,0.7);
-    padding: 40px 80px;
+    padding: 32px 80px;
     border-radius: 16px;
     p{
       margin: 0;
