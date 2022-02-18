@@ -46,6 +46,7 @@ export default {
   color: #2c3e50;
   min-width: 1200px;
   overflow: auto;
+  background: #3e279b;
 }
 .view{
   width: 100%;
