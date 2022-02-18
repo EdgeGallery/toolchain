@@ -271,11 +271,15 @@ export default {
 .VmDeployConfig{
   width: 100%;
   margin-top: 40px;
-  padding-top: 30px;
-  padding-left:112px;
+  padding:30px 60px 40px 100px ;
+  background: #2B1771;
+  border-radius:6px ;
+  .el-input__inner {
+    width: 700px;
+  }
   .uploader-drop {
-  margin-left: 60px;
-}
+    margin-left: 60px;
+  }
   .look2{
     margin-top: 16px;
   }
@@ -298,13 +302,12 @@ export default {
     .title{
       margin-left:16px;
       line-height: 47px;
-      font-size: 18px;
+      font-size: 16px;
       font-family: defaultFontLight,Arial,Helvetica,sans-serif!important;
       font-weight: 400;
       color: #fff;
     }
   }
-
   .showConfigDiv{
     width: 100%;
     .formConfing{
@@ -386,11 +389,10 @@ export default {
   color: #380879;
   margin: 20px 0 10px 66px;
 }
-.el-input__inner {
-    width: 600px;
-}
 .el-form-item {
   margin-top: 16px;
 }
-
+.el-form-item__label{
+  text-align: right !important;
+}
 </style>

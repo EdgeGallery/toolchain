@@ -181,13 +181,13 @@ a{
 }
 .uploader-file-info {
  background-color: #2F1B68;
- width: 600px;
+ width: 800px;
  border-radius: 10px !important;
  height: 30px !important;
  box-shadow: inset 0px 4px  12px 0  rgba(0,0,0,0.25);
 }
 .uploader-file .uploader-file-progress {
-  width: 600px;
+  width: 800px;
   border-radius: 10px !important;
   height: 30px !important;
   background: none !important;
@@ -232,6 +232,9 @@ a{
   display: block !important;
 }
 /*下拉框样式*/ 
+.el-select{
+  width: 800px !important;
+}
 .el-select-dropdown{
   background: rgba(46,20,124,0.7);
   backdrop-filter: blur(4px);

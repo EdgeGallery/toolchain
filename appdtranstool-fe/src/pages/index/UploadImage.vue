@@ -264,17 +264,16 @@ export default {
   font-size: 14px;
   color: #688ef3;
 }
- .el-button {
-  width: 174px !important;
-  height: 46px !important;
+.el-button {
+  padding: 6px 23px;
   background-color: #fff !important;
-  color: #380879 !important;
+  color: #5944C0 !important;
   border: none !important;
   border-radius: 12px !important;
-  font-size: 20px !important;
+  font-size: 14px !important;
 }
 .el-button:hover{
-   background: #5E40C8 !important;
+   background: #5944C0 !important;
    color: #fff !important;
 }
 </style>

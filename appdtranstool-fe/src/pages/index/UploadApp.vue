@@ -325,6 +325,9 @@ export default {
 }
 .UploadApp{
   width: 100%;
+  padding: 66px 80px 66px 10px;
+  background:#2B1771;
+  border-radius:8px ;
   .radioStyle{
     margin-top: 12px;
   }
