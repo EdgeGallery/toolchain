@@ -396,6 +396,7 @@ export default {
           height: 50px;
           display: flex;
           justify-content: space-between;
+          margin-bottom:20px ;
           .topLeft{
             width: 100%;
             height: 40px;
