@@ -163,7 +163,7 @@ export default {
 
 <style lang="less">
 .UploadImage{
-  margin-top: 40px;
+  margin-top: 20px;
   width: 100%;
   padding: 25px 0 0 100px;
   .uploader-file{

@@ -270,7 +270,7 @@ export default {
 <style lang="less">
 .VmDeployConfig{
   width: 100%;
-  margin-top: 40px;
+  margin-top: 21px;
   padding:30px 60px 40px 100px ;
   background: #2B1771;
   border-radius:6px ;
